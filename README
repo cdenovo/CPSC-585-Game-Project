@@ -24,4 +24,9 @@ Git Extensions: gitextensions.googlecode.com/files/GitExtensions228SetupComplete
 Pivotal Tracker: www.pivotaltracker.com
 	-Once you sign up, give me your usernames and I'll add you to the project.
 	The project's URL is https://www.pivotaltracker.com/projects/448573 but it's set to be Private right now
+
 	
+	
+Using Git Extensions with Visual Studio 2010:
+
+Make sure that you add *.opensdf to your .gitignore file by going (from within Visual Studio) Git->Edit gitignore and adding "*.opensdf" w/o quotes
