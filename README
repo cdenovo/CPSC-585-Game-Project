@@ -8,3 +8,20 @@ Maya 2012
 Pivotal Tracker
 GitHub
 Git Extensions
+
+
+Set up DirectX SDK with Visual Studio 2010: http://takinginitiative.net/2010/07/02/setting-up-the-directx-sdk-with-visual-studio-2010/
+
+
+
+Other info:
+
+Git Extensions: gitextensions.googlecode.com/files/GitExtensions228SetupComplete.msi
+	(probably want to install MsysGit and KDiff as well, included with the installer, just make sure you check the appropriate boxes in the installer)
+	-DO NOT USE PUTTY (github doesn't support it), use OpenSSH instead
+	-If you're installing Git through this installer, also make sure you set the line-ending conversion settings in the installer to "Checkout as-is, commit as-is" so we don't get any problems with line endings
+
+Pivotal Tracker: www.pivotaltracker.com
+	-Once you sign up, give me your usernames and I'll add you to the project.
+	The project's URL is https://www.pivotaltracker.com/projects/448573 but it's set to be Private right now
+	
