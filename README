@@ -27,6 +27,5 @@ Pivotal Tracker: www.pivotaltracker.com
 
 	
 	
-Using Git Extensions with Visual Studio 2010:
-
-Make sure that you add *.opensdf to your .gitignore file by going (from within Visual Studio) Git->Edit gitignore and adding "*.opensdf" w/o quotes
+When using Git, please try to create a branch of your own and just working on that branch on your local PC,
+then commit and push only to that branch on GitHub, then after testing everything, merge the branch with the master branch on GitHub
