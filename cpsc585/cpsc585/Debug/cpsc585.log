@@ -1,22 +1,17 @@
-﻿Build started 1/7/2012 5:32:05 PM.
-     1>Project "C:\Users\INFERNO\Documents\CPSC585\CPSC-585-Game-Project\cpsc585\cpsc585\cpsc585.vcxproj" on node 2 (rebuild target(s)).
-     1>_PrepareForClean:
-         Deleting file "Debug\cpsc585.lastbuildstate".
-       InitializeBuildStatus:
+﻿Build started 1/9/2012 8:41:10 PM.
+     1>Project "C:\Users\Java\Desktop\CPSC585\CPSC-585-Game-Project\cpsc585\cpsc585\cpsc585.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
          Creating "Debug\cpsc585.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Main.cpp
-         Main.cpp
+         All outputs are up-to-date.
        Link:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\INFERNO\Documents\CPSC585\CPSC-585-Game-Project\cpsc585\Debug\cpsc585.exe" /NOLOGO d3dx10.lib d3d10.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\cpsc585.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\INFERNO\Documents\CPSC585\CPSC-585-Game-Project\cpsc585\Debug\cpsc585.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\INFERNO\Documents\CPSC585\CPSC-585-Game-Project\cpsc585\Debug\cpsc585.lib" /MACHINE:X86 Debug\Main.obj
-         cpsc585.vcxproj -> C:\Users\INFERNO\Documents\CPSC585\CPSC-585-Game-Project\cpsc585\Debug\cpsc585.exe
-       Manifest:
-         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"C:\Users\INFERNO\Documents\CPSC585\CPSC-585-Game-Project\cpsc585\Debug\cpsc585.exe;#1" /manifest Debug\cpsc585.exe.intermediate.manifest
+         All outputs are up-to-date.
+         cpsc585.vcxproj -> C:\Users\Java\Desktop\CPSC585\CPSC-585-Game-Project\cpsc585\Debug\cpsc585.exe
        FinalizeBuildStatus:
          Deleting file "Debug\cpsc585.unsuccessfulbuild".
          Touching "Debug\cpsc585.lastbuildstate".
-     1>Done Building Project "C:\Users\INFERNO\Documents\CPSC585\CPSC-585-Game-Project\cpsc585\cpsc585\cpsc585.vcxproj" (rebuild target(s)).
+     1>Done Building Project "C:\Users\Java\Desktop\CPSC585\CPSC-585-Game-Project\cpsc585\cpsc585\cpsc585.vcxproj" (build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.42
+Time Elapsed 00:00:00.17
