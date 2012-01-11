@@ -1,17 +1,9 @@
-﻿Build started 1/9/2012 8:41:10 PM.
-     1>Project "C:\Users\Java\Desktop\CPSC585\CPSC-585-Game-Project\cpsc585\cpsc585\cpsc585.vcxproj" on node 2 (build target(s)).
-     1>InitializeBuildStatus:
-         Creating "Debug\cpsc585.unsuccessfulbuild" because "AlwaysCreate" was specified.
-       ClCompile:
-         All outputs are up-to-date.
-       Link:
-         All outputs are up-to-date.
-         cpsc585.vcxproj -> C:\Users\Java\Desktop\CPSC585\CPSC-585-Game-Project\cpsc585\Debug\cpsc585.exe
-       FinalizeBuildStatus:
-         Deleting file "Debug\cpsc585.unsuccessfulbuild".
-         Touching "Debug\cpsc585.lastbuildstate".
-     1>Done Building Project "C:\Users\Java\Desktop\CPSC585\CPSC-585-Game-Project\cpsc585\cpsc585\cpsc585.vcxproj" (build target(s)).
+﻿Build started 1/10/2012 10:07:14 PM.
+     1>Project "C:\Users\INFERNO\Documents\CPSC585\CPSC-585-Game-Project\cpsc585\cpsc585\cpsc585.vcxproj" on node 2 (clean target(s)).
+     1>_PrepareForClean:
+         Deleting file "Debug\cpsc585.lastbuildstate".
+     1>Done Building Project "C:\Users\INFERNO\Documents\CPSC585\CPSC-585-Game-Project\cpsc585\cpsc585\cpsc585.vcxproj" (clean target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.17
+Time Elapsed 00:00:00.02
