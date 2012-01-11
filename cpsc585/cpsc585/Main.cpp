@@ -160,7 +160,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 					input->processWindowsMsg(umessage, wparam);
 			}
 
-		// All other messages pass to the message handler in the system class.
+		// All other messages pass to the default message handler
 		default:
 			{
 				return DefWindowProc(hwnd, umessage, wparam, lparam);
