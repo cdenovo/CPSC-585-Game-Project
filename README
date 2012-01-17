@@ -1,9 +1,7 @@
-Test 
-
 This is what we will likely be using for this project:
 
 Visual Studio 2010
-DirextX SDK (latest version: June 2010)
+DirextX SDK (latest version: June 2010) [We'll be developing for DirectX 9.0c)
 Havok Physics SDK
 Havok Content Tools (if you're going to be doing stuff with Maya)
 Maya 2012
@@ -28,6 +26,15 @@ Pivotal Tracker: www.pivotaltracker.com
 	The project's URL is https://www.pivotaltracker.com/projects/448573 but it's set to be Private right now
 
 	
-	
-When using Git, please try to create a branch of your own and just working on that branch on your local PC,
-then commit and push only to that branch on GitHub, then after testing everything, merge the branch with the master branch on GitHub
+Good way to work on the repository:
+
+1) Clone repository to your PC
+2) Copy the cpsc585 Visual Studio directory to a new place
+3) Edit the copied cpsc585 (so NOT in the cloned repository directory) as you like
+4) Under the Build menu in VS2010, go Clean Solution
+5) In Git GUI, open the cloned repository, and Create a Branch (this also checks out the branch)
+6) copy your modified cpsc585 folder over the one in the cloned repository
+7) In the Git GUI, go Rescan, then Stage Changed, then Commit
+8) Branch -> Checkout -> Master
+9) Merge -> Local -> yourBranchName
+10) Push to origin!
