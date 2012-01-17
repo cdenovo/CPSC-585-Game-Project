@@ -1,12 +1,12 @@
-#pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "d3dx11.lib")
-#pragma comment(lib, "d3dx10.lib")
+#pragma comment(lib, "d3d9.lib")
 
-#include <dxgi.h>
-#include <d3dcommon.h>
-#include <d3d11.h>
-#include <d3dx10math.h>
+#include <d3d9.h>
+#include <d3dx9.h>
+
+
+#include "Camera.h"
+#include "Model.h"
+
 
 class Renderer
 {
@@ -18,14 +18,14 @@ public:
 	void render();
 
 private:
-	ID3D10Device* device;
-	IDXGISwapChain* swapChain;
-	ID3D10RenderTargetView* renderTargetView;
-	ID3D10Texture2D* depthStencilBuffer;
-	ID3D10DepthStencilState* depthStencilState;
-	ID3D10DepthStencilView* depthStencilView;
+	IDirect3D9* d3dObject;
+	IDirect3DDevice9* device;
+
 	D3DXMATRIX projectionMatrix;
 	D3DXMATRIX worldMatrix;
 	D3DXMATRIX orthoMatrix;
+
+	Camera* camera;
+	Model* model;
 };
 

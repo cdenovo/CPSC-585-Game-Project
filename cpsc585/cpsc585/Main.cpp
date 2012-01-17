@@ -44,8 +44,7 @@ bool initialize()
 	screenSettings.dmBitsPerPel = 32; // bit depth
 	screenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 
-	// Set fullscreen
-	ChangeDisplaySettings(&screenSettings, CDS_FULLSCREEN);
+	ChangeDisplaySettings(&screenSettings, NULL);
 
 	// Create the window at position 0, 0, and with the resolution defined just above
 	hwnd = CreateWindowEx(WS_EX_APPWINDOW, appName, appName, WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP,

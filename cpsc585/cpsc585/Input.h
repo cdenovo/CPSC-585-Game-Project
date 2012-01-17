@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <XInput.h>
 
 class Input
 {
