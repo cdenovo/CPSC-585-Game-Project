@@ -15,9 +15,10 @@ public:
 	void simulate(float milliseconds);
 
 private:
+	string getFPSString(float milliseconds);
+
 	Renderer* renderer;
 	Input* input;
 	int count;
 	int fps;
 };
-

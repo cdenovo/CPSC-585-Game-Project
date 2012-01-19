@@ -27,9 +27,25 @@ void AI::initialize(Renderer* r, Input* i)
 
 void AI::simulate(float milliseconds)
 {
-	count++;
-
 	_ASSERT(milliseconds > 0.0f);
+
+	string stringArray[] = { getFPSString(milliseconds), "Test test!",
+		"another test!", "looooooooooooooooooooooooooooooong sentence!",
+		"Eveeeeeeeeeeen looooooooooooooooooooooooooooooooooooonnnnnnnnnggggggggeeeeeeeeeeeeeeeeeeeeeeer" };
+	
+	renderer->setText(stringArray, sizeof(stringArray) / sizeof(string));
+
+
+
+
+	
+	return;
+}
+
+
+string AI::getFPSString(float milliseconds)
+{
+	count++;
 
 	if (count > 20)
 	{
@@ -40,12 +56,6 @@ void AI::simulate(float milliseconds)
 	char tmp[5];
 
 	_itoa_s(fps, tmp, 5, 10);
-	
-	string stringArray[] = { string("FPS: ").append((const char*) tmp), "Test test!",
-		"another test!", "looooooooooooooooooooooooooooooong sentence!",
-		"Eveeeeeeeeeeen looooooooooooooooooooooooooooooooooooonnnnnnnnnggggggggeeeeeeeeeeeeeeeeeeeeeeer"};
-	
-	renderer->setText(stringArray, sizeof(stringArray) / sizeof(string));
-	
-	return;
+
+	return string("FPS: ").append((const char*) tmp);
 }
