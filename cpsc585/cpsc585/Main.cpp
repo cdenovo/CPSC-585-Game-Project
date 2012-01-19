@@ -8,7 +8,10 @@ bool initialize()
 	ai = new AI();
 	input = new Input();
 	sound = new Sound();
+	
+	quit = false;
 
+	prevTime = 0;
 
 	// TO DO: Load config.ini file to set up resolution and input settings
 
@@ -75,6 +78,8 @@ bool initialize()
 	if (!(renderer->initialize(1280, 1024, hwnd, 0.1f, 1000.0f)))
 		return false;
 
+	ai->initialize(renderer, input);
+
 
 	return true;
 }
@@ -87,6 +92,16 @@ void run()
 
 	// Zero-out the memory used by msg
 	ZeroMemory(&msg, sizeof(MSG));
+
+	SYSTEMTIME st;
+	FILETIME ft;
+	GetSystemTime(&st);
+	SystemTimeToFileTime(&st, &ft);
+	ULARGE_INTEGER largeInt;
+	largeInt.LowPart = ft.dwLowDateTime;
+	largeInt.HighPart = ft.dwHighDateTime;
+
+	prevTime = largeInt.QuadPart / 10000;
 
 	while (!quit)
 	{
@@ -125,8 +140,13 @@ void shutdown()
 	hInstance = NULL;
 
 	// TO DO: Shut down and free up ai, renderer, sound, input
-	renderer->shutdown();
 
+	ai->shutdown();
+
+	ai = NULL;
+
+	renderer->shutdown();
+	
 	renderer = NULL;
 
 	return;
@@ -185,6 +205,26 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 // Main program loop. Return "true" when you want to break out of the loop
 bool mainLoop()
 {
+	SYSTEMTIME st;
+	FILETIME ft;
+	GetSystemTime(&st);
+	SystemTimeToFileTime(&st, &ft);
+	ULARGE_INTEGER largeInt;
+	largeInt.LowPart = ft.dwLowDateTime;
+	largeInt.HighPart = ft.dwHighDateTime;
+
+	ULONGLONG currentTime(largeInt.QuadPart / 10000);
+	
+	if (currentTime == prevTime)
+	{
+		renderer->render();
+		return false;
+	}
+
+	quit = input->update();
+	ai->simulate((float) (currentTime - prevTime));
 	renderer->render();
-	return false;
+
+	prevTime = currentTime;
+	return quit;
 }

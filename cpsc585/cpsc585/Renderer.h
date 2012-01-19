@@ -1,13 +1,17 @@
-#pragma comment(lib, "d3d9.lib")
+#pragma comment(lib, "d3dx9.lib")
 
 #include <d3d9.h>
 #include <d3dx9.h>
 
+#include <string>
+
+using namespace std;
 
 #include "Camera.h"
 #include "Model.h"
 
-
+#ifndef _RENDERER_H
+#define _RENDERER_H
 class Renderer
 {
 public:
@@ -16,8 +20,11 @@ public:
 	bool initialize(int width, int height, HWND hwnd, float zNear, float zFar);
 	void shutdown();
 	void render();
-
+	void setText(string* sentences, int count);
+	
 private:
+	void writeText(string text, int line);
+
 	IDirect3D9* d3dObject;
 	IDirect3DDevice9* device;
 
@@ -27,5 +34,12 @@ private:
 
 	Camera* camera;
 	Model* model;
-};
+	
+	ID3DXFont* font;
+	
+	int numSentences;
+	string* sentences;
 
+	int rotY;
+};
+#endif

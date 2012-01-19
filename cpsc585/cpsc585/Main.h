@@ -23,3 +23,7 @@ void shutdown();
 bool mainLoop();
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+bool quit;
+
+ULONGLONG prevTime;

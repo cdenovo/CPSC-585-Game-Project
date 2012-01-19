@@ -3,9 +3,49 @@
 
 AI::AI(void)
 {
+	renderer = NULL;
+	input = NULL;
 }
 
 
 AI::~AI(void)
 {
+}
+
+void AI::shutdown()
+{
+
+}
+
+void AI::initialize(Renderer* r, Input* i)
+{
+	renderer = r;
+	input = i;
+	count = 25;
+	fps = 0;
+}
+
+void AI::simulate(float milliseconds)
+{
+	count++;
+
+	_ASSERT(milliseconds > 0.0f);
+
+	if (count > 20)
+	{
+		fps = (int) floor(1000.0f / milliseconds);
+		count = 0;
+	}
+	
+	char tmp[5];
+
+	_itoa_s(fps, tmp, 5, 10);
+	
+	string stringArray[] = { string("FPS: ").append((const char*) tmp), "Test test!",
+		"another test!", "looooooooooooooooooooooooooooooong sentence!",
+		"Eveeeeeeeeeeen looooooooooooooooooooooooooooooooooooonnnnnnnnnggggggggeeeeeeeeeeeeeeeeeeeeeeer"};
+	
+	renderer->setText(stringArray, sizeof(stringArray) / sizeof(string));
+	
+	return;
 }
