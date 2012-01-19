@@ -80,7 +80,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	device->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_XRGB(50, 50, 50));    // ambient light
 	
 	D3DLIGHT9 light;    // create the light struct
-    D3DMATERIAL9 material;    // create the material struct
+	D3DMATERIAL9 material;    // create the material struct
 	
 	ZeroMemory(&light, sizeof(light));    // clear out the light struct for use
 	light.Type = D3DLIGHT_DIRECTIONAL;    // make the light type 'directional light'
@@ -190,8 +190,14 @@ void Renderer::writeText(string text, int line)
 
 void Renderer::setText(string* sentenceArray, int count)
 {
-	numSentences = count;
+	if ((sentences) && (numSentences < count))
+	{
+		delete [] sentences;
+		sentences = NULL;
+	}
 	
+	numSentences = count;
+
 	sentences = new string[count];
 
 	for (int i = 0; i < count; i++)

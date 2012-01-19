@@ -1,3 +1,4 @@
+#pragma once
 #pragma comment(lib, "d3dx9.lib")
 
 #include <d3d9.h>
@@ -10,8 +11,7 @@ using namespace std;
 #include "Camera.h"
 #include "Model.h"
 
-#ifndef _RENDERER_H
-#define _RENDERER_H
+
 class Renderer
 {
 public:
@@ -42,4 +42,3 @@ private:
 
 	int rotY;
 };
-#endif

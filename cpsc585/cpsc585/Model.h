@@ -1,9 +1,9 @@
+#pragma once
+
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <d3dx9math.h>
 
-#ifndef _MODEL_H
-#define _MODEL_H
 class Model
 {
 public:
@@ -26,4 +26,3 @@ private:
 	int vertexCount;
 	int indexCount;
 };
-#endif

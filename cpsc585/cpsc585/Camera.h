@@ -1,9 +1,8 @@
+#pragma once
 #pragma comment(lib, "d3d9.lib")
 
 #include <d3dx9math.h>
 
-#ifndef _CAMERA_H
-#define _CAMERA_H
 class Camera
 {
 public:
@@ -23,4 +22,3 @@ private:
 	float rotX, rotY, rotZ;
 	D3DXMATRIX viewMatrix;
 };
-#endif

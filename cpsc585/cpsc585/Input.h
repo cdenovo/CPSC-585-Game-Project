@@ -1,10 +1,9 @@
+#pragma once
 #pragma comment(lib, "XInput.lib")
 
 #include <Windows.h>
 #include <XInput.h>
 
-#ifndef _INPUT_H
-#define _INPUT_H
 class Input
 {
 public:
@@ -16,4 +15,3 @@ public:
 private:
 	bool quit;
 };
-#endif
