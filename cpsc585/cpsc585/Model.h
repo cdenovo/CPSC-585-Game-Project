@@ -1,3 +1,5 @@
+#pragma once
+
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <d3dx9math.h>
@@ -9,14 +11,14 @@ public:
 	~Model(void);
 	void initialize(IDirect3DDevice9* device);
 	void shutdown();
-	void render(IDirect3DDevice9* device);
+	void render(IDirect3DDevice9* device, float posX, float posY, float posZ, int rotXDegrees, int rotYDegrees, int rotZDegrees);
 	int getIndexCount();
 
 private:
 	struct Vertex
 	{
 		D3DXVECTOR3 position;
-		D3DCOLOR color;
+		D3DXVECTOR3 normal;
 	};
 
 	IDirect3DVertexBuffer9* vertexBuffer;
@@ -24,4 +26,3 @@ private:
 	int vertexCount;
 	int indexCount;
 };
-

@@ -1,3 +1,6 @@
+#pragma once
+#pragma comment(lib, "d3d9.lib")
+
 #include <d3dx9math.h>
 
 class Camera

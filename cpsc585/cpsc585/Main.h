@@ -1,10 +1,8 @@
 #include <Windows.h>
 #define WIN32_LEAN_AND_MEAN
 
-#include "Renderer.h"
+// AI.h includes everything Main needs to know about
 #include "AI.h"
-#include "Input.h"
-#include "Sound.h"
 
 Renderer* renderer;
 AI* ai;
@@ -23,3 +21,7 @@ void shutdown();
 bool mainLoop();
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+bool quit;
+
+ULONGLONG prevTime;
