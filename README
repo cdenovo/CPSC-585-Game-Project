@@ -28,8 +28,10 @@ Pivotal Tracker: www.pivotaltracker.com
 	
 Good way to work on the repository:
 
-1) Clone repository to your PC
-2) Copy the cpsc585 Visual Studio directory to a new place
+1) Clone repository to your PC (ONE TIME. Havok is ~150MB and won't change)
+2) Copy the cpsc585 Visual Studio directory to a new place (if you're doing this
+on your university account, keep the cloned repository on a USB stick, otherwise
+you'll take up too much space on your account with 2 copies of Havok)
 3) Edit the copied cpsc585 (so NOT in the cloned repository directory) as you like
 4) Under the Build menu in VS2010, go Clean Solution
 5) In Git GUI, open the cloned repository, and Create a Branch (this also checks out the branch)
@@ -38,3 +40,5 @@ Good way to work on the repository:
 8) Branch -> Checkout -> Master
 9) Merge -> Local -> yourBranchName
 10) Push to origin!
+11) If the repo has been updated, just PULL instead of Clone, so you don't re-download Havok,
+then do your edits as mentioned above
