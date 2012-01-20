@@ -5,6 +5,7 @@ AI::AI(void)
 {
 	renderer = NULL;
 	input = NULL;
+	physics = NULL;
 }
 
 
@@ -14,7 +15,12 @@ AI::~AI(void)
 
 void AI::shutdown()
 {
-
+	if (physics)
+	{
+		physics->shutdown();
+		delete physics;
+		physics = NULL;
+	}
 }
 
 void AI::initialize(Renderer* r, Input* i)
@@ -23,6 +29,8 @@ void AI::initialize(Renderer* r, Input* i)
 	input = i;
 	count = 25;
 	fps = 0;
+
+	physics = new Physics();
 }
 
 void AI::simulate(float milliseconds)

@@ -1,10 +1,8 @@
 #include <Windows.h>
 #define WIN32_LEAN_AND_MEAN
 
-#include "Renderer.h"
+// AI.h includes everything Main needs to know about
 #include "AI.h"
-#include "Input.h"
-#include "Sound.h"
 
 Renderer* renderer;
 AI* ai;

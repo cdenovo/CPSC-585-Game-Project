@@ -1,8 +1,12 @@
+#pragma once
+
 #include <stdlib.h>
 #include <math.h>
 
 #include "Renderer.h"
 #include "Input.h"
+#include "Physics.h"
+#include "Sound.h"
 
 
 class AI
@@ -19,6 +23,7 @@ private:
 
 	Renderer* renderer;
 	Input* input;
+	Physics* physics;
 	int count;
 	int fps;
 };
