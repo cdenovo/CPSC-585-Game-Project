@@ -65,6 +65,7 @@
     <ClCompile Include="AI.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Intention.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Physics.cpp" />
@@ -76,6 +77,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Havok.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Intention.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Physics.h" />
