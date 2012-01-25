@@ -7,6 +7,7 @@
 #include "Input.h"
 #include "Physics.h"
 #include "Sound.h"
+#include "Intention.h"
 
 
 class AI
@@ -17,6 +18,7 @@ public:
 	void shutdown();
 	void initialize(Renderer* renderer, Input* input);
 	void simulate(float milliseconds);
+	string boolToString(bool boolean);
 
 private:
 	string getFPSString(float milliseconds);
