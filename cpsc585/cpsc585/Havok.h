@@ -24,7 +24,7 @@
 #undef HK_FEATURE_PRODUCT_DESTRUCTION
 #undef HK_FEATURE_PRODUCT_BEHAVIOR
 
-#define HK_EXCLUDE_LIBRARY_hkcdInternal
+//#define HK_EXCLUDE_LIBRARY_hkcdInternal (apparently other parts of havok use this)
 #define HK_EXCLUDE_LIBRARY_hkpVehicle
 #define HK_EXCLUDE_LIBRARY_hkVisualize
 #define HK_EXCLUDE_LIBRARY_hkCompat
@@ -58,18 +58,7 @@
 #include <Common/Base/KeyCode.h>
 #define HK_CLASSES_FILE <Common/Serialize/Classlist/hkKeyCodeClasses.h>
 
-#include <Common/Base/hkBase.h>
-#include <Common/Base/System/hkBaseSystem.h>
-#include <Common/Base/System/Error/hkDefaultError.h>
-#include <Common/Base/Memory/System/Util/hkMemoryInitUtil.h>
-#include <Common/Base/Monitor/hkMonitorStream.h>
-#include <Common/Base/Memory/System/hkMemorySystem.h>
-#include <Common/Base/Memory/Allocator/Malloc/hkMallocAllocator.h>
 
-#include <Physics/Collide/hkpCollide.h>
-#include <Physics/Collide/Shape/Convex/Box/hkpBoxShape.h>
-#include <Physics/Collide/Shape/Compound/Tree/Mopp/hkpMoppBvTreeShape.h>
-#include <Physics/Collide/Shape/Compound/Tree/Mopp/hkpMoppUtility.h>
-#include <Physics/Collide/Shape/Compound/Tree/Mopp/hkpMoppCompilerInput.h>
-#include <Physics/Dynamics/hkpDynamics.h>
-#include <Physics/Collide/Dispatch/hkpAgentRegisterUtil.h>
+#if defined(HK_PLATFORM_NGP)
+unsigned int sceLibcHeapSize = 64*1024*1024;
+#endif

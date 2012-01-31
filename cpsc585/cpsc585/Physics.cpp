@@ -21,3 +21,9 @@ void Physics::shutdown()
 	hkBaseSystem::quit();
 	hkMemoryInitUtil::quit();
 }
+
+static void HK_CALL errorReport(const char* msg, void* userContext)
+{
+	using namespace std;
+	printf("%s", msg);
+}
