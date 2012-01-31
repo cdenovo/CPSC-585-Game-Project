@@ -12,10 +12,12 @@ Physics::~Physics(void)
 
 void Physics::initialize()
 {
-	
+	memoryRouter = hkMemoryInitUtil::initDefault( hkMallocAllocator::m_defaultMallocAllocator, hkMemorySystem::FrameInfo( 500* 1024 ) );
+	hkBaseSystem::init( memoryRouter, errorReport );
 }
 
 void Physics::shutdown()
 {
-	// Free memory allocated by this class
+	hkBaseSystem::quit();
+	hkMemoryInitUtil::quit();
 }
