@@ -31,6 +31,7 @@ void AI::initialize(Renderer* r, Input* i)
 	fps = 0;
 
 	physics = new Physics();
+	physics->initialize();
 }
 
 void AI::simulate(float milliseconds)
