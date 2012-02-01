@@ -21,40 +21,56 @@ bool initialize()
 	WNDCLASSEX wc;
 	DEVMODE screenSettings;
 
+	
+	// Get initial screen settings
+	initialScreenSettings.dmSize = sizeof(DEVMODE);
+	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &initialScreenSettings);
+
+	// Initialize screenSettings
+	screenSettings.dmSize = sizeof(DEVMODE);
+	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &screenSettings);
+
 	hInstance = GetModuleHandle(NULL);
 	appName = "CPSC 585 Game";
 
-	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+	memset(&wc, 0, sizeof(WNDCLASSEX));
+
+	wc.style = CS_HREDRAW | CS_VREDRAW;// | CS_OWNDC;
 	wc.lpfnWndProc = WndProc;
-	wc.cbClsExtra    = 0;
-	wc.cbWndExtra    = 0;
 	wc.hInstance     = hInstance;
 	wc.hIcon		 = LoadIcon(NULL, IDI_WINLOGO);
 	wc.hIconSm       = wc.hIcon;
 	wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-	wc.lpszMenuName  = NULL;
+	//wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wc.lpszClassName = appName;
 	wc.cbSize        = sizeof(WNDCLASSEX);
 	
 	// Register the window class.
 	RegisterClassEx(&wc);
 
-	memset(&screenSettings, 0, sizeof(screenSettings));
-	screenSettings.dmSize = sizeof(screenSettings);
-	screenSettings.dmPelsWidth = (unsigned long) 1280; // Screen width
-	screenSettings.dmPelsHeight = (unsigned long) 1024; // Screen height
-	screenSettings.dmBitsPerPel = 32; // bit depth
+	unsigned long resx, resy;
+	// Get screen resolution
+	resx = initialScreenSettings.dmPelsWidth;
+	resy = initialScreenSettings.dmPelsHeight;
+
+	screenSettings.dmPelsWidth = resx; // Screen width
+	screenSettings.dmPelsHeight = resy; // Screen height
+	screenSettings.dmBitsPerPel = initialScreenSettings.dmBitsPerPel; // bit depth
 	screenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-
-	ChangeDisplaySettings(&screenSettings, NULL);
-
+	
+	if (ChangeDisplaySettings(&screenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
+	{
+		return false;
+	}
+	
 	// Create the window at position 0, 0, and with the resolution defined just above
 	hwnd = CreateWindowEx(WS_EX_APPWINDOW, appName, appName, WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP,
-			0, 0, 1280, 1024, NULL, NULL, hInstance, NULL);
-
+			0, 0, resx, resy, NULL, NULL, hInstance, NULL);
+	
 	// Bring up the window and set focus
-	ShowWindow(hwnd, SW_SHOW);
+	ShowWindow(hwnd, SW_SHOWNORMAL);
+	
+
 	SetForegroundWindow(hwnd);
 	SetFocus(hwnd);
 
@@ -75,7 +91,7 @@ bool initialize()
 		return false;
 
 	// TO DO: Run the 'initialize' method for each component
-	if (!(renderer->initialize(1280, 1024, hwnd, 0.1f, 1000.0f)))
+	if (!(renderer->initialize(resx, resy, hwnd, 0.1f, 1000.0f)))
 		return false;
 
 	ai->initialize(renderer, input);
@@ -149,6 +165,8 @@ void shutdown()
 	
 	renderer = NULL;
 
+	ChangeDisplaySettings(&initialScreenSettings, NULL);
+
 	return;
 }
 
@@ -157,33 +175,46 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 	// (refernced a tutorial at http://www.rastertek.com/dx10tut02.html)
 	switch(umessage)
 	{
-		// Check if the window is being destroyed.
-		case WM_DESTROY:
+		// Prevent entering powersave/screensaver
+		case WM_SYSCOMMAND:
+		{
+			switch (wparam)
 			{
-				PostQuitMessage(0);
+				case SC_SCREENSAVE:
+				case SC_MONITORPOWER:
 				return 0;
 			}
+			
+			return 0;
+		}
+		// Check if the window is being destroyed.
+		case WM_DESTROY:
+		{
+			PostQuitMessage(0);
+			return 0;
+		}
 
 		// Check if the window is being closed.
 		case WM_CLOSE:
-			{
-				PostQuitMessage(0);		
-				return 0;
-			}
+		{
+			PostQuitMessage(0);		
+			return 0;
+		}
 
 		case WM_KEYDOWN: case WM_KEYUP : case WM_MOUSEMOVE: case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN: case WM_LBUTTONUP: case WM_RBUTTONUP: 
 		// Pass to handler for all input, that will work alongside XInput
-			{
-				if (input)
-					input->processWindowsMsg(umessage, wparam);
-			}
+		{
+			if (input)
+				input->processWindowsMsg(umessage, wparam);
+			return 0;
+		}
 
 		// All other messages pass to the default message handler
 		default:
-			{
-				return DefWindowProc(hwnd, umessage, wparam, lparam);
-			}
+		{
+			return DefWindowProc(hwnd, umessage, wparam, lparam);
+		}
 	}
 }
 
@@ -214,7 +245,7 @@ bool mainLoop()
 	largeInt.HighPart = ft.dwHighDateTime;
 
 	ULONGLONG currentTime(largeInt.QuadPart / 10000);
-	
+
 	if (currentTime == prevTime)
 	{
 		renderer->render();

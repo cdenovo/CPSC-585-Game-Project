@@ -26,3 +26,5 @@ static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 bool quit;
 
 ULONGLONG prevTime;
+
+DEVMODE initialScreenSettings;

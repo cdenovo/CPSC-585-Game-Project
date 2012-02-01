@@ -28,15 +28,21 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	ZeroMemory(&params,sizeof(params));
 
 	params.Windowed = TRUE;
-	params.BackBufferFormat = D3DFMT_UNKNOWN;
+	params.BackBufferFormat = D3DFMT_X8R8G8B8;
+	params.BackBufferWidth = width;
+	params.BackBufferHeight = height;
 	params.PresentationInterval = D3DPRESENT_INTERVAL_ONE;	// VSYNC. Change to INTERVAL_IMMEDIATE to turn off VSYNC
 	params.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	params.EnableAutoDepthStencil = TRUE;
 	params.AutoDepthStencilFormat = D3DFMT_D16;
+	params.hDeviceWindow = hwnd;
 
 	
-	d3dObject->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd,
-		D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &device);
+	if (FAILED(d3dObject->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd,
+		D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &device)))
+	{
+		return false;
+	}
 
 	device->SetRenderState(D3DRS_LIGHTING, FALSE);
 	
