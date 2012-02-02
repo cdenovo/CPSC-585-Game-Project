@@ -52,7 +52,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>\\pc.cpsc.ucalgary.ca\Users\ug\cdebavel\Documents\CPSC585\CPSC-585-Game-Project\cpsc585\DirectX;\\pc.cpsc.ucalgary.ca\Users\ug\cdebavel\Documents\CPSC585\CPSC-585-Game-Project\cpsc585\Havok</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\DirectX;..\Havok</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
