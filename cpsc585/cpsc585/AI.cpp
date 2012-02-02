@@ -6,6 +6,10 @@ AI::AI(void)
 	renderer = NULL;
 	input = NULL;
 	physics = NULL;
+
+
+	player = NULL;
+	//aiVehicle1 = NULL;
 }
 
 
@@ -32,6 +36,12 @@ void AI::initialize(Renderer* r, Input* i)
 
 	physics = new Physics();
 	physics->initialize();
+
+	player = new Racer(r->getDevice());
+	r->addDrawable(player->drawable);
+
+	aiVehicle1 = new Racer(r->getDevice());
+	r->addDrawable(aiVehicle1->drawable);
 }
 
 void AI::simulate(float milliseconds)
@@ -52,34 +62,36 @@ void AI::simulate(float milliseconds)
 		char buf5[33];
 		_itoa_s(intention.leftStick, buf5, 10);
 
-		string stringArray[] = { getFPSString(milliseconds), 
+		std::string stringArray[] = { getFPSString(milliseconds), 
 			"X: " + boolToString(intention.xPressed),
 			"Y: " + boolToString(intention.yPressed),
 			"A: " + boolToString(intention.aPressed),
 			"B: " + boolToString(intention.bPressed),
 			"Back: " + boolToString(intention.selectPressed),
 			"Start: " + boolToString(intention.startPressed),
-			string("Right Trigger: ").append(buf1),
-			string("Left Trigger: ").append(buf2),
-			string("RStick X: ").append(buf3),
-			string("RStick Y: ").append(buf4),
-			string("LStick: ").append(buf5),};
+			std::string("Right Trigger: ").append(buf1),
+			std::string("Left Trigger: ").append(buf2),
+			std::string("RStick X: ").append(buf3),
+			std::string("RStick Y: ").append(buf4),
+			std::string("LStick: ").append(buf5),};
 	
-		renderer->setText(stringArray, sizeof(stringArray) / sizeof(string));
+		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
 	}
 	else{
-		string stringArray[] = {""};
-		renderer->setText(stringArray, sizeof(stringArray) / sizeof(string));
+		std::string stringArray[] = {""};
+		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
 	}
 
 	// ---------------------------------------------------------------
 
+	player->drawable->setPosAndRot(intention.leftStick / 1000.0f, 0, 0, 0, 0.0174f * (float) intention.rightTrig, 0);
+	aiVehicle1->drawable->setPosAndRot(-5.0f, -5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	
 	return;
 }
 
 
-string AI::getFPSString(float milliseconds)
+std::string AI::getFPSString(float milliseconds)
 {
 	count++;
 
@@ -93,10 +105,10 @@ string AI::getFPSString(float milliseconds)
 
 	_itoa_s(fps, tmp, 5, 10);
 
-	return string("FPS: ").append((const char*) tmp);
+	return std::string("FPS: ").append((const char*) tmp);
 }
 
-string AI::boolToString(bool boolean)
+std::string AI::boolToString(bool boolean)
 {
 	if(boolean == true){
 		return "True";

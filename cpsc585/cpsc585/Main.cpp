@@ -91,7 +91,7 @@ bool initialize()
 		return false;
 
 	// TO DO: Run the 'initialize' method for each component
-	if (!(renderer->initialize(resx, resy, hwnd, 0.1f, 1000.0f)))
+	if (!(renderer->initialize(resx, resy, hwnd, 0.1f, 1000.0f, 2)))
 		return false;
 
 	ai->initialize(renderer, input);

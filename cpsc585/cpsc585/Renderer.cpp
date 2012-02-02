@@ -7,11 +7,13 @@ Renderer::Renderer()
 	device = NULL;
 	
 	camera = NULL;
-	model = NULL;
 	font = NULL;
 
 	sentences = NULL;
 	numSentences = 0;
+	numDrawables = 0;
+	drawables = NULL;
+	currentDrawable = 0;
 }
 
 
@@ -19,8 +21,12 @@ Renderer::~Renderer()
 {
 }
 
-bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float zFar)
+bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float zFar, int numToDraw)
 {
+	numDrawables = numToDraw;
+
+	drawables = new Drawable*[numToDraw];
+
 	d3dObject = Direct3DCreate9(D3D_SDK_VERSION);
 
 	D3DPRESENT_PARAMETERS params;
@@ -73,13 +79,6 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	
 	camera = new Camera;
 	camera->setPos(0.0f, 0.0f, -30.0f);
-	
-	model = new Model;
-	model->initialize(device);
-	rotY = 0;
-
-
-
 
 
 	device->SetRenderState(D3DRS_LIGHTING, TRUE);
@@ -114,11 +113,9 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 
 void Renderer::shutdown()
 {
-	if (model)
+	if (drawables)
 	{
-		model->shutdown();
-		delete model;
-		model = NULL;
+		// Clean up drawables
 	}
 
 	if (camera)
@@ -163,15 +160,15 @@ void Renderer::render()
 	device->SetTransform(D3DTS_VIEW, &viewMatrix);
 	device->SetTransform(D3DTS_WORLD, &worldMatrix);
 
-	rotY += 1;
-	if (rotY >360)
-		rotY = 0;
-	device->BeginScene();
-	
-	model->render(device, 0.0f, 0.0f, 0.0f, 10, rotY, 0);
 
-	model->render(device, -10.0f, -2.0f, 0.0f, 10, rotY, 45);
-	
+	device->BeginScene();
+
+	for (int i = 0; i < currentDrawable; i++)
+	{
+		drawables[i]->render(device);
+	}
+
+
 	for (int i = 0; i < numSentences; i++)
 	{
 		writeText(sentences[i], i);
@@ -184,7 +181,7 @@ void Renderer::render()
 	return;
 }
 
-void Renderer::writeText(string text, int line)
+void Renderer::writeText(std::string text, int line)
 {
 	device->SetTransform(D3DTS_PROJECTION, &orthoMatrix);
 
@@ -194,7 +191,7 @@ void Renderer::writeText(string text, int line)
 	font->DrawText(NULL, text.c_str(), -1, &rect, DT_LEFT|DT_NOCLIP, D3DCOLOR_XRGB(255, 255, 255));
 }
 
-void Renderer::setText(string* sentenceArray, int count)
+void Renderer::setText(std::string* sentenceArray, int count)
 {
 	if ((sentences) && (numSentences < count))
 	{
@@ -204,10 +201,26 @@ void Renderer::setText(string* sentenceArray, int count)
 	
 	numSentences = count;
 
-	sentences = new string[count];
+	sentences = new std::string[count];
 
 	for (int i = 0; i < count; i++)
 	{
-		sentences[i] = string(sentenceArray[i]);
+		sentences[i] = std::string(sentenceArray[i]);
 	}
+}
+
+
+void Renderer::addDrawable(Drawable* drawable)
+{
+	if (currentDrawable < numDrawables)
+	{
+		drawables[currentDrawable] = drawable;
+		currentDrawable++;
+	}
+}
+
+
+IDirect3DDevice9* Renderer::getDevice()
+{
+	return device;
 }

@@ -8,6 +8,7 @@
 #include "Physics.h"
 #include "Sound.h"
 #include "Intention.h"
+#include "Racer.h"
 
 
 class AI
@@ -18,14 +19,17 @@ public:
 	void shutdown();
 	void initialize(Renderer* renderer, Input* input);
 	void simulate(float milliseconds);
-	string boolToString(bool boolean);
+	std::string boolToString(bool boolean);
 
 private:
-	string getFPSString(float milliseconds);
+	std::string getFPSString(float milliseconds);
 
 	Renderer* renderer;
 	Input* input;
 	Physics* physics;
 	int count;
 	int fps;
+
+	Racer* player;
+	Racer* aiVehicle1;
 };

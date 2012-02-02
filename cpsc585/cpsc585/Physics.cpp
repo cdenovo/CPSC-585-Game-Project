@@ -24,6 +24,5 @@ void Physics::shutdown()
 
 static void HK_CALL errorReport(const char* msg, void* userContext)
 {
-	using namespace std;
 	printf("%s", msg);
 }

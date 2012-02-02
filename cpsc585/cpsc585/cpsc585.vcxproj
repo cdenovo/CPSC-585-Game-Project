@@ -52,7 +52,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\DirectX;..\Havok</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>\\pc.cpsc.ucalgary.ca\Users\ug\cdebavel\Documents\CPSC585\CPSC-585-Game-Project\cpsc585\DirectX;\\pc.cpsc.ucalgary.ca\Users\ug\cdebavel\Documents\CPSC585\CPSC-585-Game-Project\cpsc585\Havok</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -80,23 +80,31 @@
   <ItemGroup>
     <ClCompile Include="AI.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Drawable.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Intention.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Physics.cpp" />
+    <ClCompile Include="Racer.cpp" />
+    <ClCompile Include="RacerMesh.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Sound.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AI.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Drawable.h" />
     <ClInclude Include="Havok.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Intention.h" />
     <ClInclude Include="Main.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Physics.h" />
+    <ClInclude Include="Racer.h" />
+    <ClInclude Include="RacerMesh.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Sound.h" />
   </ItemGroup>
