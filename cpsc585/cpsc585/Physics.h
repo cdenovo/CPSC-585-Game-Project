@@ -33,10 +33,15 @@ class Physics
 public:
 	Physics(void);
 	~Physics(void);
+
 	void initialize();
 	void shutdown();
+	void addRigidBody(hkpRigidBody *rb);
+
+	void accelerate(hkpRigidBody *racer, float acceleration);
+	void steer(hkpRigidBody *racer, float steering);
 
 private:
 	hkMemoryRouter* memoryRouter;
-	
+	hkpWorld* world;
 };
