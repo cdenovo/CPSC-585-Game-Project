@@ -34,6 +34,7 @@ void AI::initialize(Renderer* r, Input* i)
 	count = 25;
 	fps = 0;
 
+	//Initialize physics
 	physics = new Physics();
 	physics->initialize();
 
