@@ -251,7 +251,7 @@ bool mainLoop()
 		renderer->render();
 		return false;
 	}
-	
+
 	quit = input->update();
 	ai->simulate((float) (currentTime - prevTime));
 	renderer->render();
