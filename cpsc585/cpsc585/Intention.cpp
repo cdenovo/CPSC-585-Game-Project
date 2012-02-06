@@ -34,3 +34,90 @@ void Intention::reset()
 	lbumpPressed = false;
 	rbumpPressed = false;
 }
+
+
+/**
+* Converts intention into serialized data to be sent over a network
+* Assumes bitstr is a size 11 char array
+*/
+void Intention::serialize(char bitstr[])
+{
+	//Initialize bitstring
+	for(int i = 0; i < 11; i++)
+	{
+		bitstr[i] = 0;
+	}
+
+	bitstr[0] = 0x80 & (xPressed << 7); //Store xPressed
+	bitstr[0] = bitstr[0] | (0x40 & (yPressed << 6)); //Store yPressed
+	bitstr[0] = bitstr[0] | (0x20 & (aPressed << 5)); //Store aPressed
+	bitstr[0] = bitstr[0] | (0x10 & (bPressed << 4)); //Store bPressed
+	bitstr[0] = bitstr[0] | (0x08 & (selectPressed << 3)); //Store selectPressed
+	bitstr[0] = bitstr[0] | (0x04 & (startPressed << 2)); //Store startPressed
+	bitstr[0] = bitstr[0] | (0x02 & (lbumpPressed << 1)); //Store lbumpPressed
+	bitstr[0] = bitstr[0] | (0x01 & rbumpPressed); //Store rbumpPressed
+
+	//Store rightStickX
+	bitstr[1] = (rightStickX & 0xFF00) >> 8;
+	bitstr[2] = rightStickX & 0x00FF;
+
+	//Store rightStickY
+	bitstr[3] = (rightStickY & 0xFF00) >> 8;
+	bitstr[4] = rightStickY & 0x00FF;
+
+	//Store leftStick
+	bitstr[5] = (leftStick & 0xFF00) >> 8;
+	bitstr[6] = leftStick & 0x00FF;
+
+	//Store rightTrig
+	bitstr[7] = (rightTrig & 0xFF00) >> 8;
+	bitstr[8] = rightTrig & 0x00FF;
+
+	//Store leftTrig
+	bitstr[9] = (leftTrig & 0xFF00) >> 8;
+	bitstr[10] = leftTrig & 0x00FF;
+}
+
+
+/**
+* Converts a serialized intention class back into the intention class
+* Assumes that input bitstr is a char array of size 11
+*/
+void Intention::unserialize(char bitstr[])
+{
+	//Get boolean values (the ?true:false is to not get any compiler warnings about performance issues)
+	xPressed =  (bitstr[0] & 0x80)?true:false;
+	yPressed = (bitstr[0] & 0x40)?true:false;
+	aPressed = (bitstr[0] & 0x20)?true:false;
+	bPressed = (bitstr[0] & 0x10)?true:false;
+	selectPressed = (bitstr[0] & 0x08)?true:false;
+	startPressed = (bitstr[0] & 0x04)?true:false;
+	lbumpPressed = (bitstr[0] & 0x02)?true:false;
+	rbumpPressed = (bitstr[0] & 0x01)?true:false;
+
+	rightStickX = ((int)bitstr[1] << 8) | bitstr[2]; //Get rightStickX
+	rightStickY = ((int)bitstr[3] << 8) | bitstr[4]; //Get rightStickY
+	leftStick = ((int)bitstr[5] << 8) | bitstr[6]; //Get leftStick
+	rightTrig = ((int)bitstr[7] << 8) | bitstr[8]; //Get rightTrig
+	leftTrig = ((int)bitstr[9] << 8) | bitstr[10]; //Get leftTrig
+}
+
+
+/**
+* Converts the intention class into a string
+*/
+std::string Intention::toStr()
+{
+
+	std::stringstream ss;
+	ss << "xPressed: " << xPressed << "\nyPressed: " << yPressed << std::endl;
+	ss << "aPressed: " << aPressed << "\nbPressed: " << bPressed << std::endl;
+	ss << "selectPressed: " << selectPressed << "\nstartPressed: " << startPressed << std::endl;
+	ss << "lbumpPressed: " << lbumpPressed << "\nrbumpPressed: " << rbumpPressed << std::endl;
+
+	ss << "rightStickX: " << rightStickX << "\nrightStickY: " << rightStickY << std::endl;
+	ss << "leftStick: " << leftStick << std::endl;
+	ss << "rightTrig: " << rightTrig << "\nleftTrig: " << leftTrig << std::endl;
+
+	return ss.str();
+}
