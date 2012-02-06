@@ -11,6 +11,7 @@ public:
 	~Racer(void);
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians
+	void update();
 
 
 private:

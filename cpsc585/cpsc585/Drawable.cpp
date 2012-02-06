@@ -24,6 +24,11 @@ void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevic
 			mesh = RacerMesh::getInstance(device);
 			break;
 		}
+	case WORLD:
+		{
+			mesh = RacerMesh::getInstance(device);
+			break;
+		}
 	default:
 		mesh = NULL;
 	}
@@ -56,4 +61,10 @@ void Drawable::render(IDirect3DDevice9* device)
 	device->SetTransform(D3DTS_WORLD, &transform);
 
 	mesh->render(device);
+}
+
+void Drawable::setTransform(D3DXMATRIX* input)
+{
+	D3DXMatrixIdentity(&transform);
+	D3DXMatrixMultiply(&transform, &transform, input);
 }

@@ -257,5 +257,9 @@ bool mainLoop()
 	renderer->render();
 
 	prevTime = currentTime;
+
+	if (quit)
+		ai->shutdown();
+
 	return quit;
 }

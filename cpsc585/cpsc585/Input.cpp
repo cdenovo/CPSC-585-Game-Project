@@ -64,11 +64,57 @@ bool Input::update()
 		if(gamepad.wButtons & XINPUT_GAMEPAD_BACK){
 			intention.selectPressed = true;
 		}
-		intention.rightTrig = gamepad.bRightTrigger;
-		intention.leftTrig = gamepad.bLeftTrigger;
-		intention.rightStickX = gamepad.sThumbRX;
-		intention.rightStickY = gamepad.sThumbRY;
-		intention.leftStick = gamepad.sThumbLX;
+
+		if (gamepad.bRightTrigger >= XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+		{
+			intention.rightTrig = gamepad.bRightTrigger;
+		}
+		else
+		{
+			intention.rightTrig = 0;
+		}
+
+		if (gamepad.bLeftTrigger >= XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+		{
+			intention.leftTrig = gamepad.bLeftTrigger;
+		}
+		else
+		{
+			intention.leftTrig = 0;
+		}
+		
+		if ((gamepad.sThumbRX >= XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+			|| (gamepad.sThumbRX <= -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE))
+		{
+			intention.rightStickX = gamepad.sThumbRX;
+		}
+		else
+		{
+			intention.rightStickX = 0;
+		}
+
+		if ((gamepad.sThumbRY >= XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+			|| (gamepad.sThumbRY <= -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE))
+		{
+			intention.rightStickY = gamepad.sThumbRY;
+		}
+		else
+		{
+			intention.rightStickY = 0;
+		}
+		
+		
+		if ((gamepad.sThumbLX >= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+			|| (gamepad.sThumbLX <= -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE))
+		{
+			intention.leftStick = gamepad.sThumbLX;
+		}
+		else
+		{
+			intention.leftStick = 0;
+		}
+
+		
 
 		 /*Vibrating the controller:
 			XINPUT_VIBRATION Vibration;

@@ -37,8 +37,9 @@ public:
 	void initialize();
 	void shutdown();
 	void addRigidBody(hkpRigidBody *rb);
+	void step(float seconds);
 
-	void accelerate(hkpRigidBody *racer, float acceleration);
+	void accelerate(float milliseconds, hkpRigidBody *racer, hkVector4 *accelerationVector);
 	void steer(hkpRigidBody *racer, float steering);
 
 private:

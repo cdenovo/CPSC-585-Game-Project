@@ -9,6 +9,7 @@
 #include "Sound.h"
 #include "Intention.h"
 #include "Racer.h"
+#include "World.h"
 
 
 class AI
@@ -31,5 +32,5 @@ private:
 	int fps;
 
 	Racer* player;
-	Racer* aiVehicle1;
+	World* world;
 };

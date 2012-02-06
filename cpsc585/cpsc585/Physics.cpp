@@ -18,16 +18,23 @@ void Physics::initialize()
 	hkpWorldCinfo::SimulationType simulationType;
 	simulationType = hkpWorldCinfo::SIMULATION_TYPE_CONTINUOUS;
 
+	// Initialize the physics world
 	hkpWorldCinfo info;
-	info.setBroadPhaseWorldSize( 5000.0f );
-	info.setupSolverInfo(hkpWorldCinfo::SOLVER_TYPE_4ITERS_HARD);
+	
+	info.m_gravity.set(0.0f, -20.0f, 0.0f); // Set gravity (x,y,z)	[using 9.8 instead of ~20 looks bad]
+	info.setBroadPhaseWorldSize(100.0f); // Defaults to 1000.0f which is good in most cases, using 100 until the world is bigger
+	info.setupSolverInfo(hkpWorldCinfo::SOLVER_TYPE_4ITERS_MEDIUM);
 	info.m_collisionTolerance = 0.01f;
-	info.m_gravity = hkVector4( 0.0f,-9.8f,0.0f);
 	info.m_simulationType = simulationType;
 	info.m_broadPhaseBorderBehaviour = info.BROADPHASE_BORDER_FIX_ENTITY;
 	info.m_enableDeactivation = true;
 
+
 	world = new hkpWorld(info);
+
+	hkpAgentRegisterUtil::registerAllAgents( world->getCollisionDispatcher() );
+
+
 	world->lock();
 }
 
@@ -42,12 +49,17 @@ void Physics::addRigidBody(hkpRigidBody *rb)
 	world->addEntity( rb );
 }
 
-void Physics::accelerate(hkpRigidBody *racer, float acceleration)
+void Physics::accelerate(float milliseconds, hkpRigidBody *racer, hkVector4 *accelVec)
 {
-	
+	racer->applyForce(milliseconds / 1000.f, *accelVec); // Just for testing purposes
 }
 
 static void HK_CALL errorReport(const char* msg, void* userContext)
 {
 	printf("%s", msg);
+}
+
+void Physics::step(float milliseconds)
+{
+	world->stepDeltaTime(milliseconds / 1000.0f);
 }

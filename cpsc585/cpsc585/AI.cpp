@@ -9,7 +9,7 @@ AI::AI(void)
 
 
 	player = NULL;
-	//aiVehicle1 = NULL;
+	world = NULL;
 }
 
 
@@ -19,6 +19,18 @@ AI::~AI(void)
 
 void AI::shutdown()
 {
+	if (player)
+	{
+		delete player;
+		player = NULL;
+	}
+
+	if (world)
+	{
+		delete world;
+		world = NULL;
+	}
+
 	if (physics)
 	{
 		physics->shutdown();
@@ -40,9 +52,13 @@ void AI::initialize(Renderer* r, Input* i)
 
 	player = new Racer(r->getDevice());
 	r->addDrawable(player->drawable);
+	physics->addRigidBody(player->body);
+	player->setPosAndRot(0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-	aiVehicle1 = new Racer(r->getDevice());
-	r->addDrawable(aiVehicle1->drawable);
+	world = new World(r->getDevice());
+	r->addDrawable(world->drawable);
+	physics->addRigidBody(world->body);
+	world->setPosAndRot(0.0f, -10.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 void AI::simulate(float milliseconds)
@@ -85,9 +101,12 @@ void AI::simulate(float milliseconds)
 
 	// ---------------------------------------------------------------
 
-	player->drawable->setPosAndRot(intention.leftStick / 1000.0f, 0, 0, 0, 0.0174f * (float) intention.rightTrig, 0);
-	aiVehicle1->drawable->setPosAndRot(-5.0f, -5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	hkVector4 vec((float) intention.rightStickX, intention.rightTrig * 100.0f, (float) intention.rightStickY);
 	
+	physics->accelerate(milliseconds, player->body, &vec);
+	physics->step(milliseconds);
+	player->update();
+
 	return;
 }
 

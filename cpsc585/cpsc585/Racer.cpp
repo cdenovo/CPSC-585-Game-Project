@@ -3,17 +3,18 @@
 
 Racer::Racer(IDirect3DDevice9* device)
 {
-	drawable = new Drawable(RACER, "somename", device);
+	drawable = new Drawable(RACER, "someTextureName", device);
 
-	hkVector4 halfExtent(.5,.5,.5); //Half extent for racer rigid body box
-	hkpBoxShape *box = new hkpBoxShape(halfExtent, 0); //Create shape
 
-	hkpRigidBodyCinfo rigidBodyInfo; //Store shape in rigidBodyInfo
-	rigidBodyInfo.m_shape = box;
-
-	body = new hkpRigidBody(rigidBodyInfo); //Create rigid body
-
-	box->removeReference();
+	hkpRigidBodyCinfo info;
+	hkVector4 halfExtent(3.0f, 3.0f, 3.0f);		//Half extent for racer rigid body box
+	info.m_shape = new hkpBoxShape(halfExtent);
+	info.m_restitution = 1.0;
+	const hkReal boxMass = 1000.0f;
+	hkpMassProperties massProperties;
+	hkpInertiaTensorComputer::computeShapeVolumeMassProperties(info.m_shape, boxMass, massProperties);
+	info.setMassProperties(massProperties);
+	body = new hkpRigidBody(info);		//Create rigid body
 }
 
 
@@ -30,4 +31,22 @@ void Racer::setPosAndRot(float posX, float posY, float posZ,
 {
 	drawable->setPosAndRot(posX, posY, posZ,
 		rotX, rotY, rotZ);
+
+	hkQuaternion quat;
+	quat.setAxisAngle(hkVector4(1.0f, 0.0f, 0.0f), rotX);
+	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotY));
+	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotZ));
+
+	body->setPositionAndRotation(hkVector4(posX, posY, posZ), quat);
+}
+
+
+void Racer::update()
+{
+	if (drawable && body)
+	{
+		D3DXMATRIX transMat;
+		(body->getTransform()).get4x4ColumnMajor(transMat);
+		drawable->setTransform(&transMat);
+	}
 }
