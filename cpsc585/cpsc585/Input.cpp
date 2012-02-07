@@ -37,7 +37,68 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 	else
 	{
 		// Process input
-
+		if (umessage == WM_KEYDOWN)
+		{
+			switch (wparam)
+			{
+			case VK_UP:
+				{
+					intention.rightStickY = 25000;
+					break;
+				}
+			case VK_DOWN:
+				{
+					intention.rightStickY = -25000;
+					break;
+				}
+			case VK_LEFT:
+				{
+					intention.rightStickX = -25000;
+					break;
+				}
+			case VK_RIGHT:
+				{
+					intention.rightStickX = 25000;
+					break;
+				}
+			case VK_SPACE:
+				{
+					intention.rightTrig = 255;
+					break;
+				}
+			}
+		}
+		else if (umessage == WM_KEYUP)
+		{
+			switch (wparam)
+			{
+			case VK_UP:
+				{
+					intention.rightStickY = 0;
+					break;
+				}
+			case VK_DOWN:
+				{
+					intention.rightStickY = 0;
+					break;
+				}
+			case VK_LEFT:
+				{
+					intention.rightStickX = 0;
+					break;
+				}
+			case VK_RIGHT:
+				{
+					intention.rightStickX = 0;
+					break;
+				}
+			case VK_SPACE:
+				{
+					intention.rightTrig = 0;
+					break;
+				}
+			}
+		}
 	}
 	return;
 }

@@ -21,7 +21,7 @@ Renderer::~Renderer()
 {
 }
 
-bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float zFar, int numToDraw)
+bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float zFar, int numToDraw, char* msg)
 {
 	numDrawables = numToDraw;
 
@@ -29,20 +29,35 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 
 	d3dObject = Direct3DCreate9(D3D_SDK_VERSION);
 	
+	D3DCAPS9 caps;
+	d3dObject->GetDeviceCaps(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, &caps);
+
+	if (!(caps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT))
+	{
+		LPCTSTR descr = "This program requires a video card that supports hardware vertex processing!";
+		strcpy_s((char*) msg, 128, descr);
+		
+		return false;
+	}
 
 
 	D3DPRESENT_PARAMETERS params;
 
-	ZeroMemory(&params,sizeof(params));
+	ZeroMemory(&params,sizeof(D3DPRESENT_PARAMETERS));
 
 	params.Windowed = TRUE;
+	params.BackBufferCount= 1;
 	params.BackBufferFormat = D3DFMT_X8R8G8B8;
+	
 	params.BackBufferWidth = width;
 	params.BackBufferHeight = height;
-	params.PresentationInterval = D3DPRESENT_INTERVAL_ONE;	// VSYNC. Change to INTERVAL_IMMEDIATE to turn off VSYNC
+	params.MultiSampleType=D3DMULTISAMPLE_NONE;
 	params.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	params.hDeviceWindow = hwnd;
 	params.EnableAutoDepthStencil = TRUE;
+
+	// VSYNC. Change to INTERVAL_IMMEDIATE to turn off VSYNC, change to INTERVAL_ONE to turn on VSYNC
+	params.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
 
 	// Now need to set up the depth stencil format.
 	D3DFORMAT formats[] = { D3DFMT_D32, D3DFMT_D24X8, D3DFMT_D16 };
@@ -68,13 +83,24 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 		}
 	}
 	
+	if (format == (D3DFORMAT) 0)
+	{
+		LPCTSTR descr = "Couldn't find a suitable depth format!";
+		strcpy_s((char*) msg, 128, descr);
+		
+		return false;
+	}
 	
 	params.AutoDepthStencilFormat = format;
 
-	
-	if (FAILED(d3dObject->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd,
-		D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &device)))
+	HRESULT result = d3dObject->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd,
+		D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &device);
+
+	if (FAILED(result))
 	{
+		LPCTSTR descr = DXGetErrorDescription(result);
+		strcpy_s((char*) msg, 128, descr);
+		
 		return false;
 	}
 

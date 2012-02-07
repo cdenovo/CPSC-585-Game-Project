@@ -1,8 +1,10 @@
 #pragma once
 #pragma comment(lib, "d3dx9.lib")
+#pragma comment(lib, "DxErr.lib")
 
 #include <d3d9.h>
 #include <d3dx9.h>
+#include <DxErr.h>
 
 #include <string>
 
@@ -15,7 +17,7 @@ class Renderer
 public:
 	Renderer();
 	~Renderer();
-	bool initialize(int width, int height, HWND hwnd, float zNear, float zFar, int numDrawables);
+	bool initialize(int width, int height, HWND hwnd, float zNear, float zFar, int numDrawables, char* msg);
 	void shutdown();
 	void render();
 	void setText(std::string* sentences, int count);
