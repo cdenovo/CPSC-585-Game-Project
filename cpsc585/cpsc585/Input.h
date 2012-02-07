@@ -19,4 +19,5 @@ private:
 	bool quit;
 	bool debug;
 	Intention intention;
+	bool controllerAvailable;
 };

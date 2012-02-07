@@ -28,6 +28,8 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	drawables = new Drawable*[numToDraw];
 
 	d3dObject = Direct3DCreate9(D3D_SDK_VERSION);
+	
+
 
 	D3DPRESENT_PARAMETERS params;
 
@@ -39,9 +41,35 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	params.BackBufferHeight = height;
 	params.PresentationInterval = D3DPRESENT_INTERVAL_ONE;	// VSYNC. Change to INTERVAL_IMMEDIATE to turn off VSYNC
 	params.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	params.EnableAutoDepthStencil = TRUE;
-	params.AutoDepthStencilFormat = D3DFMT_D16;
 	params.hDeviceWindow = hwnd;
+	params.EnableAutoDepthStencil = TRUE;
+
+	// Now need to set up the depth stencil format.
+	D3DFORMAT formats[] = { D3DFMT_D32, D3DFMT_D24X8, D3DFMT_D16 };
+	
+	D3DFORMAT format = (D3DFORMAT) 0;
+	
+	for (int i = 0; i < 3; i++)
+	{
+		HRESULT result = d3dObject->CheckDeviceFormat(D3DADAPTER_DEFAULT,
+			D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DUSAGE_DEPTHSTENCIL,
+			D3DRTYPE_SURFACE, formats[i]);
+
+		if (result == D3D_OK)
+		{
+			result = d3dObject->CheckDepthStencilMatch(D3DADAPTER_DEFAULT,
+				D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, D3DFMT_X8R8G8B8, formats[i]);
+
+			if (result == D3D_OK)
+			{
+				format = formats[i];
+				break;
+			}
+		}
+	}
+	
+	
+	params.AutoDepthStencilFormat = format;
 
 	
 	if (FAILED(d3dObject->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd,
@@ -51,6 +79,8 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	}
 
 	device->SetRenderState(D3DRS_LIGHTING, FALSE);
+	device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+	device->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESS);
 	
 
 	D3DVIEWPORT9 viewport;

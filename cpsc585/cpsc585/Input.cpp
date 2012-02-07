@@ -5,6 +5,21 @@ Input::Input(void)
 {
 	quit = false;
 	debug = false;
+
+	XINPUT_CAPABILITIES cap;
+	
+	if (XInputGetCapabilities(0, XINPUT_FLAG_GAMEPAD, &cap) == ERROR_SUCCESS)
+	{
+		controllerAvailable = true;
+	}
+	else
+	{
+		XINPUT_STATE state;
+		HRESULT res = XInputGetState(0, &state);
+		intention.reset();
+
+		controllerAvailable = false;
+	}
 }
 
 
@@ -30,6 +45,9 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 // Returns TRUE if quitting, FALSE otherwise
 bool Input::update()
 {
+	if (!controllerAvailable)
+		return quit;
+
 	XINPUT_STATE state;
 	
 	HRESULT res = XInputGetState(0, &state);
