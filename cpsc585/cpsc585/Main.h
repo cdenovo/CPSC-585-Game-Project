@@ -20,6 +20,8 @@ bool initialize();
 void run();
 void shutdown();
 bool mainLoop();
+void errorPopup(LPCTSTR errorMsg);
+
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 

@@ -86,8 +86,8 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	D3DVIEWPORT9 viewport;
 	viewport.Width = width;
 	viewport.Height = height;
-	viewport.MinZ = zNear;
-	viewport.MaxZ = zFar;
+	viewport.MinZ = 0.0f;
+	viewport.MaxZ = 1.0f;
 	viewport.X = 0;
 	viewport.Y = 0;
 

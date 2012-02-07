@@ -60,13 +60,14 @@ bool initialize()
 	
 	if (ChangeDisplaySettings(&screenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
 	{
+		errorPopup("Changing display settings failed!");
 		return false;
 	}
 	
 	// Create the window at position 0, 0, and with the resolution defined just above
 	hwnd = CreateWindowEx(WS_EX_APPWINDOW, appName, appName, WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP,
 			0, 0, resx, resy, NULL, NULL, hInstance, NULL);
-	
+
 	// Bring up the window and set focus
 	ShowWindow(hwnd, SW_SHOWNORMAL);
 	
@@ -88,11 +89,17 @@ bool initialize()
 
 	// Initialize components
 	if (!renderer || !ai || !sound || !input)
+	{
+		errorPopup("Creating Renderer, AI, Sound, or Input component failed! [!renderer || !ai || !sound || !input]");
 		return false;
+	}
 
 	// TO DO: Run the 'initialize' method for each component
-	if (!(renderer->initialize(resx, resy, hwnd, 0.1f, 1000.0f, 2)))
+	if (!(renderer->initialize(resx, resy, hwnd, 1.0f, 1000.0f, 2)))
+	{
+		errorPopup("Renderer initialization failed!");
 		return false;
+	}
 
 	ai->initialize(renderer, input);
 
@@ -224,7 +231,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	{
 		run();
 	}
-
+	else
+	{
+		errorPopup("Initialization failed!");
+		return 0;
+	}
 
 	shutdown();
 
@@ -262,4 +273,10 @@ bool mainLoop()
 		ai->shutdown();
 
 	return quit;
+}
+
+
+void errorPopup(LPCTSTR errorMsg)
+{
+	MessageBox(hwnd, errorMsg, NULL, MB_OK);
 }
