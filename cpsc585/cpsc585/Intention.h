@@ -3,6 +3,8 @@
 #include <iostream>
 #include <sstream>
 
+#define MESSAGELENGTH 11
+
 class Intention
 {
 public:
@@ -10,7 +12,7 @@ public:
 	~Intention(void);
 	void reset();
 
-	void serialize(char bitstr[]);
+	std::string serialize();
 	void unserialize(char bitstr[]);
 
 	std::string toStr();
