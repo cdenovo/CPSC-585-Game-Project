@@ -67,7 +67,8 @@ void AI::simulate(float milliseconds)
 	Intention intention = input->getIntention();
 
 	// Debugging Information ---------------------------------------
-	if(input->debugging()){
+	if(input->debugging())
+	{
 		char buf1[33];
 		_itoa_s(intention.rightTrig, buf1, 10);
 		char buf2[33];
@@ -78,7 +79,7 @@ void AI::simulate(float milliseconds)
 		_itoa_s(intention.rightStickY, buf4, 10);
 		char buf5[33];
 		_itoa_s(intention.leftStick, buf5, 10);
-
+		
 		std::string stringArray[] = { getFPSString(milliseconds), 
 			"X: " + boolToString(intention.xPressed),
 			"Y: " + boolToString(intention.yPressed),
@@ -90,7 +91,7 @@ void AI::simulate(float milliseconds)
 			std::string("Left Trigger: ").append(buf2),
 			std::string("RStick X: ").append(buf3),
 			std::string("RStick Y: ").append(buf4),
-			std::string("LStick: ").append(buf5),};
+			std::string("LStick: ").append(buf5)};
 	
 		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
 	}

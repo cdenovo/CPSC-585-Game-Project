@@ -26,7 +26,7 @@ void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevic
 		}
 	case WORLD:
 		{
-			mesh = RacerMesh::getInstance(device);
+			mesh = WorldMesh::getInstance(device);
 			break;
 		}
 	default:
@@ -67,4 +67,38 @@ void Drawable::setTransform(D3DXMATRIX* input)
 {
 	D3DXMatrixIdentity(&transform);
 	D3DXMatrixMultiply(&transform, &transform, input);
+}
+
+
+D3DXVECTOR3 Drawable::getXVector()
+{
+	D3DXVECTOR4 xVec(1.0f, 0.0f, 0.0f, 0.0f);
+	D3DXVECTOR4 temp;
+	D3DXVec4Transform(&temp, &xVec, &transform);
+	D3DXVec4Normalize(&temp, &temp);
+
+	return D3DXVECTOR3(temp.x, temp.y, temp.z);
+}
+
+D3DXVECTOR3 Drawable::getZVector()
+{
+	D3DXVECTOR4 zVec(0.0f, 0.0f, 1.0f, 0.0f);
+	D3DXVECTOR4 temp;
+	D3DXVec4Transform(&temp, &zVec, &transform);
+	D3DXVec4Normalize(&temp, &temp);
+	
+	return D3DXVECTOR3(temp.x, temp.y, temp.z);
+}
+
+D3DXVECTOR3 Drawable::getPosition()
+{
+	D3DXVECTOR3 posVec(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR4 temp;
+	D3DXVec3Transform(&temp, &posVec, &transform);
+
+	posVec.x = temp.x;
+	posVec.y = temp.y;
+	posVec.z = temp.z;
+
+	return posVec;
 }

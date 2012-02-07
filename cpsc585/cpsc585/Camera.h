@@ -3,22 +3,23 @@
 
 #include <d3dx9math.h>
 
+#include "Drawable.h"
+
+
 class Camera
 {
 public:
 	Camera(void);
 	~Camera(void);
-	void setPos(float x, float y, float z);
-	void setRot(float x, float y, float z);
-
-	D3DXVECTOR3 getPos();
-	D3DXVECTOR3 GetRot();
+	void setFocus(Drawable* focus);
+	void update();
 
 	void render();
 	void getViewMatrix(D3DXMATRIX& matrix);
 
 private:
-	float posX, posY, posZ;
-	float rotX, rotY, rotZ;
 	D3DXMATRIX viewMatrix;
+	Drawable* focusObject;
+	D3DXVECTOR3 up, lookAt, position;
+	float kValue;
 };

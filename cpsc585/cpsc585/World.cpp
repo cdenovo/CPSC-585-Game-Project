@@ -7,7 +7,7 @@ World::World(IDirect3DDevice9* device)
 
 
 	hkpRigidBodyCinfo info;
-	hkVector4 halfExtent(3.0f, 3.0f, 3.0f);
+	hkVector4 halfExtent(50.0f, 3.0f, 50.0f);
 	info.m_shape = new hkpBoxShape(halfExtent);
 	info.m_motionType = hkpMotion::MOTION_FIXED;	// Static object
 

@@ -5,6 +5,7 @@
 
 #include "Mesh.h"
 #include "RacerMesh.h"
+#include "WorldMesh.h"
 
 #include <string>
 
@@ -20,7 +21,9 @@ public:
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians
 	void setTransform(D3DXMATRIX* input);
-	
+	D3DXVECTOR3 getXVector();
+	D3DXVECTOR3 getZVector();
+	D3DXVECTOR3 getPosition();
 
 private:
 	void initialize(MeshType type, std::string textureName, IDirect3DDevice9* device);

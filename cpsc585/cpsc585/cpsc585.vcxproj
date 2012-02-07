@@ -92,6 +92,7 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="World.cpp" />
+    <ClCompile Include="WorldMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AI.h" />
@@ -109,6 +110,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="World.h" />
+    <ClInclude Include="WorldMesh.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

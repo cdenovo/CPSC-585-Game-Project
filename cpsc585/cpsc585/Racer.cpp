@@ -7,9 +7,9 @@ Racer::Racer(IDirect3DDevice9* device)
 
 
 	hkpRigidBodyCinfo info;
-	hkVector4 halfExtent(3.0f, 3.0f, 3.0f);		//Half extent for racer rigid body box
+	hkVector4 halfExtent(1.0f, 1.0f, 2.5f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
-	info.m_restitution = 1.0;
+	info.m_restitution = 0.2f;
 	const hkReal boxMass = 1000.0f;
 	hkpMassProperties massProperties;
 	hkpInertiaTensorComputer::computeShapeVolumeMassProperties(info.m_shape, boxMass, massProperties);

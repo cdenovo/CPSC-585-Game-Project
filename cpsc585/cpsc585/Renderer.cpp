@@ -78,9 +78,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	D3DXMatrixOrthoLH(&orthoMatrix, (float)width, (float)height, zNear, zFar);
 	
 	camera = new Camera;
-	camera->setPos(0.0f, 0.0f, -30.0f);
-
-
+	
 	device->SetRenderState(D3DRS_LIGHTING, TRUE);
 	device->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_XRGB(50, 50, 50));    // ambient light
 	
@@ -149,22 +147,43 @@ void Renderer::render()
 	
 	device->SetRenderState(D3DRS_ZENABLE, TRUE);
 
-	camera->render();
+	camera->update();
 
 	// Get view matrix
 	camera->getViewMatrix(viewMatrix);
 
-	device->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(25, 25, 100), 1.0f, 0);
+	device->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(100, 100, 255), 1.0f, 0);
 	
 	device->SetTransform(D3DTS_PROJECTION, &projectionMatrix);
 	device->SetTransform(D3DTS_VIEW, &viewMatrix);
 	device->SetTransform(D3DTS_WORLD, &worldMatrix);
 
 
+	D3DMATERIAL9 material;    // create the material struct
+	ZeroMemory(&material, sizeof(D3DMATERIAL9));    // clear out the struct for use
+	material.Diffuse = D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f);
+	material.Ambient = D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f);
+	device->SetMaterial(&material);    // set the globably-used material to &material
+
 	device->BeginScene();
+
+	
 
 	for (int i = 0; i < currentDrawable; i++)
 	{
+		if (i == 1)
+		{
+			material.Diffuse = D3DXCOLOR(0.2f, 1.0f, 0.2f, 1.0f);
+			material.Ambient = D3DXCOLOR(0.2f, 1.0f, 0.2f, 1.0f);
+			device->SetMaterial(&material);    // set the globably-used material to &material
+		}
+		else if (i == 2)
+		{
+			material.Diffuse = D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f);
+			material.Ambient = D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f);
+			device->SetMaterial(&material);    // set the globably-used material to &material
+		}
+
 		drawables[i]->render(device);
 	}
 
@@ -210,13 +229,23 @@ void Renderer::setText(std::string* sentenceArray, int count)
 }
 
 
-void Renderer::addDrawable(Drawable* drawable)
+int Renderer::addDrawable(Drawable* drawable)
 {
 	if (currentDrawable < numDrawables)
 	{
 		drawables[currentDrawable] = drawable;
+
+		if (currentDrawable == 0)
+		{
+			camera->setFocus(drawable);
+		}
+
 		currentDrawable++;
+
+		return (currentDrawable - 1);
 	}
+
+	return -1;
 }
 
 

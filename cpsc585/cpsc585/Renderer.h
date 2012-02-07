@@ -19,7 +19,7 @@ public:
 	void shutdown();
 	void render();
 	void setText(std::string* sentences, int count);
-	void addDrawable(Drawable* drawable);
+	int addDrawable(Drawable* drawable);
 	IDirect3DDevice9* getDevice();
 	
 private:
