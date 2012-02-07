@@ -72,22 +72,12 @@ void Drawable::setTransform(D3DXMATRIX* input)
 
 D3DXVECTOR3 Drawable::getXVector()
 {
-	D3DXVECTOR4 xVec(1.0f, 0.0f, 0.0f, 0.0f);
-	D3DXVECTOR4 temp;
-	D3DXVec4Transform(&temp, &xVec, &transform);
-	D3DXVec4Normalize(&temp, &temp);
-
-	return D3DXVECTOR3(temp.x, temp.y, temp.z);
+	return D3DXVECTOR3(transform._11, transform._12, transform._13);
 }
 
 D3DXVECTOR3 Drawable::getZVector()
 {
-	D3DXVECTOR4 zVec(0.0f, 0.0f, 1.0f, 0.0f);
-	D3DXVECTOR4 temp;
-	D3DXVec4Transform(&temp, &zVec, &transform);
-	D3DXVec4Normalize(&temp, &temp);
-	
-	return D3DXVECTOR3(temp.x, temp.y, temp.z);
+	return D3DXVECTOR3(transform._31, transform._32, transform._33);
 }
 
 D3DXVECTOR3 Drawable::getPosition()
