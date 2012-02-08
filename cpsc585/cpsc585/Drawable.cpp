@@ -82,13 +82,5 @@ D3DXVECTOR3 Drawable::getZVector()
 
 D3DXVECTOR3 Drawable::getPosition()
 {
-	D3DXVECTOR3 posVec(0.0f, 0.0f, 0.0f);
-	D3DXVECTOR4 temp;
-	D3DXVec3Transform(&temp, &posVec, &transform);
-
-	posVec.x = temp.x;
-	posVec.y = temp.y;
-	posVec.z = temp.z;
-
-	return posVec;
+	return D3DXVECTOR3(transform._41, transform._42, transform._43);
 }

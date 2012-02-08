@@ -54,6 +54,11 @@ void Physics::accelerate(float milliseconds, hkpRigidBody *racer, hkVector4 *acc
 	racer->applyForce(milliseconds / 1000.f, *accelVec); // Just for testing purposes
 }
 
+void Physics::rotate(float milliseconds, hkpRigidBody *racer, hkVector4 *rotVec)
+{
+	racer->applyTorque(milliseconds / 1000.f, *rotVec);
+}
+
 static void HK_CALL errorReport(const char* msg, void* userContext)
 {
 	printf("%s", msg);

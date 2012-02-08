@@ -101,10 +101,20 @@ void AI::simulate(float milliseconds)
 	}
 
 	// ---------------------------------------------------------------
-
-	hkVector4 vec((float) intention.rightStickX, intention.rightTrig * 100.0f, (float) intention.rightStickY);
 	
-	physics->accelerate(milliseconds, player->body, &vec);
+	D3DXVECTOR3 zVec = player->drawable->getZVector();
+	D3DXVECTOR3 xVec = player->drawable->getXVector();
+
+	hkVector4 zAcc = hkVector4(zVec.x, zVec.y, zVec.z);
+	zAcc.mul((float) intention.rightStickY);
+
+	hkVector4 xAcc = hkVector4(xVec.x, xVec.y, xVec.z);
+	xAcc.mul((float) intention.rightStickX);
+
+	physics->accelerate(milliseconds, player->body, &zAcc);
+	physics->accelerate(milliseconds, player->body, &xAcc);
+	physics->accelerate(milliseconds, player->body, &(hkVector4(0.0f, intention.rightTrig * 100.0f, 0.0f)));
+	physics->rotate(milliseconds, player->body, &(hkVector4(0.0f, intention.leftStick / 10.0f, 0.0f)));
 	physics->step(milliseconds);
 	player->update();
 

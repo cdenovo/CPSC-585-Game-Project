@@ -106,8 +106,18 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 // Returns TRUE if quitting, FALSE otherwise
 bool Input::update()
 {
-	if (!controllerAvailable)
+	XINPUT_CAPABILITIES cap;
+
+	if (XInputGetCapabilities(0, XINPUT_FLAG_GAMEPAD, &cap) != ERROR_SUCCESS)
+	{
+		controllerAvailable = false;
+
 		return quit;
+	}
+	else
+	{
+		controllerAvailable = true;
+	}
 
 	XINPUT_STATE state;
 	

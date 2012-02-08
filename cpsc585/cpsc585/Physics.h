@@ -40,6 +40,7 @@ public:
 	void step(float seconds);
 
 	void accelerate(float milliseconds, hkpRigidBody *racer, hkVector4 *accelerationVector);
+	void rotate(float milliseconds, hkpRigidBody *racer, hkVector4 *rotVector);
 	void steer(hkpRigidBody *racer, float steering);
 
 private:

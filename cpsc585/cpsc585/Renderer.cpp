@@ -57,7 +57,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	params.EnableAutoDepthStencil = TRUE;
 
 	// VSYNC. Change to INTERVAL_IMMEDIATE to turn off VSYNC, change to INTERVAL_ONE to turn on VSYNC
-	params.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
+	params.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 
 	// Now need to set up the depth stencil format.
 	D3DFORMAT formats[] = { D3DFMT_D32, D3DFMT_D24X8, D3DFMT_D16 };
