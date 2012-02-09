@@ -10,12 +10,19 @@ Drawable::Drawable(MeshType type, std::string textureName, IDirect3DDevice9* dev
 
 Drawable::~Drawable(void)
 {
+	if (texture)
+	{
+		texture->Release();
+		texture = NULL;
+	}
 }
 
 
 void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevice9* device)
 {
-	// set up private texture member, loading texture textureName
+	texture = NULL;
+
+	D3DXCreateTextureFromFile(device, textureName.c_str(), &texture);
 
 	switch (type)
 	{
@@ -59,6 +66,7 @@ void Drawable::render(IDirect3DDevice9* device)
 {
 	// Apply transforms, THEN call render on the mesh
 	device->SetTransform(D3DTS_WORLD, &transform);
+	device->SetTexture(0, texture);
 
 	mesh->render(device);
 }

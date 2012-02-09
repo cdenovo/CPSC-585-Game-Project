@@ -3,7 +3,7 @@
 
 World::World(IDirect3DDevice9* device)
 {
-	drawable = new Drawable(WORLD, "someTextureName", device);
+	drawable = new Drawable(WORLD, "checker.dds", device);
 
 
 	hkpRigidBodyCinfo info;

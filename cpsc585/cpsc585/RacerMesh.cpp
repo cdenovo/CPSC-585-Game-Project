@@ -26,7 +26,7 @@ RacerMesh::~RacerMesh(void)
 void RacerMesh::render(IDirect3DDevice9* device)
 {
 	device->SetStreamSource(0, vertexBuffer, 0, sizeof(Vertex));
-	device->SetFVF(D3DFVF_XYZ | D3DFVF_NORMAL);
+	device->SetFVF(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX2);
 	device->SetIndices(indexBuffer);
 	device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, vertexCount, 0, indexCount / 3);
 }
@@ -42,7 +42,7 @@ void RacerMesh::initialize(IDirect3DDevice9* device)
 	//vertices = new Vertex[vertexCount];
 	//indices = new unsigned long[indexCount];
 
-	device->CreateVertexBuffer(sizeof(Vertex) * vertexCount, D3DUSAGE_WRITEONLY, D3DFVF_XYZ | D3DFVF_NORMAL,
+	device->CreateVertexBuffer(sizeof(Vertex) * vertexCount, D3DUSAGE_WRITEONLY, D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX2,
 		D3DPOOL_MANAGED, &vertexBuffer, NULL);
 
 
@@ -51,35 +51,35 @@ void RacerMesh::initialize(IDirect3DDevice9* device)
 	
 	Vertex tmp1[] =
      {
-        { D3DXVECTOR3(-1.0f, -1.0f, 2.5f), D3DXVECTOR3(0.0f, 0.0f, 1.0f)},    // side 1
-         { D3DXVECTOR3(1.0f, -1.0f, 2.5f), D3DXVECTOR3(0.0f, 0.0f, 1.0f)},
-         { D3DXVECTOR3(-1.0f, 1.0f, 2.5f), D3DXVECTOR3(0.0f, 0.0f, 1.0f)},
-         { D3DXVECTOR3(1.0f, 1.0f, 2.5f), D3DXVECTOR3(0.0f, 0.0f, 1.0f)},
+        { D3DXVECTOR3(-1.0f, -1.0f, 2.5f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 0, 1},    // side 1
+         { D3DXVECTOR3(1.0f, -1.0f, 2.5f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 1, 1},
+         { D3DXVECTOR3(-1.0f, 1.0f, 2.5f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 0, 0},
+         { D3DXVECTOR3(1.0f, 1.0f, 2.5f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 1, 0},
 
-         { D3DXVECTOR3(-1.0f, -1.0f, -2.5f), D3DXVECTOR3(0.0f, 0.0f, -1.0f)},    // side 2
-         { D3DXVECTOR3(-1.0f, 1.0f, -2.5f), D3DXVECTOR3(0.0f, 0.0f, -1.0f)},
-         { D3DXVECTOR3(1.0f, -1.0f, -2.5f), D3DXVECTOR3(0.0f, 0.0f, -1.0f)},
-         { D3DXVECTOR3(1.0f, 1.0f, -2.5f), D3DXVECTOR3(0.0f, 0.0f, -1.0f)},
+         { D3DXVECTOR3(-1.0f, -1.0f, -2.5f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 0, 1},    // side 2
+         { D3DXVECTOR3(-1.0f, 1.0f, -2.5f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 1, 1},
+         { D3DXVECTOR3(1.0f, -1.0f, -2.5f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 0, 0},
+         { D3DXVECTOR3(1.0f, 1.0f, -2.5f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 1, 0},
 
-         { D3DXVECTOR3(-1.0f, 1.0f, -2.5f), D3DXVECTOR3(0.0f, 1.0f, 0.0f)},    // side 3
-         { D3DXVECTOR3(-1.0f, 1.0f, 2.5f), D3DXVECTOR3(0.0f, 1.0f, 0.0f)},
-         { D3DXVECTOR3(1.0f, 1.0f, -2.5f), D3DXVECTOR3(0.0f, 1.0f, 0.0f)},
-         { D3DXVECTOR3(1.0f, 1.0f, 2.5f), D3DXVECTOR3(0.0f, 1.0f, 0.0f)},
+         { D3DXVECTOR3(-1.0f, 1.0f, -2.5f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 0, 1},    // side 3
+         { D3DXVECTOR3(-1.0f, 1.0f, 2.5f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 1, 1},
+         { D3DXVECTOR3(1.0f, 1.0f, -2.5f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 0, 0},
+         { D3DXVECTOR3(1.0f, 1.0f, 2.5f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 1, 0},
 
-         { D3DXVECTOR3(-1.0f, -1.0f, -2.5f), D3DXVECTOR3(0.0f, -1.0f, 0.0f)},    // side 4
-         { D3DXVECTOR3(1.0f, -1.0f, -2.5f), D3DXVECTOR3(0.0f, -1.0f, 0.0f)},
-         { D3DXVECTOR3(-1.0f, -1.0f, 2.5f), D3DXVECTOR3(0.0f, -1.0f, 0.0f)},
-         { D3DXVECTOR3(1.0f, -1.0f, 2.5f), D3DXVECTOR3(0.0f, -1.0f, 0.0f)},
+         { D3DXVECTOR3(-1.0f, -1.0f, -2.5f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 0, 1},    // side 4
+         { D3DXVECTOR3(1.0f, -1.0f, -2.5f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 1, 1},
+         { D3DXVECTOR3(-1.0f, -1.0f, 2.5f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 0, 0},
+         { D3DXVECTOR3(1.0f, -1.0f, 2.5f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 1, 0},
 
-         { D3DXVECTOR3(1.0f, -1.0f, -2.5f), D3DXVECTOR3(1.0f, 0.0f, 0.0f)},    // side 5
-         { D3DXVECTOR3(1.0f, 1.0f, -2.5f), D3DXVECTOR3(1.0f, 0.0f, 0.0f)},
-         { D3DXVECTOR3(1.0f, -1.0f, 2.5f), D3DXVECTOR3(1.0f, 0.0f, 0.0f)},
-         { D3DXVECTOR3(1.0f, 1.0f, 2.5f), D3DXVECTOR3(1.0f, 0.0f, 0.0f)},
+         { D3DXVECTOR3(1.0f, -1.0f, -2.5f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 0, 1},    // side 5
+         { D3DXVECTOR3(1.0f, 1.0f, -2.5f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 1, 1},
+         { D3DXVECTOR3(1.0f, -1.0f, 2.5f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 0, 0},
+         { D3DXVECTOR3(1.0f, 1.0f, 2.5f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 1, 0},
 
-         { D3DXVECTOR3(-1.0f, -1.0f, -2.5f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f)},    // side 6
-         { D3DXVECTOR3(-1.0f, -1.0f, 2.5f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f)},
-         { D3DXVECTOR3(-1.0f, 1.0f, -2.5f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f)},
-         { D3DXVECTOR3(-1.0f, 1.0f, 2.5f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f)},
+         { D3DXVECTOR3(-1.0f, -1.0f, -2.5f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 0, 1},    // side 6
+         { D3DXVECTOR3(-1.0f, -1.0f, 2.5f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 1, 1},
+         { D3DXVECTOR3(-1.0f, 1.0f, -2.5f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 0, 0},
+         { D3DXVECTOR3(-1.0f, 1.0f, 2.5f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 1, 0}
      };
 
 	memcpy(vertices, tmp1, sizeof(tmp1));

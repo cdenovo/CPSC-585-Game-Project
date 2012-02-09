@@ -14,13 +14,14 @@ protected:
 	{
 		D3DXVECTOR3 position;
 		D3DXVECTOR3 normal;
+		float u;
+		float v; // Texture coordinates
 	};
 
 	IDirect3DVertexBuffer9* vertexBuffer;
 	IDirect3DIndexBuffer9* indexBuffer;
+
 	int vertexCount;
 	int indexCount;
-
-
 };
 

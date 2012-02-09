@@ -104,7 +104,6 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 		return false;
 	}
 
-	device->SetRenderState(D3DRS_LIGHTING, FALSE);
 	device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 	device->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESS);
 	
@@ -136,22 +135,23 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	camera = new Camera;
 	
 	device->SetRenderState(D3DRS_LIGHTING, TRUE);
-	device->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_XRGB(50, 50, 50));    // ambient light
+	device->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_XRGB(50, 50, 50));
+	
 	
 	D3DLIGHT9 light;    // create the light struct
 	D3DMATERIAL9 material;    // create the material struct
 	
 	ZeroMemory(&light, sizeof(light));    // clear out the light struct for use
 	light.Type = D3DLIGHT_DIRECTIONAL;    // make the light type 'directional light'
-	light.Diffuse = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);    // set the light's color
-	light.Direction = D3DXVECTOR3(1.0f, -0.3f, 1.0f);
+	light.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);    // set the light's color
+	light.Direction = D3DXVECTOR3(1.0f, -0.5f, 1.0f);
 	
     device->SetLight(0, &light);    // send the light struct properties to light #0
 	device->LightEnable(0, TRUE);    // turn on light #0
 
-	ZeroMemory(&material, sizeof(D3DMATERIAL9));    // clear out the struct for use
-	material.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);    // set diffuse color to white
-	material.Ambient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);    // set ambient color to white
+	ZeroMemory(&material, sizeof(D3DMATERIAL9));
+	material.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	material.Ambient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
 	device->SetMaterial(&material);    // set the globably-used material to &material
 
@@ -160,7 +160,8 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	D3DXCreateFont(device, 0, 10, FW_NORMAL, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, DRAFT_QUALITY,
 		DEFAULT_PITCH | FF_DONTCARE, "", &font);
 
-
+	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTOP_SELECTARG1);
+	device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);	// Just to be safe (ignored)
 
 	return true;
 }
@@ -208,18 +209,11 @@ void Renderer::render()
 	// Get view matrix
 	camera->getViewMatrix(viewMatrix);
 
-	device->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(100, 100, 255), 1.0f, 0);
+	device->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 40), 1.0f, 0);
 	
 	device->SetTransform(D3DTS_PROJECTION, &projectionMatrix);
 	device->SetTransform(D3DTS_VIEW, &viewMatrix);
 	device->SetTransform(D3DTS_WORLD, &worldMatrix);
-
-
-	D3DMATERIAL9 material;    // create the material struct
-	ZeroMemory(&material, sizeof(D3DMATERIAL9));    // clear out the struct for use
-	material.Diffuse = D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f);
-	material.Ambient = D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f);
-	device->SetMaterial(&material);    // set the globably-used material to &material
 
 	device->BeginScene();
 
@@ -227,19 +221,6 @@ void Renderer::render()
 
 	for (int i = 0; i < currentDrawable; i++)
 	{
-		if (i == 1)
-		{
-			material.Diffuse = D3DXCOLOR(0.2f, 1.0f, 0.2f, 1.0f);
-			material.Ambient = D3DXCOLOR(0.2f, 1.0f, 0.2f, 1.0f);
-			device->SetMaterial(&material);    // set the globably-used material to &material
-		}
-		else if (i == 2)
-		{
-			material.Diffuse = D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f);
-			material.Ambient = D3DXCOLOR(1.0f, 0.2f, 0.2f, 1.0f);
-			device->SetMaterial(&material);    // set the globably-used material to &material
-		}
-
 		drawables[i]->render(device);
 	}
 

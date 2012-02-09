@@ -34,5 +34,5 @@ public:
 private:
 	Mesh* mesh;
 	D3DXMATRIX transform;
-	// need to add texture member
+	IDirect3DTexture9* texture;
 };

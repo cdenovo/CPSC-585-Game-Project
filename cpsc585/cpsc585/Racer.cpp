@@ -3,7 +3,7 @@
 
 Racer::Racer(IDirect3DDevice9* device)
 {
-	drawable = new Drawable(RACER, "someTextureName", device);
+	drawable = new Drawable(RACER, "bricks.dds", device);
 
 
 	hkpRigidBodyCinfo info;
