@@ -38,15 +38,14 @@ void Intention::reset()
 
 /**
 * Converts intention into serialized data to be sent over a network
-* Assumes bitstr is a size 11 char array
+* Assumes bitstr is a size MESSAGELENGTH char array
 */
-void Intention::serialize(char bitstr[])
+std::string Intention::serialize()
 {
+	std::string bitstr;
+
 	//Initialize bitstring
-	for(int i = 0; i < 11; i++)
-	{
-		bitstr[i] = 0;
-	}
+	bitstr.append(MESSAGELENGTH, 0);
 
 	bitstr[0] = 0x80 & (xPressed << 7); //Store xPressed
 	bitstr[0] = bitstr[0] | (0x40 & (yPressed << 6)); //Store yPressed
@@ -76,12 +75,14 @@ void Intention::serialize(char bitstr[])
 	//Store leftTrig
 	bitstr[9] = (leftTrig & 0xFF00) >> 8;
 	bitstr[10] = leftTrig & 0x00FF;
+
+	return bitstr;
 }
 
 
 /**
 * Converts a serialized intention class back into the intention class
-* Assumes that input bitstr is a char array of size 11
+* Assumes that input bitstr is a char array of size MESSAGELENGTH
 */
 void Intention::unserialize(char bitstr[])
 {

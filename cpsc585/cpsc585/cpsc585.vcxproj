@@ -80,6 +80,7 @@
   <ItemGroup>
     <ClCompile Include="AI.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Client.cpp" />
     <ClCompile Include="Drawable.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Intention.cpp" />
@@ -90,6 +91,7 @@
     <ClCompile Include="Racer.cpp" />
     <ClCompile Include="RacerMesh.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Server.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="World.cpp" />
     <ClCompile Include="WorldMesh.cpp" />
@@ -97,6 +99,7 @@
   <ItemGroup>
     <ClInclude Include="AI.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Client.h" />
     <ClInclude Include="Drawable.h" />
     <ClInclude Include="Havok.h" />
     <ClInclude Include="Input.h" />
@@ -108,6 +111,7 @@
     <ClInclude Include="Racer.h" />
     <ClInclude Include="RacerMesh.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Server.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="World.h" />
     <ClInclude Include="WorldMesh.h" />
