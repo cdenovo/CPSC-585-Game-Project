@@ -1,6 +1,10 @@
 #include <iostream>
 #include <string>
 #include <WinSock.h>
+#include <stdlib.h>
+#include <dos.h>
+#include <conio.h>
+#include <windows.h>
 
 #include "Client.h"
 #include "Server.h"
@@ -41,8 +45,15 @@ void server()
 		}
 
 		cout << "Connection recieved\n";
+		while(true)
+		{
+			DWORD dwMillseconds=1000;
+			Sleep(dwMillseconds);
+			s.changeTrack("New Track");
+		}
 
 		//Get input
+		cin.clear();
 		cin >> command;
 		if(command != "Q" && command != "q")
 		{
@@ -65,6 +76,21 @@ void client()
 		if(command != "Q" && command != "q")
 		{
 			c.connectToServer(5869, command);
+
+			while(true)
+			{
+				string track = c.track;
+				c.getTCPMessages();
+
+				if(track != c.track)
+				{
+					cout << "Track changed to " << c.track << endl;
+
+					track = c.track;
+					string temp;
+					cin >> temp;
+				}
+			}
 		}
 	}
 }

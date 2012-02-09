@@ -24,13 +24,15 @@ public:
 
 private:
 	void closeConnection();
-	int sendTCPMessage(std::string message, int clientID);
+	int sendTCPMessage(const char* message, int length, int clientID);
+	int sendTCPMessage(const std::string &message, int clientID);
 	int sendUDPMessage(std::string message, int clientID);
 
 	SOCKET sTCP; //Handle for the socket
 	SOCKET sUDP;
 	WSADATA w;
 	SOCKADDR_IN clients[MAXCLIENTS];
+	SOCKET clientSocks[MAXCLIENTS];
 	int numClients;
 };
 

@@ -2,6 +2,7 @@
 
 Server::Server()
 {
+	numClients = 0;
 }
 
 Server::~Server()
@@ -39,8 +40,11 @@ int Server::listenOnPort(int port)
 				if(bind(sTCP, (LPSOCKADDR)&addr, sizeof(addr)) != SOCKET_ERROR)
 				{
 					listen(sTCP, SOMAXCONN); //Allows max # of connections as possible, start listening
-					accept(sTCP, NULL,NULL);
+					int size = sizeof(clients[numClients]); //Get size of addr struct
+					clientSocks[numClients] = accept(sTCP, (LPSOCKADDR)&clients[numClients], &size); //Accept connection and store data in struct
+					numClients++; //Increment the number of clients connected
                     success = true;
+					std::cout << "Connection accepted.\n";
 				}
 			}
 		}
@@ -67,9 +71,16 @@ void Server::closeConnection()
 /**
  * Sends the given message over TCP to the client with the given ID
  */
-int Server::sendTCPMessage(std::string message, int clientID)
+int Server::sendTCPMessage(const char* message, int length, int clientID)
 {
-	return sendto(sTCP,message.c_str(),message.length(), 0, (SOCKADDR*) &clients[clientID], sizeof(clients[clientID]));
+	std::cout << "Client ID: " << clientID << "\n";
+	return send(clientSocks[clientID],message,length, 0);
+}
+
+int Server::sendTCPMessage(const std::string &message, int clientID)
+{
+	std::cout << "Client ID: " << clientID << "\n";
+	return send(clientSocks[clientID],message.c_str(),message.length(), 0);
 }
 
 /**
@@ -111,11 +122,25 @@ int Server::playerJoined(int id)
  */
 int Server::changeTrack(std::string track)
 {
+	//Get size of message and split into chars
+	int size = track.length() + 5;
+
+	char* buffer = new char[size];
+	buffer[0] = 'T';
+	memcpy(buffer+1,&size,sizeof(int));
+	memcpy(buffer+5,track.c_str(),track.length());
+	std::cout << "Clients: " << numClients << "\n";
+
 	//Send each client a message
 	for(int i = 0; i < numClients; i++)
 	{
-		sendTCPMessage("TRACK " + track,i); //Send the message
+		int result = sendTCPMessage(buffer,size,i); //Send the message
+		if(result == -1)
+			result = WSAGetLastError();
+		std::cout << "Returned " << result << "\n";
 	}
+
+	delete[] buffer;
 
 	return true;
 }

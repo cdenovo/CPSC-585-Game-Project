@@ -1,7 +1,18 @@
 #include "Client.h"
 
+//Client headers
+const char BUTTON = 'B';
+const char READY = 'R';
+
+//Server headers
+const char TRACK = 'T';
+const char START = 'S';
+const char CLIENTINFO = 'C';
+const char WORLDSTATE = 'W';
+
 Client::Client()
 {
+	start = false;
 }
 
 Client::~Client()
@@ -33,17 +44,98 @@ bool Client::connectToServer(int port, std::string ipAddress)
 
 		sTCP = socket(AF_INET, SOCK_STREAM, 0); //Create UDP socket
 		sUDP = socket(AF_INET, SOCK_DGRAM, 0); // Create UDP socket
+
 		if(sTCP != INVALID_SOCKET) //If we could create socket
 		{
 			//Try to connect
 			if(connect(sTCP, (SOCKADDR*) &target, sizeof(target)) != SOCKET_ERROR)
 			{
+				std::cout << "Success!\n";
 				success = true;
 			}
+			else
+			{
+				int error = WSAGetLastError();
+				std::cout << "Fail!\n";
+			}
+
+			u_long iMode=1;
+			ioctlsocket(sTCP,FIONBIO,&iMode);
+			ioctlsocket(sUDP,FIONBIO,&iMode);
 		}
 	}
 
 	return success;
+}
+
+/**
+ * Receives any TCP messages in the buffer
+ */
+void Client::getTCPMessages()
+{
+	char buff[1000];
+
+	int err = 0;
+
+	while(err != WSAEWOULDBLOCK)
+	{
+		//Find out the size of the message
+		err = recv(sTCP, buff, 5, MSG_PEEK);
+		if(err == -1)
+		{
+			err = WSAGetLastError();
+		}
+
+		if(err != WSAEWOULDBLOCK)
+		{
+			int size = *((int*)(buff+1)); //Get size
+
+			//Get the message
+			err = recv(sTCP, buff, size, 0);
+			if(err == -1)
+			{
+				err = WSAGetLastError();
+			}
+
+			std::cout << "Err: " << err << "\n";
+
+			std::string msg = "";
+			for(int i = 0; i < size; i++)
+			{
+				msg.append(1, buff[i]);
+			}
+			std::cout << "Message: " << msg << " Size: " << size << std::endl;
+
+			//Call the correct function depending on the message
+			switch(buff[0])
+			{
+			case TRACK: //Update track
+				track = "";
+
+				for(int i = 5; i < size; i++)
+				{
+					track.append(1, buff[i]);
+				}
+				break;
+
+			case START: //Start game
+				start = true;
+				break;
+
+			case CLIENTINFO: //Get updated client info
+				break;
+
+			case WORLDSTATE: //Get updated world state
+				world = "";
+
+				for(int i = 3; i < size; i++)
+				{
+					world.append(1, buff[i]);
+				}
+				break;
+			}
+		}
+	}
 }
 
 int Client::sendTCPMessage(std::string message)
@@ -56,14 +148,34 @@ int Client::sendUDPMessage(std::string message)
 	return sendto(sUDP, message.c_str(), message.length(), 0, (SOCKADDR*) &target, sizeof(target));
 }
 
+/**
+ * Lets the server know that the client is ready.
+ */
 int Client::ready()
 {
-	return sendTCPMessage("READY");
+	//Get size of message and split it into chars
+	int size = 3;
+	char size1 = (0xFFFF0000 & size) >> 8;
+	char size2 = 0x0000FFFF & size;
+
+	return sendTCPMessage("" + READY + size1 + size2);
 }
 
+/**
+ * Sends the button state of the controller to the server.
+ */
 int Client::sendButtonState(Intention intention)
 {
-	return sendUDPMessage("BUTTON " + intention.serialize());
+	std::string msg = intention.serialize(); //Get serialized button input
+
+	//Get size of message and split into chars
+	int size = msg.length() + 3;
+	char size1 = (0xFFFF0000 & size) >> 8;
+	char size2 = 0x0000FFFF & size;
+
+	std::stringstream ss;
+	ss << BUTTON << size1 << size2 << msg;
+	return sendUDPMessage(ss.str());
 }
 
 /**
