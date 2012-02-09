@@ -138,14 +138,19 @@ void Client::getTCPMessages()
 	}
 }
 
+int Client::sendTCPMessage(const char* message, int length)
+{
+	return send(sTCP,message,length, 0);
+}
+
 int Client::sendTCPMessage(std::string message)
 {
 	return send(sTCP,message.c_str(),message.length(), 0);
 }
 
-int Client::sendUDPMessage(std::string message)
+int Client::sendUDPMessage(const char* message, int length)
 {
-	return sendto(sUDP, message.c_str(), message.length(), 0, (SOCKADDR*) &target, sizeof(target));
+	return sendto(sUDP, message, length, 0, (SOCKADDR*) &target, sizeof(target));
 }
 
 /**
@@ -153,12 +158,17 @@ int Client::sendUDPMessage(std::string message)
  */
 int Client::ready()
 {
-	//Get size of message and split it into chars
-	int size = 3;
-	char size1 = (0xFFFF0000 & size) >> 8;
-	char size2 = 0x0000FFFF & size;
+	//Get size of message and put it in the buffer
+	int size = 5;
+	char* buffer = new char[size];
+	buffer[0] = READY;
+	memcpy(buffer+1,&size,sizeof(int));
 
-	return sendTCPMessage("" + READY + size1 + size2);
+	int err = sendTCPMessage(buffer,size);
+
+	delete[] buffer;
+
+	return err;
 }
 
 /**
@@ -168,14 +178,16 @@ int Client::sendButtonState(Intention intention)
 {
 	std::string msg = intention.serialize(); //Get serialized button input
 
-	//Get size of message and split into chars
-	int size = msg.length() + 3;
-	char size1 = (0xFFFF0000 & size) >> 8;
-	char size2 = 0x0000FFFF & size;
+	//Put data in buffer
+	int size = msg.length() + 5;
+	char* buffer = new char[size];
+	buffer[0] = BUTTON;
+	memcpy(buffer+1,&size,sizeof(int));
+	memcpy(buffer+5,&msg,msg.length());
 
-	std::stringstream ss;
-	ss << BUTTON << size1 << size2 << msg;
-	return sendUDPMessage(ss.str());
+	int err = sendUDPMessage(buffer,size); //Send message
+
+	return err;
 }
 
 /**
