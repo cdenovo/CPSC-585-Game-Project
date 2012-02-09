@@ -129,7 +129,6 @@ int Server::changeTrack(std::string track)
 	buffer[0] = 'T';
 	memcpy(buffer+1,&size,sizeof(int));
 	memcpy(buffer+5,track.c_str(),track.length());
-	std::cout << "Clients: " << numClients << "\n";
 
 	//Send each client a message
 	for(int i = 0; i < numClients; i++)
@@ -150,15 +149,20 @@ int Server::changeTrack(std::string track)
  */
 int Server::startGame(std::string track, int startPos[])
 {
+	int size = track.length() + sizeof(int)*2 + sizeof(char);
+	char* buffer = new char[size];
+	buffer[0] = 'S';
+	memcpy(buffer+1,&size,sizeof(int));
+	
 	//Send each client a message
 	for(int i = 0; i < numClients; i++)
 	{
-		std::stringstream ss;
-		
-		ss << "START " << track << " " << startPos[i];
+		memcpy(buffer+5,&startPos[i],sizeof(int));
 
-		sendTCPMessage(ss.str(),i); //Send the message
+		sendTCPMessage(buffer, size, i); //Send the message
 	}
+
+	delete[] buffer;
 
 	return true;
 }
@@ -166,17 +170,21 @@ int Server::startGame(std::string track, int startPos[])
 /**
  * Server lets all clients know the game is over and gives the final positions
  */
-int Server::endGame(std::string track, int pos[])
+int Server::endGame()
 {
+	//Set up buffer to send
+	int size = 5;
+	char* buffer = new char[size];
+	buffer[0] = 'E';
+	memcpy(buffer+1,&size,sizeof(int));
+
 	//Send each client a message
 	for(int i = 0; i < numClients; i++)
 	{
-		std::stringstream ss;
-		
-		ss << "END " << pos[i];
-
-		sendTCPMessage(ss.str(),i); //Send the message
+		sendTCPMessage(buffer,size,i); //Send the message
 	}
+
+	delete[] buffer;
 
 	return true;
 }
@@ -186,11 +194,20 @@ int Server::endGame(std::string track, int pos[])
  */
 int Server::update(std::string worldState)
 {
+	//Set up buffer to send
+	int size = worldState.length() + 5;
+	char* buffer = new char[size];
+	buffer[0] = 'W';
+	memcpy(buffer+1,&size,sizeof(int));
+	memcpy(buffer+5,worldState.c_str(),worldState.length());
+
 	//Send each client a message
 	for(int i = 0; i < numClients; i++)
 	{
-		sendTCPMessage("WORLD " + worldState,i); //Send the message
+		sendTCPMessage(buffer,size,i); //Send the message
 	}
+
+	delete[] buffer;
 
 	return true;
 }

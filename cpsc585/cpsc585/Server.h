@@ -17,8 +17,8 @@ public:
 
 	int playerJoined(int ID);
 	int changeTrack(std::string track);
-	int startGame(std::string track, int startPos[]);
-	int endGame(std::string track, int pos[]);
+	int startGame(std::string track, int pos[]);
+	int endGame();
 	
 	int update(std::string worldState);
 

@@ -25,7 +25,8 @@ public:
 
 private:
 	int sendTCPMessage(std::string message);
-	int sendUDPMessage(std::string message);
+	int sendTCPMessage(const char* message, int length);
+	int sendUDPMessage(const char* message, int length);
 	void closeConnection();
 
 	SOCKET sTCP;
