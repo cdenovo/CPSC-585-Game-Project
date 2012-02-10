@@ -207,8 +207,7 @@ void Racer::accelerate(float seconds, float value)
 // between -1.0 and 1.0 (left is negative)
 void Racer::turn(float seconds, float value)
 {
-	hkReal angle = 0;//wheelFL->body->getRotation().getAngle();
-
+	hkReal angle = body->getRotation().getAngle();
 
 	hkQuaternion quat;
 	angle += value * (3.14f/3.75f);
@@ -219,6 +218,9 @@ void Racer::turn(float seconds, float value)
 		angle += 2*3.14;
 	quat = hkQuaternion(drawable->getYhkVector(), angle);
 	
+
+	// Actually, should only rotate the "displayable" since the tire height of
+	// the physics object is the only part that matters
 	wheelFL->body->setRotation(quat);
 	wheelFR->body->setRotation(quat);
 

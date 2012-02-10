@@ -9,11 +9,12 @@ FrontWheel::FrontWheel(IDirect3DDevice9* device, int filter)
 	hkVector4 endAxis = hkVector4(0.25f, 0, 0);
 	hkReal radius = 0.4f;
 
+
 	hkpRigidBodyCinfo info;
 	hkVector4 halfExtent(0.15f, 0.3f, 0.3f);		//Half extent for wheel rigid body box
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);
 	info.m_restitution = 0.2f;
-	hkReal wheelMass = 25.0f;
+	hkReal wheelMass = 1.0f;
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_MOVING;
 	hkpMassProperties massProperties;
 	hkpInertiaTensorComputer::computeCylinderVolumeMassProperties(startAxis, endAxis, radius, wheelMass, massProperties);
