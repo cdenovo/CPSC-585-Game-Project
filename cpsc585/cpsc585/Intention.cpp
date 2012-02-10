@@ -16,6 +16,9 @@ Intention::Intention(void)
 	leftStick = 0;
 	rightTrig = 0;
 	leftTrig = 0;
+
+	acceleration = 0;
+	steering = 0;
 }
 
 
@@ -33,6 +36,14 @@ void Intention::reset()
 	startPressed = false;
 	lbumpPressed = false;
 	rbumpPressed = false;
+	rightStickX = 0;
+	rightStickY = 0;
+	leftStick = 0;
+	rightTrig = 0;
+	leftTrig = 0;
+
+	acceleration = 0;
+	steering = 0;
 }
 
 
