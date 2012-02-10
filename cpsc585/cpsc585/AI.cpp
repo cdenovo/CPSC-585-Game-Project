@@ -106,9 +106,9 @@ void AI::simulate(float milliseconds)
 	// ---------------------------------------------------------------
 	
 	if (intention.leftStick < 0)
-		player->turn(milliseconds / 1000.0f, -1.0f);
+		player->turn(milliseconds / 1000.0f, -1.0f, ((intention.rightTrig - intention.leftTrig) < 0)?true:false);
 	else if (intention.leftStick > 0)
-		player->turn(milliseconds / 1000.0f, 1.0f);
+		player->turn(milliseconds / 1000.0f, 1.0f, ((intention.rightTrig - intention.leftTrig) < 0)?true:false);
 
 	player->accelerate(milliseconds / 1000.0f, (float) intention.rightTrig - (float) intention.leftTrig);
 

@@ -17,7 +17,7 @@ public:
 	void update();
 
 	void accelerate(float seconds, float value);	// between -1.0 and 1.0 (backwards is negative)
-	void turn(float seconds, float value);			// between -1.0 and 1.0 (left is negative)
+	void turn(float seconds, float value, bool reversing);			// between -1.0 and 1.0 (left is negative)
 
 	int getIndex();
 

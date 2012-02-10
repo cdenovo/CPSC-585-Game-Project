@@ -30,8 +30,8 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 	hkpRigidBodyCinfo info;
 	hkVector4 halfExtent(1.0f, 1.0f, 2.5f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
-	info.m_restitution = 0.5f;
-	hkReal boxMass = 1000.0f;
+	info.m_restitution = 0.2f;
+	hkReal boxMass = 2000.0f;
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_MOVING;
 	hkpMassProperties massProperties;
 	hkpInertiaTensorComputer::computeBoxVolumeMassProperties(halfExtent, boxMass, massProperties);
@@ -205,17 +205,20 @@ void Racer::accelerate(float seconds, float value)
 
 
 // between -1.0 and 1.0 (left is negative)
-void Racer::turn(float seconds, float value)
+void Racer::turn(float seconds, float value, bool reversing)
 {
+	if (reversing)
+		value *= -1;
+
 	hkReal angle = body->getRotation().getAngle();
 
 	hkQuaternion quat;
 	angle += value * (3.14f/3.75f);
 
-	if (angle >= 3.14)
-		angle -= 2*3.14;
-	else if (angle <= -3.14)
-		angle += 2*3.14;
+	if (angle >= 3.14f)
+		angle -= 2*3.14f;
+	else if (angle <= -3.14f)
+		angle += 2*3.14f;
 	quat = hkQuaternion(drawable->getYhkVector(), angle);
 	
 
@@ -226,10 +229,10 @@ void Racer::turn(float seconds, float value)
 
 
 	hkVector4 force = drawable->getYhkVector();
-	force.mul(value * 10000.0f);
+	force.mul(value * 25000.0f);
 	body->applyTorque(seconds, force);
-
+	
 	force = drawable->getXhkVector();
-	force.mul(value * 15.0f);
+	force.mul(value * 1000.0f);
 	body->applyForce(seconds, force);
 }
