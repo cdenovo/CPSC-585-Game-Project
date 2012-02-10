@@ -44,5 +44,8 @@
     <ClInclude Include="..\..\cpsc585\cpsc585\Server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\cpsc585\cpsc585\NetworkInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -89,6 +89,7 @@
     <ClInclude Include="..\..\cpsc585\cpsc585\Client.h" />
     <ClInclude Include="..\..\cpsc585\cpsc585\Input.h" />
     <ClInclude Include="..\..\cpsc585\cpsc585\Intention.h" />
+    <ClInclude Include="..\..\cpsc585\cpsc585\NetworkInfo.h" />
     <ClInclude Include="..\..\cpsc585\cpsc585\Server.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
