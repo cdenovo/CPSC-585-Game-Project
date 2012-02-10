@@ -13,14 +13,14 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 	yAxis = hkVector4(0.0f, 1.0f, 0.0f);
 	zAxis = hkVector4(0.0f, 0.0f, 1.0f);
 
-	attachFL = hkVector4(-1.25f, -0.5f, 1.5f);
-	attachFR = hkVector4(1.25f, -0.5f, 1.5f);
-	attachRL = hkVector4(-1.25f, -0.5f, -2.0f);
-	attachRR = hkVector4(1.25f, -0.5f, -2.0f);
+	attachFL = hkVector4(-1.15f, -0.5f, 1.5f);
+	attachFR = hkVector4(1.15f, -0.5f, 1.5f);
+	attachRL = hkVector4(-1.15f, -0.5f, -2.0f);
+	attachRR = hkVector4(1.15f, -0.5f, -2.0f);
 	
 	chassisMass = 800.0f;
 
-	accelerationScale = 12.0f;
+	accelerationScale = 18.0f;
 	torqueScale = 180.0f;
 	centripScale = 140.0f;
 
@@ -41,8 +41,8 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 	hkpRigidBodyCinfo info;
 	hkVector4 halfExtent(1.0f, 0.75f, 2.5f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
-	info.m_qualityType = HK_COLLIDABLE_QUALITY_MOVING;
-	
+	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL;
+	info.m_restitution = 1.0f;
 	info.m_gravityFactor = 3.0f;
 	info.m_angularDamping = 3.0f;
 	hkpMassProperties massProperties;
@@ -77,12 +77,14 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 
 
 	// Now constrain the tires
+	wheelFL->body->setFriction(1.2f);
 	hkpGenericConstraintData* constraint = new hkpGenericConstraintData();
 	buildConstraint(&attachFL, constraint);
 	hkpConstraintInstance* constraintInst = new hkpConstraintInstance(wheelFL->body, body, constraint);
 	p->world->addConstraint(constraintInst);
 	constraint->removeReference();
 	
+	wheelFR->body->setFriction(1.2f);
 	constraint = new hkpGenericConstraintData();
 	buildConstraint(&attachFR, constraint);
 	hkpConstraintInstance* constraintInstFR = new hkpConstraintInstance(wheelFR->body, body, constraint);
@@ -209,7 +211,7 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 
 	kit->constrainToAngularDof(xID);
 
-	kit->setLinearLimit(yID, -0.25f, -.1f);
+	kit->setLinearLimit(yID, -0.75f, -0.1f);
 	kit->end();
 
 	constraint->setSolvingMethod(hkpConstraintAtom::METHOD_STABILIZED);
@@ -249,7 +251,9 @@ void Racer::steer(float seconds, float value)
 
 	hkVector4 force = drawable->getYhkVector();
 	hkReal dot = vel.dot3(drawable->getZhkVector());
-	dot /= vel.length3();
+	hkReal denom = vel.length3();
+	if (denom != 0)
+		dot /= vel.length3();		// This is slow! not good, see note below
 
 	// These values build up too slowly, and shoot up too quickly after a while
 	// Really needs to be modified. The slides given to us by Radical suggest
