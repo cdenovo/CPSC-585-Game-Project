@@ -12,7 +12,9 @@
 #include <Common/Base/Memory/Allocator/Malloc/hkMallocAllocator.h>
 
 #include <Physics/Collide/hkpCollide.h>
+#include <Physics/Collide/Agent/ConvexAgent/BoxBox/hkpBoxBoxAgent.h>
 #include <Physics/Collide/Shape/Convex/Box/hkpBoxShape.h>
+#include <Physics/Collide/Shape/Convex/Cylinder/hkpCylinderShape.h>
 #include <Physics/Collide/Shape/Compound/Tree/Mopp/hkpMoppBvTreeShape.h>
 #include <Physics/Collide/Shape/Compound/Tree/Mopp/hkpMoppUtility.h>
 #include <Physics/Collide/Shape/Compound/Tree/Mopp/hkpMoppCompilerInput.h>
@@ -22,7 +24,12 @@
 #include <Physics/Dynamics/World/hkpWorldCinfo.h>
 #include <Physics/Dynamics/Entity/hkpRigidBody.h>
 #include <Physics/Dynamics/Entity/hkpRigidBodyCinfo.h>
+#include <Physics/Dynamics/Constraint/ConstraintKit/hkpConstraintConstructionKit.h>
 #include <Physics/Utilities/Dynamics/Inertia/hkpInertiaTensorComputer.h>
+#include <Physics/Collide/Filter/Group/hkpGroupFilter.h>
+#include <Physics/Collide/Filter/Group/hkpGroupFilterSetup.h>
+#include <Physics/Dynamics/Constraint/hkpConstraintInstance.h>
+#include <Physics/Dynamics/Constraint/Util/hkpConstraintStabilizationUtil.h>
 
 
 
@@ -43,7 +50,8 @@ public:
 	void rotate(float milliseconds, hkpRigidBody *racer, hkVector4 *rotVector);
 	void steer(hkpRigidBody *racer, float steering);
 
+	hkpWorld* world;
+
 private:
 	hkMemoryRouter* memoryRouter;
-	hkpWorld* world;
 };

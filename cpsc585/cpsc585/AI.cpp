@@ -50,15 +50,18 @@ void AI::initialize(Renderer* r, Input* i)
 	physics = new Physics();
 	physics->initialize();
 
-	player = new Racer(r->getDevice());
-	r->addDrawable(player->drawable);
-	physics->addRigidBody(player->body);
-	player->setPosAndRot(0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-	world = new World(r->getDevice());
-	r->addDrawable(world->drawable);
-	physics->addRigidBody(world->body);
+	// You no longer have to manually add objects to the physics and renderer
+	player = new Racer(r->getDevice(), renderer, physics);
+	player->setPosAndRot(0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+
+	world = new World(r->getDevice(), renderer, physics);
 	world->setPosAndRot(0.0f, -10.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+
+
+
+	// This is how you set an object for the camera to focus on!
+	renderer->setFocus(player->getIndex());
 }
 
 void AI::simulate(float milliseconds)
@@ -102,19 +105,34 @@ void AI::simulate(float milliseconds)
 
 	// ---------------------------------------------------------------
 	
-	D3DXVECTOR3 zVec = player->drawable->getZVector();
-	D3DXVECTOR3 xVec = player->drawable->getXVector();
+	if (intention.leftStick < 0)
+		player->turn(milliseconds / 1000.0f, -1.0f);
+	else if (intention.leftStick > 0)
+		player->turn(milliseconds / 1000.0f, 1.0f);
 
-	hkVector4 zAcc = hkVector4(zVec.x, zVec.y, zVec.z);
+	player->accelerate(milliseconds / 1000.0f, (float) intention.rightTrig - (float) intention.leftTrig);
+
+	
+
+
+	/*hkVector4 zAcc = player->drawable->getZhkVector();
 	zAcc.mul((float) intention.rightStickY);
 
-	hkVector4 xAcc = hkVector4(xVec.x, xVec.y, xVec.z);
+	hkVector4 xAcc = player->drawable->getXhkVector();
 	xAcc.mul((float) intention.rightStickX);
 
+	hkVector4 yRot = player->drawable->getYhkVector();
+	yRot.mul((float) intention.leftStick / 10.0f);
+	
 	physics->accelerate(milliseconds, player->body, &zAcc);
 	physics->accelerate(milliseconds, player->body, &xAcc);
 	physics->accelerate(milliseconds, player->body, &(hkVector4(0.0f, intention.rightTrig * 100.0f, 0.0f)));
-	physics->rotate(milliseconds, player->body, &(hkVector4(0.0f, intention.leftStick / 10.0f, 0.0f)));
+	physics->rotate(milliseconds, player->body, &yRot);*/
+
+	// To manipulate a Racer, you should use the methods Racer::accelerate(float) and Racer::steer(float)
+	// Both inputs should be between -1.0 and 1.0. negative means backward or left, positive is forward or right.
+
+
 	physics->step(milliseconds);
 	player->update();
 

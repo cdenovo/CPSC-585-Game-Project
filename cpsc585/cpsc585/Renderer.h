@@ -22,6 +22,7 @@ public:
 	void render();
 	void setText(std::string* sentences, int count);
 	int addDrawable(Drawable* drawable);
+	void setFocus(int drawableIndex);
 	IDirect3DDevice9* getDevice();
 	
 private:

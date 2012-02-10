@@ -135,7 +135,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	camera = new Camera;
 	
 	device->SetRenderState(D3DRS_LIGHTING, TRUE);
-	device->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_XRGB(50, 50, 50));
+	device->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_XRGB(100, 100, 100));
 	
 	
 	D3DLIGHT9 light;    // create the light struct
@@ -285,6 +285,15 @@ int Renderer::addDrawable(Drawable* drawable)
 	return -1;
 }
 
+void Renderer::setFocus(int drawableIndex)
+{
+	if ((drawableIndex < 0) || (drawableIndex >= currentDrawable))
+	{
+		return;
+	}
+
+	camera->setFocus(drawables[drawableIndex]);
+}
 
 IDirect3DDevice9* Renderer::getDevice()
 {

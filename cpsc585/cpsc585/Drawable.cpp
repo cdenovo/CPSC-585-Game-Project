@@ -36,6 +36,11 @@ void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevic
 			mesh = WorldMesh::getInstance(device);
 			break;
 		}
+	case FRONTWHEEL:
+		{
+			mesh = FrontWheelMesh::getInstance(device);
+			break;
+		}
 	default:
 		mesh = NULL;
 	}
@@ -83,6 +88,11 @@ D3DXVECTOR3 Drawable::getXVector()
 	return D3DXVECTOR3(transform._11, transform._12, transform._13);
 }
 
+D3DXVECTOR3 Drawable::getYVector()
+{
+	return D3DXVECTOR3(transform._21, transform._22, transform._23);
+}
+
 D3DXVECTOR3 Drawable::getZVector()
 {
 	return D3DXVECTOR3(transform._31, transform._32, transform._33);
@@ -91,4 +101,19 @@ D3DXVECTOR3 Drawable::getZVector()
 D3DXVECTOR3 Drawable::getPosition()
 {
 	return D3DXVECTOR3(transform._41, transform._42, transform._43);
+}
+
+hkVector4 Drawable::getXhkVector()
+{
+	return hkVector4(transform._11, transform._12, transform._13);
+}
+
+hkVector4 Drawable::getYhkVector()
+{
+	return hkVector4(transform._21, transform._22, transform._23);
+}
+
+hkVector4 Drawable::getZhkVector()
+{
+	return hkVector4(transform._31, transform._32, transform._33);
 }

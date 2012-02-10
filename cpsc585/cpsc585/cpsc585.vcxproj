@@ -82,6 +82,8 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Drawable.cpp" />
+    <ClCompile Include="FrontWheel.cpp" />
+    <ClCompile Include="FrontWheelMesh.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Intention.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -90,6 +92,8 @@
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Racer.cpp" />
     <ClCompile Include="RacerMesh.cpp" />
+    <ClCompile Include="RearWheel.cpp" />
+    <ClCompile Include="RearWheelMesh.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Sound.cpp" />
@@ -101,6 +105,8 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="Drawable.h" />
+    <ClInclude Include="FrontWheel.h" />
+    <ClInclude Include="FrontWheelMesh.h" />
     <ClInclude Include="Havok.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Intention.h" />
@@ -110,6 +116,8 @@
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Racer.h" />
     <ClInclude Include="RacerMesh.h" />
+    <ClInclude Include="RearWheel.h" />
+    <ClInclude Include="RearWheelMesh.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="Sound.h" />

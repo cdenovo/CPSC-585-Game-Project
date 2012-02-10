@@ -14,7 +14,7 @@ void Physics::initialize()
 {
 	memoryRouter = hkMemoryInitUtil::initDefault( hkMallocAllocator::m_defaultMallocAllocator, hkMemorySystem::FrameInfo( 500* 1024 ) );
 	hkBaseSystem::init( memoryRouter, errorReport );
-
+	
 	hkpWorldCinfo::SimulationType simulationType;
 	simulationType = hkpWorldCinfo::SIMULATION_TYPE_CONTINUOUS;
 
@@ -33,9 +33,6 @@ void Physics::initialize()
 	world = new hkpWorld(info);
 
 	hkpAgentRegisterUtil::registerAllAgents( world->getCollisionDispatcher() );
-
-
-	world->lock();
 }
 
 void Physics::shutdown()
