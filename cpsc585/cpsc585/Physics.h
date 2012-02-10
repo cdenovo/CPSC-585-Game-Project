@@ -46,8 +46,8 @@ public:
 	void addRigidBody(hkpRigidBody *rb);
 	void step(float seconds);
 
-	void accelerate(float milliseconds, hkpRigidBody *racer, hkVector4 *accelerationVector);
-	void rotate(float milliseconds, hkpRigidBody *racer, hkVector4 *rotVector);
+	void accelerate(float seconds, hkpRigidBody *racer, hkVector4 *accelerationVector);
+	void rotate(float seconds, hkpRigidBody *racer, hkVector4 *rotVector);
 	void steer(hkpRigidBody *racer, float steering);
 
 	hkpWorld* world;

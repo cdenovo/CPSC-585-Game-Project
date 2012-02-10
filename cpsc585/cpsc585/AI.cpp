@@ -53,10 +53,10 @@ void AI::initialize(Renderer* r, Input* i)
 
 	// You no longer have to manually add objects to the physics and renderer
 	player = new Racer(r->getDevice(), renderer, physics);
-	player->setPosAndRot(0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	player->setPosAndRot(0.0f, 8.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	world = new World(r->getDevice(), renderer, physics);
-	world->setPosAndRot(0.0f, -10.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	world->setPosAndRot(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 
 
@@ -64,9 +64,9 @@ void AI::initialize(Renderer* r, Input* i)
 	renderer->setFocus(player->getIndex());
 }
 
-void AI::simulate(float milliseconds)
+void AI::simulate(float seconds)
 {
-	_ASSERT(milliseconds > 0.0f);
+	_ASSERT(seconds > 0.0f);
 	Intention intention = input->getIntention();
 
 	// Debugging Information ---------------------------------------
@@ -82,8 +82,12 @@ void AI::simulate(float milliseconds)
 		_itoa_s(intention.rightStickY, buf4, 10);
 		char buf5[33];
 		_itoa_s(intention.leftStick, buf5, 10);
+		char buf6[33];
+		_itoa_s((int) (intention.acceleration * 100.0f), buf6, 10);
+		char buf7[33];
+		_itoa_s((int) (intention.steering * 100.0f), buf7, 10);
 		
-		std::string stringArray[] = { getFPSString(milliseconds), 
+		std::string stringArray[] = { getFPSString(seconds * 1000.0f), 
 			"X: " + boolToString(intention.xPressed),
 			"Y: " + boolToString(intention.yPressed),
 			"A: " + boolToString(intention.aPressed),
@@ -94,7 +98,9 @@ void AI::simulate(float milliseconds)
 			std::string("Left Trigger: ").append(buf2),
 			std::string("RStick X: ").append(buf3),
 			std::string("RStick Y: ").append(buf4),
-			std::string("LStick: ").append(buf5)};
+			std::string("LStick: ").append(buf5),
+			std::string("Acceleration: ").append(buf6),
+			std::string("Steering: ").append(buf7)};
 	
 		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
 	}
@@ -105,12 +111,8 @@ void AI::simulate(float milliseconds)
 
 	// ---------------------------------------------------------------
 	
-	if (intention.leftStick < 0)
-		player->turn(milliseconds / 1000.0f, -1.0f, ((intention.rightTrig - intention.leftTrig) < 0)?true:false);
-	else if (intention.leftStick > 0)
-		player->turn(milliseconds / 1000.0f, 1.0f, ((intention.rightTrig - intention.leftTrig) < 0)?true:false);
-
-	player->accelerate(milliseconds / 1000.0f, (float) intention.rightTrig - (float) intention.leftTrig);
+	player->steer(seconds, intention.steering);
+	player->accelerate(seconds, intention.acceleration);
 
 	
 
@@ -124,16 +126,16 @@ void AI::simulate(float milliseconds)
 	hkVector4 yRot = player->drawable->getYhkVector();
 	yRot.mul((float) intention.leftStick / 10.0f);
 	
-	physics->accelerate(milliseconds, player->body, &zAcc);
-	physics->accelerate(milliseconds, player->body, &xAcc);
-	physics->accelerate(milliseconds, player->body, &(hkVector4(0.0f, intention.rightTrig * 100.0f, 0.0f)));
-	physics->rotate(milliseconds, player->body, &yRot);*/
+	physics->accelerate(seconds, player->body, &zAcc);
+	physics->accelerate(seconds, player->body, &xAcc);
+	physics->accelerate(seconds, player->body, &(hkVector4(0.0f, intention.rightTrig * 100.0f, 0.0f)));
+	physics->rotate(seconds, player->body, &yRot);*/
 
 	// To manipulate a Racer, you should use the methods Racer::accelerate(float) and Racer::steer(float)
 	// Both inputs should be between -1.0 and 1.0. negative means backward or left, positive is forward or right.
 
 
-	physics->step(milliseconds);
+	physics->step(seconds);
 	player->update();
 
 	return;

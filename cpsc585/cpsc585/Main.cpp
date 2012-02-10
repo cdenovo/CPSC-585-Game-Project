@@ -266,7 +266,7 @@ bool mainLoop()
 	}
 	
 	quit = input->update();
-	ai->simulate((float) (currentTime - prevTime));
+	ai->simulate((currentTime - prevTime) / 1000.0f);
 	renderer->render();
 
 	prevTime = currentTime;
@@ -282,3 +282,4 @@ void errorPopup(LPCTSTR errorMsg)
 {
 	MessageBox(hwnd, errorMsg, NULL, MB_OK);
 }
+

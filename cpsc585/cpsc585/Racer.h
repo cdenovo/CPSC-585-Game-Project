@@ -17,7 +17,7 @@ public:
 	void update();
 
 	void accelerate(float seconds, float value);	// between -1.0 and 1.0 (backwards is negative)
-	void turn(float seconds, float value, bool reversing);			// between -1.0 and 1.0 (left is negative)
+	void steer(float seconds, float value);			// between -1.0 and 1.0 (left is negative)
 
 	int getIndex();
 
@@ -39,5 +39,13 @@ private:
 	
 	int xID, yID, zID;
 	hkVector4 xAxis, yAxis, zAxis;
+	hkVector4 attachFL, attachFR, attachRL, attachRR;
+
+	hkReal chassisMass;
+
+	float currentSteering;
+	float accelerationScale;
+	float torqueScale;
+	float centripScale;
 };
 

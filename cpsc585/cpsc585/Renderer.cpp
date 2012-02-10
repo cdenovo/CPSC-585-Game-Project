@@ -209,7 +209,7 @@ void Renderer::render()
 	// Get view matrix
 	camera->getViewMatrix(viewMatrix);
 
-	device->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 40), 1.0f, 0);
+	device->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(10, 10, 80), 1.0f, 0);
 	
 	device->SetTransform(D3DTS_PROJECTION, &projectionMatrix);
 	device->SetTransform(D3DTS_VIEW, &viewMatrix);

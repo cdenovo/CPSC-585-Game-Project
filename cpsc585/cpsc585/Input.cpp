@@ -154,49 +154,58 @@ bool Input::update()
 			intention.selectPressed = true;
 		}
 
-		if (gamepad.bRightTrigger >= XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+		if (gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
 		{
-			intention.rightTrig = gamepad.bRightTrigger;
+			intention.rightTrig = gamepad.bRightTrigger - XINPUT_GAMEPAD_TRIGGER_THRESHOLD;
 		}
 		else
 		{
 			intention.rightTrig = 0;
 		}
 
-		if (gamepad.bLeftTrigger >= XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+		if (gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
 		{
-			intention.leftTrig = gamepad.bLeftTrigger;
+			intention.leftTrig = gamepad.bLeftTrigger - XINPUT_GAMEPAD_TRIGGER_THRESHOLD;
 		}
 		else
 		{
 			intention.leftTrig = 0;
 		}
 		
-		if ((gamepad.sThumbRX >= XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
-			|| (gamepad.sThumbRX <= -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE))
+		if (gamepad.sThumbRX > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
 		{
-			intention.rightStickX = gamepad.sThumbRX;
+			intention.rightStickX = gamepad.sThumbRX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
+		}
+		else if (gamepad.sThumbRX < -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+		{
+			intention.rightStickX = gamepad.sThumbRX + XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 		}
 		else
 		{
 			intention.rightStickX = 0;
 		}
 
-		if ((gamepad.sThumbRY >= XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
-			|| (gamepad.sThumbRY <= -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE))
+		if (gamepad.sThumbRY > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
 		{
-			intention.rightStickY = gamepad.sThumbRY;
+			intention.rightStickY = gamepad.sThumbRY - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
+		}
+		else if (gamepad.sThumbRY < -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+		{
+			intention.rightStickY = gamepad.sThumbRY + XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 		}
 		else
 		{
 			intention.rightStickY = 0;
 		}
 		
-		
-		if ((gamepad.sThumbLX >= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-			|| (gamepad.sThumbLX <= -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE))
+
+		if (gamepad.sThumbLX > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
-			intention.leftStick = gamepad.sThumbLX;
+			intention.leftStick = gamepad.sThumbLX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+		}
+		else if (gamepad.sThumbLX < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+		{
+			intention.leftStick = gamepad.sThumbLX + XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 		}
 		else
 		{
@@ -204,6 +213,12 @@ bool Input::update()
 		}
 
 		
+		// Compute acceleration and steering (between -1.0 and 1.0)
+		intention.acceleration = (intention.rightTrig - intention.leftTrig) / (float) (255 - XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
+		intention.steering = intention.leftStick / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+		
+
+
 
 		 /*Vibrating the controller:
 			XINPUT_VIBRATION Vibration;

@@ -46,14 +46,14 @@ void Physics::addRigidBody(hkpRigidBody *rb)
 	world->addEntity( rb );
 }
 
-void Physics::accelerate(float milliseconds, hkpRigidBody *racer, hkVector4 *accelVec)
+void Physics::accelerate(float seconds, hkpRigidBody *racer, hkVector4 *accelVec)
 {
-	racer->applyForce(milliseconds / 1000.f, *accelVec); // Just for testing purposes
+	racer->applyForce(seconds, *accelVec); // Just for testing purposes
 }
 
-void Physics::rotate(float milliseconds, hkpRigidBody *racer, hkVector4 *rotVec)
+void Physics::rotate(float seconds, hkpRigidBody *racer, hkVector4 *rotVec)
 {
-	racer->applyTorque(milliseconds / 1000.f, *rotVec);
+	racer->applyTorque(seconds, *rotVec);
 }
 
 static void HK_CALL errorReport(const char* msg, void* userContext)
@@ -61,7 +61,7 @@ static void HK_CALL errorReport(const char* msg, void* userContext)
 	printf("%s", msg);
 }
 
-void Physics::step(float milliseconds)
+void Physics::step(float seconds)
 {
-	world->stepDeltaTime(milliseconds / 1000.0f);
+	world->stepDeltaTime(seconds);
 }

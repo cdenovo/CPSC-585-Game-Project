@@ -33,4 +33,8 @@ public:
 	int leftStick;
 	int rightTrig;
 	int leftTrig;
+
+
+	float acceleration; // between -1.0 and 1.0
+	float steering; // between -1.0 and 1.0
 };

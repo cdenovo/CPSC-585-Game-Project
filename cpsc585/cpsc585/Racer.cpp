@@ -13,7 +13,18 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 	yAxis = hkVector4(0.0f, 1.0f, 0.0f);
 	zAxis = hkVector4(0.0f, 0.0f, 1.0f);
 
+	attachFL = hkVector4(-1.25f, -0.5f, 1.5f);
+	attachFR = hkVector4(1.25f, -0.5f, 1.5f);
+	attachRL = hkVector4(-1.25f, -0.5f, -2.0f);
+	attachRR = hkVector4(1.25f, -0.5f, -2.0f);
+	
+	chassisMass = 800.0f;
 
+	accelerationScale = 12.0f;
+	torqueScale = 180.0f;
+	centripScale = 140.0f;
+
+	currentSteering = 0.0f;
 
 	drawable = new Drawable(RACER, "bricks.dds", device);
 
@@ -28,13 +39,14 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 
 	
 	hkpRigidBodyCinfo info;
-	hkVector4 halfExtent(1.0f, 1.0f, 2.5f);		//Half extent for racer rigid body box
+	hkVector4 halfExtent(1.0f, 0.75f, 2.5f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
-	info.m_restitution = 0.2f;
-	hkReal boxMass = 2000.0f;
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_MOVING;
+	
+	info.m_gravityFactor = 3.0f;
+	info.m_angularDamping = 3.0f;
 	hkpMassProperties massProperties;
-	hkpInertiaTensorComputer::computeBoxVolumeMassProperties(halfExtent, boxMass, massProperties);
+	hkpInertiaTensorComputer::computeBoxVolumeMassProperties(halfExtent, chassisMass, massProperties);
 	info.setMassProperties(massProperties);
 	info.m_collisionFilterInfo = hkpGroupFilter::calcFilterInfo(hkpGroupFilterSetup::LAYER_DYNAMIC, collisionGroupFilter);
 	body = new hkpRigidBody(info);		//Create rigid body
@@ -65,30 +77,26 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 
 
 	// Now constrain the tires
-	hkVector4 attachmentFL = hkVector4(-1.25f, -0.9f, 1.5f);
 	hkpGenericConstraintData* constraint = new hkpGenericConstraintData();
-	buildConstraint(&attachmentFL, constraint);
+	buildConstraint(&attachFL, constraint);
 	hkpConstraintInstance* constraintInst = new hkpConstraintInstance(wheelFL->body, body, constraint);
 	p->world->addConstraint(constraintInst);
 	constraint->removeReference();
 	
-	hkVector4 attachmentFR = hkVector4(1.25f, -0.9f, 1.5f);
 	constraint = new hkpGenericConstraintData();
-	buildConstraint(&attachmentFR, constraint);
+	buildConstraint(&attachFR, constraint);
 	hkpConstraintInstance* constraintInstFR = new hkpConstraintInstance(wheelFR->body, body, constraint);
 	p->world->addConstraint(constraintInstFR);
 	constraint->removeReference();
 	
-	hkVector4 attachmentRL = hkVector4(-1.25f, -0.9f, -1.5f);
 	constraint = new hkpGenericConstraintData();
-	buildConstraint(&attachmentRL, constraint);
+	buildConstraint(&attachRL, constraint);
 	constraintInst = new hkpConstraintInstance(wheelRL->body, body, constraint);
 	p->world->addConstraint(constraintInst);
 	constraint->removeReference();
 
-	hkVector4 attachmentRR = hkVector4(1.25f, -0.9f, -1.5f);
 	constraint = new hkpGenericConstraintData();
-	buildConstraint(&attachmentRR, constraint);
+	buildConstraint(&attachRR, constraint);
 	constraintInst = new hkpConstraintInstance(wheelRR->body, body, constraint);
 	p->world->addConstraint(constraintInst);
 	constraint->removeReference();
@@ -140,17 +148,37 @@ void Racer::update()
 		drawable->setTransform(&transMat);
 		
 		// Now update wheels
-		(wheelFL->body->getTransform()).get4x4ColumnMajor(transMat);
-		wheelFL->drawable->setTransform(&transMat);
-
-		(wheelFR->body->getTransform()).get4x4ColumnMajor(transMat);
-		wheelFR->drawable->setTransform(&transMat);
-		
 		(wheelRL->body->getTransform()).get4x4ColumnMajor(transMat);
 		wheelRL->drawable->setTransform(&transMat);
 		
 		(wheelRR->body->getTransform()).get4x4ColumnMajor(transMat);
 		wheelRR->drawable->setTransform(&transMat);
+
+
+
+		(wheelFL->body->getTransform()).get4x4ColumnMajor(transMat);
+
+		D3DXMATRIX rot1, rot2, trans1;
+		D3DXVECTOR3 scale, trans;
+		D3DXQUATERNION rot;
+		
+		D3DXMatrixDecompose(&scale, &rot, &trans, &transMat);
+		
+		D3DXMatrixRotationQuaternion(&rot1, &rot);
+		D3DXMatrixRotationAxis(&rot2, &(drawable->getYVector()), currentSteering * 1.11f);
+		D3DXMatrixTranslation(&trans1, trans.x, trans.y, trans.z);
+		
+		D3DXMatrixMultiply(&transMat, &rot1, &rot2);
+		D3DXMatrixMultiply(&transMat, &transMat, &trans1);
+		wheelFL->drawable->setTransform(&transMat);
+
+		(wheelFR->body->getTransform()).get4x4ColumnMajor(transMat);
+
+		D3DXMatrixTranslation(&trans1, transMat._41, transMat._42, transMat._43);
+
+		D3DXMatrixMultiply(&transMat, &rot1, &rot2);
+		D3DXMatrixMultiply(&transMat, &transMat, &trans1);
+		wheelFR->drawable->setTransform(&transMat);
 	}
 }
 
@@ -180,9 +208,8 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 	kit->constrainLinearDof(zID);
 
 	kit->constrainToAngularDof(xID);
-	//kit->constrainToAngularDof(yID);
 
-	kit->setLinearLimit(yID, -0.25f, 0.25f);
+	kit->setLinearLimit(yID, -0.25f, -.1f);
 	kit->end();
 
 	constraint->setSolvingMethod(hkpConstraintAtom::METHOD_STABILIZED);
@@ -191,48 +218,48 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 // between -1.0 and 1.0 (backwards is negative)
 void Racer::accelerate(float seconds, float value)
 {
+	if (value == 0.0f)
+		return;
+
 	hkVector4 forward = drawable->getZhkVector();
+	forward.mul(value * chassisMass * accelerationScale);
 	
+	hkVector4 leftPoint = hkVector4(body->getPosition());
+	leftPoint.add4(attachRL);
 
-	hkVector4 leftPoint = body->getPosition();
-	forward.mul(-1.5f);
-	leftPoint.add3clobberW(forward);
+	hkVector4 rightPoint = hkVector4(body->getPosition());
+	rightPoint.add4(attachRR);
 	
-	forward.mul(value * 50.0f * -1.5f);
-
 	body->applyForce(seconds, forward, leftPoint);
+	body->applyForce(seconds, forward, rightPoint);
 }
 
 
 // between -1.0 and 1.0 (left is negative)
-void Racer::turn(float seconds, float value, bool reversing)
+void Racer::steer(float seconds, float value)
 {
-	if (reversing)
-		value *= -1;
+	currentSteering = value;
 
-	hkReal angle = body->getRotation().getAngle();
+	if (value == 0.0f)
+		return;
 
-	hkQuaternion quat;
-	angle += value * (3.14f/3.75f);
+	currentSteering = value;
 
-	if (angle >= 3.14f)
-		angle -= 2*3.14f;
-	else if (angle <= -3.14f)
-		angle += 2*3.14f;
-	quat = hkQuaternion(drawable->getYhkVector(), angle);
-	
-
-	// Actually, should only rotate the "displayable" since the tire height of
-	// the physics object is the only part that matters
-	wheelFL->body->setRotation(quat);
-	wheelFR->body->setRotation(quat);
-
+	hkVector4 vel = body->getMotion()->getLinearVelocity();
 
 	hkVector4 force = drawable->getYhkVector();
-	force.mul(value * 25000.0f);
+	hkReal dot = vel.dot3(drawable->getZhkVector());
+	dot /= vel.length3();
+
+	// These values build up too slowly, and shoot up too quickly after a while
+	// Really needs to be modified. The slides given to us by Radical suggest
+	// building a table of values to use depending on the velocity.
+
+
+	force.mul(value * chassisMass * torqueScale * dot);
 	body->applyTorque(seconds, force);
 	
 	force = drawable->getXhkVector();
-	force.mul(value * 1000.0f);
+	force.mul(value * chassisMass * centripScale * dot);
 	body->applyForce(seconds, force);
 }
