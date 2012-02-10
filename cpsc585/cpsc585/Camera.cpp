@@ -3,7 +3,7 @@
 
 Camera::Camera(void)
 {
-	kValue = 7.0f;
+	kValue = 30.0f;
 
 	focusObject = NULL;
 }

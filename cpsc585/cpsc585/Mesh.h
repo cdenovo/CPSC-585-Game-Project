@@ -1,6 +1,7 @@
 #pragma once
 
 #include <d3dx9.h>
+#include <string>
 
 class Mesh
 {
@@ -14,8 +15,7 @@ protected:
 	{
 		D3DXVECTOR3 position;
 		D3DXVECTOR3 normal;
-		float u;
-		float v; // Texture coordinates
+		float u, v; // Texture coordinates
 	};
 
 	IDirect3DVertexBuffer9* vertexBuffer;
@@ -23,5 +23,7 @@ protected:
 
 	int vertexCount;
 	int indexCount;
+
+	void loadMesh(std::string filename);
 };
 

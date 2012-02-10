@@ -5,6 +5,8 @@
 #include <XInput.h>
 #include "Intention.h"
 
+#define THUMBSTICK_MAX 32767
+
 class Input
 {
 public:
