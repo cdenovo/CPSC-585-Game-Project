@@ -59,13 +59,13 @@ void AI::initialize(Renderer* r, Input* i)
 
 
 	// You no longer have to manually add objects to the physics and renderer
-	player = new Racer(r->getDevice(), renderer, physics, 0);
-	player->setPosAndRot(0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-
 	world = new World(r->getDevice(), renderer, physics);
 	world->setPosAndRot(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-	enemy = new Racer(r->getDevice(), renderer, physics, 1);
+	player = new Racer(r->getDevice(), renderer, physics, PLAYER);
+	player->setPosAndRot(0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+
+	enemy = new Racer(r->getDevice(), renderer, physics, AI1);
 	enemy->setPosAndRot(10.0f, 5.0f, 10.0f, 0.0f, 0.0f, 0.0f);
 
 	// This is how you set an object for the camera to focus on!
@@ -145,12 +145,18 @@ void AI::simulate(float seconds)
 	enemy->update();
 
 
-
+	// Switch focus (A for player, X for AI)
 	if (intention.aPressed)
 		renderer->setFocus(player->getIndex());
 	else if (intention.xPressed)
 		renderer->setFocus(enemy->getIndex());
 
+	// Reset the player (in case you fall over)
+	if (intention.yPressed)
+	{
+		D3DXVECTOR3 pos = player->drawable->getPosition();
+		player->setPosAndRot(0.0f, 10.0f, 0.0f, 0, 0, 0);
+	}
 
 
 

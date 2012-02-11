@@ -7,11 +7,12 @@
 #include "FrontWheel.h"
 #include "RearWheel.h"
 
+enum RacerType { PLAYER, AI1, AI2, AI3 };
 
 class Racer
 {
 public:
-	Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, int racerNumber);
+	Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerType);
 	~Racer(void);
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians

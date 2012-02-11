@@ -37,3 +37,20 @@ FrontWheel::~FrontWheel(void)
 		body->removeReference();
 	}
 }
+
+
+void FrontWheel::setPosAndRot(float posX, float posY, float posZ,
+		float rotX, float rotY, float rotZ)	// In Radians
+{
+	drawable->setPosAndRot(posX, posY, posZ,
+		rotX, rotY, rotZ);
+
+	hkQuaternion quat;
+	quat.setAxisAngle(hkVector4(1.0f, 0.0f, 0.0f), rotX);
+	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotY));
+	quat.mul(hkQuaternion(hkVector4(0.0f, 0.0f, 1.0f), rotZ));
+
+	hkVector4 pos = hkVector4(posX, posY, posZ);
+
+	body->setPositionAndRotation(hkVector4(posX, posY, posZ), quat);
+}

@@ -1,7 +1,7 @@
 #include "Racer.h"
 
 
-Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, int racerNumber)
+Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerType)
 {
 	index = -1;
 
@@ -27,14 +27,16 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, int racerNumber)
 	currentSteering = 0.0f;
 
 
-	switch (racerNumber)
+	switch (racerType)
 	{
-	case 0:	drawable = new Drawable(RACER, "bricks.dds", device);
+	case PLAYER:
+		drawable = new Drawable(RACER, "bricks.dds", device);
 		break;
-	case 1:
+	case AI1:
 		drawable = new Drawable(RACER, "checker.dds", device);
 		break;
-	default:	drawable = new Drawable(RACER, "bricks.dds", device);
+	default:
+		drawable = new Drawable(RACER, "bricks.dds", device);
 	}
 
 	
@@ -108,7 +110,6 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, int racerNumber)
 	constraint->removeReference();
 
 	
-
 	hkpConstraintStabilizationUtil::stabilizeRigidBodyInertia(body);
 }
 
@@ -130,16 +131,16 @@ void Racer::setPosAndRot(float posX, float posY, float posZ,
 	hkQuaternion quat;
 	quat.setAxisAngle(hkVector4(1.0f, 0.0f, 0.0f), rotX);
 	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotY));
-	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotZ));
+	quat.mul(hkQuaternion(hkVector4(0.0f, 0.0f, 1.0f), rotZ));
 
 	hkVector4 pos = hkVector4(posX, posY, posZ);
 
 	body->setPositionAndRotation(hkVector4(posX, posY, posZ), quat);
 
-	wheelFL->body->setPosition(pos);
-	wheelFR->body->setPosition(pos);
-	wheelRL->body->setPosition(pos);
-	wheelRR->body->setPosition(pos);
+	wheelFL->setPosAndRot(attachFL(0) + pos(0), attachFL(1) + pos(1), attachFL(2) + pos(2), rotX, rotY, rotZ);
+	wheelFR->setPosAndRot(attachFR(0) + pos(0), attachFR(1) + pos(1), attachFR(2) + pos(2), rotX, rotY, rotZ);
+	wheelRL->setPosAndRot(attachRL(0) + pos(0), attachRL(1) + pos(1), attachRL(2) + pos(2), rotX, rotY, rotZ);
+	wheelRR->setPosAndRot(attachRR(0) + pos(0), attachRR(1) + pos(1), attachRR(2) + pos(2), rotX, rotY, rotZ);
 
 	update();
 }
@@ -215,6 +216,7 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 
 	kit->constrainToAngularDof(xID);
 
+	
 	kit->setLinearLimit(yID, -0.75f, -0.1f);
 	kit->end();
 
