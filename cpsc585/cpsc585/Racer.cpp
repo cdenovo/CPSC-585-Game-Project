@@ -1,7 +1,7 @@
 #include "Racer.h"
 
 
-Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
+Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerType)
 {
 	index = -1;
 
@@ -26,18 +26,26 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 
 	currentSteering = 0.0f;
 
-	drawable = new Drawable(RACER, "bricks.dds", device);
+
+	switch (racerType)
+	{
+	case PLAYER:
+		drawable = new Drawable(RACER, "bricks.dds", device);
+		break;
+	case AI1:
+		drawable = new Drawable(RACER, "checker.dds", device);
+		break;
+	default:
+		drawable = new Drawable(RACER, "bricks.dds", device);
+	}
+
+	
 
 
 	// Set up filter group (so the car doesn't collide with the wheels)
-	hkpGroupFilter* filter = new hkpGroupFilter();
-	hkpGroupFilterSetup::setupGroupFilter(filter);
-
-	int collisionGroupFilter = filter->getNewSystemGroup();
-	p->world->setCollisionFilter(filter);
-	filter->removeReference();
-
+	int collisionGroupFilter = p->getFilter();
 	
+
 	hkpRigidBodyCinfo info;
 	hkVector4 halfExtent(1.0f, 0.75f, 2.5f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
@@ -48,9 +56,9 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 	hkpMassProperties massProperties;
 	hkpInertiaTensorComputer::computeBoxVolumeMassProperties(halfExtent, chassisMass, massProperties);
 	info.setMassProperties(massProperties);
-	info.m_collisionFilterInfo = hkpGroupFilter::calcFilterInfo(hkpGroupFilterSetup::LAYER_DYNAMIC, collisionGroupFilter);
+	info.m_collisionFilterInfo = hkpGroupFilter::calcFilterInfo(hkpGroupFilterSetup::LAYER_AI, collisionGroupFilter);
 	body = new hkpRigidBody(info);		//Create rigid body
-
+	body->setLinearVelocity(hkVector4(0, 0, 0));
 	info.m_shape->removeReference();
 	
 
@@ -67,24 +75,22 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 	r->addDrawable(wheelFR->drawable);
 	p->addRigidBody(wheelFR->body);
 
-	wheelRL = new FrontWheel(device, collisionGroupFilter);
+	wheelRL = new RearWheel(device, collisionGroupFilter);
 	r->addDrawable(wheelRL->drawable);
 	p->addRigidBody(wheelRL->body);
 
-	wheelRR = new FrontWheel(device, collisionGroupFilter);
+	wheelRR = new RearWheel(device, collisionGroupFilter);
 	r->addDrawable(wheelRR->drawable);
 	p->addRigidBody(wheelRR->body);
 
 
 	// Now constrain the tires
-	wheelFL->body->setFriction(1.2f);
 	hkpGenericConstraintData* constraint = new hkpGenericConstraintData();
 	buildConstraint(&attachFL, constraint);
 	hkpConstraintInstance* constraintInst = new hkpConstraintInstance(wheelFL->body, body, constraint);
 	p->world->addConstraint(constraintInst);
 	constraint->removeReference();
 	
-	wheelFR->body->setFriction(1.2f);
 	constraint = new hkpGenericConstraintData();
 	buildConstraint(&attachFR, constraint);
 	hkpConstraintInstance* constraintInstFR = new hkpConstraintInstance(wheelFR->body, body, constraint);
@@ -104,7 +110,6 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 	constraint->removeReference();
 
 	
-
 	hkpConstraintStabilizationUtil::stabilizeRigidBodyInertia(body);
 }
 
@@ -126,16 +131,16 @@ void Racer::setPosAndRot(float posX, float posY, float posZ,
 	hkQuaternion quat;
 	quat.setAxisAngle(hkVector4(1.0f, 0.0f, 0.0f), rotX);
 	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotY));
-	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotZ));
+	quat.mul(hkQuaternion(hkVector4(0.0f, 0.0f, 1.0f), rotZ));
 
 	hkVector4 pos = hkVector4(posX, posY, posZ);
 
 	body->setPositionAndRotation(hkVector4(posX, posY, posZ), quat);
 
-	wheelFL->body->setPosition(pos);
-	wheelFR->body->setPosition(pos);
-	wheelRL->body->setPosition(pos);
-	wheelRR->body->setPosition(pos);
+	wheelFL->setPosAndRot(attachFL(0) + pos(0), attachFL(1) + pos(1), attachFL(2) + pos(2), rotX, rotY, rotZ);
+	wheelFR->setPosAndRot(attachFR(0) + pos(0), attachFR(1) + pos(1), attachFR(2) + pos(2), rotX, rotY, rotZ);
+	wheelRL->setPosAndRot(attachRL(0) + pos(0), attachRL(1) + pos(1), attachRL(2) + pos(2), rotX, rotY, rotZ);
+	wheelRR->setPosAndRot(attachRR(0) + pos(0), attachRR(1) + pos(1), attachRR(2) + pos(2), rotX, rotY, rotZ);
 
 	update();
 }
@@ -211,6 +216,7 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 
 	kit->constrainToAngularDof(xID);
 
+	
 	kit->setLinearLimit(yID, -0.75f, -0.1f);
 	kit->end();
 

@@ -96,7 +96,7 @@ bool initialize()
 
 	// TO DO: Run the 'initialize' method for each component
 	char* errorMsg = new char[128];
-	if (!(renderer->initialize(resx, resy, hwnd, 1.0f, 1000.0f, 10, errorMsg)))
+	if (!(renderer->initialize(resx, resy, hwnd, 1.0f, 1000.0f, 200, errorMsg)))
 	{
 		errorPopup(errorMsg);
 		errorPopup("Renderer initialization failed!");
