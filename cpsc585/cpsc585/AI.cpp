@@ -63,7 +63,7 @@ void AI::initialize(Renderer* r, Input* i)
 	player->setPosAndRot(0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	world = new World(r->getDevice(), renderer, physics);
-	world->setPosAndRot(0.0f, 0.0f, -10.0f, 0.0f, 0.0f, 0.0f);
+	world->setPosAndRot(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	enemy = new Racer(r->getDevice(), renderer, physics, 1);
 	enemy->setPosAndRot(10.0f, 5.0f, 10.0f, 0.0f, 0.0f, 0.0f);
