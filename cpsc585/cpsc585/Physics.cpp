@@ -3,6 +3,7 @@
 
 Physics::Physics(void)
 {
+	filters = NULL;
 }
 
 
@@ -10,8 +11,14 @@ Physics::~Physics(void)
 {
 }
 
-void Physics::initialize()
+void Physics::initialize(int numObjects)
 {
+	numFilters = numObjects;
+	currentFilter = 0;
+
+	filters = new int[numFilters];
+
+
 	memoryRouter = hkMemoryInitUtil::initDefault( hkMallocAllocator::m_defaultMallocAllocator, hkMemorySystem::FrameInfo( 500* 1024 ) );
 	hkBaseSystem::init( memoryRouter, errorReport );
 	
@@ -32,7 +39,31 @@ void Physics::initialize()
 
 	world = new hkpWorld(info);
 
+
+	hkpGroupFilter* filter = new hkpGroupFilter();
+	hkpGroupFilterSetup::setupGroupFilter(filter);
+
+	for (int i = 0; i < numFilters; i++)
+	{
+		filters[i] = filter->getNewSystemGroup();
+	}
+
 	hkpAgentRegisterUtil::registerAllAgents( world->getCollisionDispatcher() );
+
+	world->setCollisionFilter(filter);
+	filter->removeReference();
+}
+
+
+int Physics::getFilter()
+{
+	if (currentFilter < numFilters)
+	{
+		currentFilter++;
+		return filters[currentFilter - 1];
+	}
+
+	return -1;
 }
 
 void Physics::shutdown()

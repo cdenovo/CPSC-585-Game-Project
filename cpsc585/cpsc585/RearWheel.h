@@ -7,9 +7,9 @@
 class RearWheel
 {
 public:
-	RearWheel(IDirect3DDevice9* device);
+	RearWheel(IDirect3DDevice9* device, int filter);
 	~RearWheel(void);
-
+	void update();
 
 private:
 

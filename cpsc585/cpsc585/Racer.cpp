@@ -1,7 +1,7 @@
 #include "Racer.h"
 
 
-Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
+Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, int racerNumber)
 {
 	index = -1;
 
@@ -26,18 +26,24 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 
 	currentSteering = 0.0f;
 
-	drawable = new Drawable(RACER, "bricks.dds", device);
+
+	switch (racerNumber)
+	{
+	case 0:	drawable = new Drawable(RACER, "bricks.dds", device);
+		break;
+	case 1:
+		drawable = new Drawable(RACER, "checker.dds", device);
+		break;
+	default:	drawable = new Drawable(RACER, "bricks.dds", device);
+	}
+
+	
 
 
 	// Set up filter group (so the car doesn't collide with the wheels)
-	hkpGroupFilter* filter = new hkpGroupFilter();
-	hkpGroupFilterSetup::setupGroupFilter(filter);
-
-	int collisionGroupFilter = filter->getNewSystemGroup();
-	p->world->setCollisionFilter(filter);
-	filter->removeReference();
-
+	int collisionGroupFilter = p->getFilter();
 	
+
 	hkpRigidBodyCinfo info;
 	hkVector4 halfExtent(1.0f, 0.75f, 2.5f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
@@ -48,9 +54,9 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 	hkpMassProperties massProperties;
 	hkpInertiaTensorComputer::computeBoxVolumeMassProperties(halfExtent, chassisMass, massProperties);
 	info.setMassProperties(massProperties);
-	info.m_collisionFilterInfo = hkpGroupFilter::calcFilterInfo(hkpGroupFilterSetup::LAYER_DYNAMIC, collisionGroupFilter);
+	info.m_collisionFilterInfo = hkpGroupFilter::calcFilterInfo(hkpGroupFilterSetup::LAYER_AI, collisionGroupFilter);
 	body = new hkpRigidBody(info);		//Create rigid body
-
+	body->setLinearVelocity(hkVector4(0, 0, 0));
 	info.m_shape->removeReference();
 	
 
@@ -67,24 +73,22 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p)
 	r->addDrawable(wheelFR->drawable);
 	p->addRigidBody(wheelFR->body);
 
-	wheelRL = new FrontWheel(device, collisionGroupFilter);
+	wheelRL = new RearWheel(device, collisionGroupFilter);
 	r->addDrawable(wheelRL->drawable);
 	p->addRigidBody(wheelRL->body);
 
-	wheelRR = new FrontWheel(device, collisionGroupFilter);
+	wheelRR = new RearWheel(device, collisionGroupFilter);
 	r->addDrawable(wheelRR->drawable);
 	p->addRigidBody(wheelRR->body);
 
 
 	// Now constrain the tires
-	wheelFL->body->setFriction(1.2f);
 	hkpGenericConstraintData* constraint = new hkpGenericConstraintData();
 	buildConstraint(&attachFL, constraint);
 	hkpConstraintInstance* constraintInst = new hkpConstraintInstance(wheelFL->body, body, constraint);
 	p->world->addConstraint(constraintInst);
 	constraint->removeReference();
 	
-	wheelFR->body->setFriction(1.2f);
 	constraint = new hkpGenericConstraintData();
 	buildConstraint(&attachFR, constraint);
 	hkpConstraintInstance* constraintInstFR = new hkpConstraintInstance(wheelFR->body, body, constraint);

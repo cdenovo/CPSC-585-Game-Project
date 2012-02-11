@@ -41,6 +41,11 @@ void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevic
 			mesh = FrontWheelMesh::getInstance(device);
 			break;
 		}
+	case REARWHEEL:
+		{
+			mesh = RearWheelMesh::getInstance(device);
+			break;
+		}
 	default:
 		mesh = NULL;
 	}

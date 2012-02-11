@@ -10,6 +10,7 @@ AI::AI(void)
 
 	player = NULL;
 	world = NULL;
+	enemy = NULL;
 }
 
 
@@ -23,6 +24,12 @@ void AI::shutdown()
 	{
 		delete player;
 		player = NULL;
+	}
+
+	if (enemy)
+	{
+		delete enemy;
+		enemy = NULL;
 	}
 
 	if (world)
@@ -48,17 +55,18 @@ void AI::initialize(Renderer* r, Input* i)
 
 	//Initialize physics
 	physics = new Physics();
-	physics->initialize();
+	physics->initialize(5);
 
 
 	// You no longer have to manually add objects to the physics and renderer
-	player = new Racer(r->getDevice(), renderer, physics);
-	player->setPosAndRot(0.0f, 8.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	player = new Racer(r->getDevice(), renderer, physics, 0);
+	player->setPosAndRot(0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	world = new World(r->getDevice(), renderer, physics);
-	world->setPosAndRot(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	world->setPosAndRot(0.0f, 0.0f, -10.0f, 0.0f, 0.0f, 0.0f);
 
-
+	enemy = new Racer(r->getDevice(), renderer, physics, 1);
+	enemy->setPosAndRot(10.0f, 5.0f, 10.0f, 0.0f, 0.0f, 0.0f);
 
 	// This is how you set an object for the camera to focus on!
 	renderer->setFocus(player->getIndex());
@@ -111,32 +119,40 @@ void AI::simulate(float seconds)
 
 	// ---------------------------------------------------------------
 	
-	player->steer(seconds, intention.steering);
-	player->accelerate(seconds, intention.acceleration);
 
-	
-
-
-	/*hkVector4 zAcc = player->drawable->getZhkVector();
-	zAcc.mul((float) intention.rightStickY);
-
-	hkVector4 xAcc = player->drawable->getXhkVector();
-	xAcc.mul((float) intention.rightStickX);
-
-	hkVector4 yRot = player->drawable->getYhkVector();
-	yRot.mul((float) intention.leftStick / 10.0f);
-	
-	physics->accelerate(seconds, player->body, &zAcc);
-	physics->accelerate(seconds, player->body, &xAcc);
-	physics->accelerate(seconds, player->body, &(hkVector4(0.0f, intention.rightTrig * 100.0f, 0.0f)));
-	physics->rotate(seconds, player->body, &yRot);*/
 
 	// To manipulate a Racer, you should use the methods Racer::accelerate(float) and Racer::steer(float)
 	// Both inputs should be between -1.0 and 1.0. negative means backward or left, positive is forward or right.
 
+	player->steer(seconds, intention.steering);
+	player->accelerate(seconds, intention.acceleration);
+
+	
+	hkVector4 vel = enemy->body->getLinearVelocity();
+	
+	enemy->steer(seconds, -0.6f);
+
+	if (vel.length3() < 5.0f)
+		enemy->accelerate(seconds, 0.7f);
+	else
+		enemy->accelerate(seconds, -1.0f);
+
+
+
 
 	physics->step(seconds);
 	player->update();
+	enemy->update();
+
+
+
+	if (intention.aPressed)
+		renderer->setFocus(player->getIndex());
+	else if (intention.xPressed)
+		renderer->setFocus(enemy->getIndex());
+
+
+
 
 	return;
 }

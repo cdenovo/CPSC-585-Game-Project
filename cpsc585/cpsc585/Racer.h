@@ -5,12 +5,13 @@
 #include "Renderer.h"
 
 #include "FrontWheel.h"
+#include "RearWheel.h"
 
 
 class Racer
 {
 public:
-	Racer(IDirect3DDevice9* device, Renderer* r, Physics* p);
+	Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, int racerNumber);
 	~Racer(void);
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians
@@ -34,8 +35,8 @@ private:
 	FrontWheel* wheelFL;
 	FrontWheel* wheelFR;
 
-	FrontWheel* wheelRL;
-	FrontWheel* wheelRR;
+	RearWheel* wheelRL;
+	RearWheel* wheelRR;
 	
 	int xID, yID, zID;
 	hkVector4 xAxis, yAxis, zAxis;

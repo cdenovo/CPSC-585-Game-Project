@@ -33,4 +33,5 @@ private:
 
 	Racer* player;
 	World* world;
+	Racer* enemy;
 };

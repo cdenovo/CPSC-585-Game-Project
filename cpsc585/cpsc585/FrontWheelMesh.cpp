@@ -49,8 +49,8 @@ void FrontWheelMesh::initialize(IDirect3DDevice9* device)
 
 	vertexBuffer->Lock(0, sizeof(Vertex) * vertexCount, (void**) &vertices, NULL);
 
-	float tireHalfWidth = 0.25f;
-	float tireRadius = 0.4f;
+	float tireHalfWidth = 0.3f;
+	float tireRadius = 0.5f;
 	
 	Vertex tmp1[] =
      {

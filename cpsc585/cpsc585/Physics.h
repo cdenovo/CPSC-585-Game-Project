@@ -41,7 +41,7 @@ public:
 	Physics(void);
 	~Physics(void);
 
-	void initialize();
+	void initialize(int numObjects);
 	void shutdown();
 	void addRigidBody(hkpRigidBody *rb);
 	void step(float seconds);
@@ -50,8 +50,13 @@ public:
 	void rotate(float seconds, hkpRigidBody *racer, hkVector4 *rotVector);
 	void steer(hkpRigidBody *racer, float steering);
 
+	int getFilter();
+
 	hkpWorld* world;
 
 private:
 	hkMemoryRouter* memoryRouter;
+	int* filters;
+	int numFilters;
+	int currentFilter;
 };
