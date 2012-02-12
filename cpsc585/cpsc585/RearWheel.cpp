@@ -1,7 +1,7 @@
 #include "RearWheel.h"
 
 
-RearWheel::RearWheel(IDirect3DDevice9* device, int filter)
+RearWheel::RearWheel(IDirect3DDevice9* device, int filter, float mass)
 {
 	drawable = new Drawable(REARWHEEL, "tire.dds", device);
 
@@ -15,7 +15,7 @@ RearWheel::RearWheel(IDirect3DDevice9* device, int filter)
 	info.m_restitution = 1.0f;
 	info.m_friction = 4.0f;
 	info.m_angularDamping = 4.0f;
-	hkReal wheelMass = 150.0f;
+	hkReal wheelMass = mass;
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL; 
 	hkpMassProperties massProperties;
 	hkpInertiaTensorComputer::computeCylinderVolumeMassProperties(startAxis, endAxis, radius, wheelMass, massProperties);
