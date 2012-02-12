@@ -17,12 +17,12 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 	attachFR = hkVector4(1.15f, -0.5f, 1.5f);
 	attachRL = hkVector4(-1.15f, -0.5f, -2.0f);
 	attachRR = hkVector4(1.15f, -0.5f, -2.0f);
-	
-	chassisMass = 800.0f;
 
-	accelerationScale = 18.0f;
-	torqueScale = 180.0f;
-	centripScale = 140.0f;
+	chassisMass = cReader.chassisMass;
+
+	accelerationScale = cReader.accelerationScale;
+	torqueScale = cReader.torqueScale;
+	centripScale = cReader.steeringScale;
 
 	currentSteering = 0.0f;
 
@@ -40,7 +40,6 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 	}
 
 	
-
 
 	// Set up filter group (so the car doesn't collide with the wheels)
 	int collisionGroupFilter = p->getFilter();
@@ -67,19 +66,19 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 
 
 	// Create tires
-	wheelFL = new FrontWheel(device, collisionGroupFilter);
+	wheelFL = new FrontWheel(device, collisionGroupFilter, cReader.frontWheelMass);
 	r->addDrawable(wheelFL->drawable);
 	p->addRigidBody(wheelFL->body);
 
-	wheelFR = new FrontWheel(device, collisionGroupFilter);
+	wheelFR = new FrontWheel(device, collisionGroupFilter, cReader.frontWheelMass);
 	r->addDrawable(wheelFR->drawable);
 	p->addRigidBody(wheelFR->body);
 
-	wheelRL = new RearWheel(device, collisionGroupFilter);
+	wheelRL = new RearWheel(device, collisionGroupFilter, cReader.rearWheelMass);
 	r->addDrawable(wheelRL->drawable);
 	p->addRigidBody(wheelRL->body);
 
-	wheelRR = new RearWheel(device, collisionGroupFilter);
+	wheelRR = new RearWheel(device, collisionGroupFilter, cReader.rearWheelMass);
 	r->addDrawable(wheelRR->drawable);
 	p->addRigidBody(wheelRR->body);
 

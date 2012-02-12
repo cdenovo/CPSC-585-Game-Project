@@ -1,11 +1,11 @@
 #pragma once
 
-#include <winsock.h>
 #include <iostream>
 #include <sstream>
 #include <string.h>
 
 #include "Intention.h"
+#include "NetworkInfo.h"
 
 class Client
 {
@@ -15,13 +15,20 @@ public:
 
 	bool connectToServer(int port, std::string ipAddress);
 	void getTCPMessages();
+	void getUDPMessages();
 
 	int ready();
+	int unready();
+	int setColor(int color);
 
 	int sendButtonState(Intention intention);
 
 	std::string world;
 	std::string track;
+	bool isReady;
+	bool start;
+	int id;
+	bool end;
 
 private:
 	int sendTCPMessage(std::string message);
@@ -33,6 +40,7 @@ private:
 	SOCKET sUDP;
 	SOCKADDR_IN target; //Socket address info
 
-	bool start;
+	ClientInfo clients[MAXCLIENTS];
+	int numClients;
 };
 

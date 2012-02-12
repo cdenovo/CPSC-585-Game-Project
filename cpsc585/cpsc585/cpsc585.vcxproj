@@ -81,6 +81,7 @@
     <ClCompile Include="AI.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="ConfigReader.cpp" />
     <ClCompile Include="Drawable.cpp" />
     <ClCompile Include="FrontWheel.cpp" />
     <ClCompile Include="FrontWheelMesh.cpp" />
@@ -104,6 +105,7 @@
     <ClInclude Include="AI.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Client.h" />
+    <ClInclude Include="ConfigReader.h" />
     <ClInclude Include="Drawable.h" />
     <ClInclude Include="FrontWheel.h" />
     <ClInclude Include="FrontWheelMesh.h" />

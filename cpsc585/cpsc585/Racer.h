@@ -6,6 +6,7 @@
 
 #include "FrontWheel.h"
 #include "RearWheel.h"
+#include "ConfigReader.h"
 
 enum RacerType { PLAYER, AI1, AI2, AI3 };
 
@@ -49,5 +50,7 @@ private:
 	float accelerationScale;
 	float torqueScale;
 	float centripScale;
+
+	ConfigReader cReader;
 };
 

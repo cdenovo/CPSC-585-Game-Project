@@ -53,12 +53,12 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 				}
 			case VK_LEFT:
 				{
-					intention.rightStickX = -25000;
+					intention.leftStick = -25000;
 					break;
 				}
 			case VK_RIGHT:
 				{
-					intention.rightStickX = 25000;
+					intention.leftStick = 25000;
 					break;
 				}
 			case VK_SPACE:
@@ -84,12 +84,12 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 				}
 			case VK_LEFT:
 				{
-					intention.rightStickX = 0;
+					intention.leftStick = 0;
 					break;
 				}
 			case VK_RIGHT:
 				{
-					intention.rightStickX = 0;
+					intention.leftStick = 0;
 					break;
 				}
 			case VK_SPACE:
@@ -99,6 +99,9 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 				}
 			}
 		}
+		// Compute acceleration and steering (between -1.0 and 1.0)
+		intention.acceleration = (intention.rightTrig - intention.leftTrig) / (float) (255 - XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
+		intention.steering = intention.leftStick / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
 	}
 	return;
 }

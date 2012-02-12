@@ -114,6 +114,15 @@ void Intention::unserialize(char bitstr[])
 	leftTrig = ((int)bitstr[9] << 8) | bitstr[10]; //Get leftTrig
 }
 
+/**
+ * Checks if two intentions are equal
+ */
+bool Intention::equals(const Intention &intent)
+{
+	return aPressed == intent.aPressed && bPressed == intent.bPressed && xPressed == intent.xPressed && yPressed == intent.yPressed && selectPressed == intent.selectPressed && startPressed == intent.startPressed
+		&& lbumpPressed == intent.lbumpPressed && rbumpPressed == intent.rbumpPressed && rightStickX == intent.rightStickX && rightStickY == intent.rightStickY && leftStick == intent.leftStick
+		&& rightTrig == intent.rightTrig && leftTrig == intent.leftTrig;
+}
 
 /**
 * Converts the intention class into a string
