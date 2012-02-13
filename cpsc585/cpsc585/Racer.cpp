@@ -3,6 +3,8 @@
 int Racer::xID = 0;
 int Racer::yID = 1;
 int Racer::zID = 2;
+
+ConfigReader Racer::config = ConfigReader();
 	
 hkVector4 Racer::xAxis = hkVector4(1.0f, 0.0f, 0.0f);
 hkVector4 Racer::yAxis = hkVector4(0.0f, 1.0f, 0.0f);
@@ -12,12 +14,19 @@ hkVector4 Racer::attachFR = hkVector4(1.15f, -0.8f, 1.5f);
 hkVector4 Racer::attachRL = hkVector4(-1.15f, -1.0f, -1.5f);
 hkVector4 Racer::attachRR = hkVector4(1.15f, -1.0f, -1.5f);
 
-hkReal Racer::chassisMass = 1000.0f;
+/*hkReal Racer::chassisMass = 1000.0f;
 float Racer::accelerationScale = 15.0f;
 float Racer::rearSpringK = 26000.0f;
 float Racer::frontSpringK = 25000.0f;
 float Racer::rearDamperC = 10200.0f;
-float Racer::frontDamperC = 10000.0f;
+float Racer::frontDamperC = 10000.0f;*/
+
+hkReal Racer::chassisMass = config.chassisMass;
+float Racer::accelerationScale = config.accelerationScale;
+float Racer::rearSpringK = config.kRear;
+float Racer::frontSpringK = config.kFront;
+float Racer::rearDamperC = config.rearDamping;
+float Racer::frontDamperC = config.frontDamping;
 
 
 Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerType)

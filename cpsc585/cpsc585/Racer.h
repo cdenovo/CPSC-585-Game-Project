@@ -6,6 +6,7 @@
 
 #include "FrontWheel.h"
 #include "RearWheel.h"
+#include "ConfigReader.h"
 
 enum RacerType { PLAYER, AI1, AI2, AI3 };
 enum WheelType { FRONT, REAR };
@@ -67,6 +68,8 @@ private:
 	static float frontSpringK;
 	static float rearDamperC;
 	static float frontDamperC;
+	
+	static ConfigReader config;
 };
 
 class WheelListener : public hkpContactListener

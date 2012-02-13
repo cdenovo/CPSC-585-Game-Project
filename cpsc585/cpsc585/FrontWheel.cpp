@@ -1,7 +1,7 @@
 #include "FrontWheel.h"
 
 
-FrontWheel::FrontWheel(IDirect3DDevice9* device, int filter)
+FrontWheel::FrontWheel(IDirect3DDevice9* device, int filter, float mass)
 {
 	touchingGround = false;
 
@@ -16,7 +16,7 @@ FrontWheel::FrontWheel(IDirect3DDevice9* device, int filter)
 	info.m_restitution = 1.0f;
 	info.m_friction = 1.0f;
 	
-	hkReal wheelMass = 75.0f;
+	hkReal wheelMass = mass;
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL; 
 	hkpMassProperties massProperties;
 	hkpInertiaTensorComputer::computeCylinderVolumeMassProperties(startAxis, endAxis, radius, wheelMass, massProperties);

@@ -7,7 +7,7 @@
 class RearWheel
 {
 public:
-	RearWheel(IDirect3DDevice9* device, int filter);
+	RearWheel(IDirect3DDevice9* device, int filter, float mass);
 	~RearWheel(void);
 	void update();
 	void setPosAndRot(float posX, float posY, float posZ,
