@@ -75,7 +75,7 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 
 
 	// Create tires
-	wheelFL = new FrontWheel(device, collisionGroupFilter);
+	wheelFL = new FrontWheel(device, collisionGroupFilter, config.frontWheelMass);
 	r->addDrawable(wheelFL->drawable);
 	p->addRigidBody(wheelFL->body);
 	
@@ -83,7 +83,7 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 	wheelFL->body->addContactListener(listenFL);
 
 	
-	wheelFR = new FrontWheel(device, collisionGroupFilter);
+	wheelFR = new FrontWheel(device, collisionGroupFilter, config.frontWheelMass);
 	r->addDrawable(wheelFR->drawable);
 	p->addRigidBody(wheelFR->body);
 
@@ -92,7 +92,7 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 	
 
 
-	wheelRL = new RearWheel(device, collisionGroupFilter);
+	wheelRL = new RearWheel(device, collisionGroupFilter, config.rearWheelMass);
 	r->addDrawable(wheelRL->drawable);
 	p->addRigidBody(wheelRL->body);
 
@@ -100,7 +100,7 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 	wheelFL->body->addContactListener(listenRL);
 
 
-	wheelRR = new RearWheel(device, collisionGroupFilter);
+	wheelRR = new RearWheel(device, collisionGroupFilter, config.rearWheelMass);
 	r->addDrawable(wheelRR->drawable);
 	p->addRigidBody(wheelRR->body);
 	
