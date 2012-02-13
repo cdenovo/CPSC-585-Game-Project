@@ -18,6 +18,7 @@ private:
 public:
 	Drawable* drawable;
 	hkpRigidBody* body;
+	bool touchingGround;
 
 private:
 

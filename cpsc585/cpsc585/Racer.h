@@ -8,6 +8,7 @@
 #include "RearWheel.h"
 
 enum RacerType { PLAYER, AI1, AI2, AI3 };
+enum WheelType { FRONT, REAR };
 
 class Racer
 {
@@ -22,14 +23,19 @@ public:
 	void steer(float seconds, float value);			// between -1.0 and 1.0 (left is negative)
 
 	int getIndex();
+	void reset();	// Reset position and set velocity/momentum to 0
+
+	void applySprings(float seconds);	// Call this every frame BEFORE stepping physics!
 
 private:
-	void buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* constraint);
+	void buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* constraint, WheelType type);
+	hkVector4 getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach, WheelType type);
 
 
 public:
 	Drawable* drawable;
 	hkpRigidBody* body;
+	static float accelerationScale;
 
 private:
 	int index;
@@ -38,16 +44,37 @@ private:
 
 	RearWheel* wheelRL;
 	RearWheel* wheelRR;
-	
-	int xID, yID, zID;
-	hkVector4 xAxis, yAxis, zAxis;
-	hkVector4 attachFL, attachFR, attachRL, attachRR;
-
-	hkReal chassisMass;
 
 	float currentSteering;
-	float accelerationScale;
-	float torqueScale;
-	float centripScale;
+
+
+	// Static elements that are common between all Racers
+	static int xID;
+	static int yID;
+	static int zID;
+	
+	static hkVector4 xAxis;
+	static hkVector4 yAxis;
+	static hkVector4 zAxis;
+	static hkVector4 attachFL;
+	static hkVector4 attachFR;
+	static hkVector4 attachRL;
+	static hkVector4 attachRR;
+
+	static hkReal chassisMass;
+
+	static float rearSpringK;
+	static float frontSpringK;
+	static float rearDamperC;
+	static float frontDamperC;
 };
 
+class WheelListener : public hkpContactListener
+{
+public:
+	void collisionAddedCallback(const hkpCollisionEvent& ev);
+	void collisionRemovedCallback(const hkpCollisionEvent& ev);
+
+	WheelListener(bool* touchingGround);
+	bool* touching;
+};

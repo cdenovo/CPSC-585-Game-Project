@@ -63,10 +63,10 @@ void AI::initialize(Renderer* r, Input* i)
 	world->setPosAndRot(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	player = new Racer(r->getDevice(), renderer, physics, PLAYER);
-	player->setPosAndRot(0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	player->setPosAndRot(0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	enemy = new Racer(r->getDevice(), renderer, physics, AI1);
-	enemy->setPosAndRot(10.0f, 5.0f, 10.0f, 0.0f, 0.0f, 0.0f);
+	enemy->setPosAndRot(10.0f, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f);
 
 	// This is how you set an object for the camera to focus on!
 	renderer->setFocus(player->getIndex());
@@ -94,6 +94,14 @@ void AI::simulate(float seconds)
 		_itoa_s((int) (intention.acceleration * 100.0f), buf6, 10);
 		char buf7[33];
 		_itoa_s((int) (intention.steering * 100.0f), buf7, 10);
+
+		char buf8[33];
+		hkVector4 vel = player->body->getLinearVelocity();
+		float velocity = vel.dot3(player->drawable->getZhkVector());
+		_itoa_s((int) (velocity), buf8, 10);
+
+		char buf9[33];
+		_itoa_s((int) (Racer::accelerationScale), buf9, 10);
 		
 		std::string stringArray[] = { getFPSString(seconds * 1000.0f), 
 			"X: " + boolToString(intention.xPressed),
@@ -108,7 +116,9 @@ void AI::simulate(float seconds)
 			std::string("RStick Y: ").append(buf4),
 			std::string("LStick: ").append(buf5),
 			std::string("Acceleration: ").append(buf6),
-			std::string("Steering: ").append(buf7)};
+			std::string("Steering: ").append(buf7),
+			std::string("Velocity: ").append(buf8),
+			std::string("Accel. Scale: ").append(buf9)};
 	
 		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
 	}
@@ -127,23 +137,22 @@ void AI::simulate(float seconds)
 	player->steer(seconds, intention.steering);
 	player->accelerate(seconds, intention.acceleration);
 
-	
 	hkVector4 vel = enemy->body->getLinearVelocity();
 	
-	enemy->steer(seconds, -0.6f);
+	enemy->steer(seconds, -0.4f);
 
-	if (vel.length3() < 5.0f)
-		enemy->accelerate(seconds, 0.7f);
+	if (vel.length3() < 20.0f)
+		enemy->accelerate(seconds, 0.5f);
 	else
 		enemy->accelerate(seconds, -1.0f);
 
 
-
+	player->applySprings(seconds);
+	enemy->applySprings(seconds);
 
 	physics->step(seconds);
 	player->update();
 	enemy->update();
-
 
 	// Switch focus (A for player, X for AI)
 	if (intention.aPressed)
@@ -155,7 +164,7 @@ void AI::simulate(float seconds)
 	if (intention.yPressed)
 	{
 		D3DXVECTOR3 pos = player->drawable->getPosition();
-		player->setPosAndRot(0.0f, 10.0f, 0.0f, 0, 0, 0);
+		player->reset();
 	}
 
 

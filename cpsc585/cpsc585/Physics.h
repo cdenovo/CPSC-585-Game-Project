@@ -30,6 +30,7 @@
 #include <Physics/Collide/Filter/Group/hkpGroupFilterSetup.h>
 #include <Physics/Dynamics/Constraint/hkpConstraintInstance.h>
 #include <Physics/Dynamics/Constraint/Util/hkpConstraintStabilizationUtil.h>
+#include <Physics/Dynamics/Collide/ContactListener/hkpContactListener.h>
 
 
 

@@ -1,28 +1,28 @@
 #include "Racer.h"
 
+int Racer::xID = 0;
+int Racer::yID = 1;
+int Racer::zID = 2;
+	
+hkVector4 Racer::xAxis = hkVector4(1.0f, 0.0f, 0.0f);
+hkVector4 Racer::yAxis = hkVector4(0.0f, 1.0f, 0.0f);
+hkVector4 Racer::zAxis = hkVector4(0.0f, 0.0f, 1.0f);
+hkVector4 Racer::attachFL = hkVector4(-1.15f, -0.8f, 1.5f);
+hkVector4 Racer::attachFR = hkVector4(1.15f, -0.8f, 1.5f);
+hkVector4 Racer::attachRL = hkVector4(-1.15f, -1.0f, -1.5f);
+hkVector4 Racer::attachRR = hkVector4(1.15f, -1.0f, -1.5f);
+
+hkReal Racer::chassisMass = 1000.0f;
+float Racer::accelerationScale = 15.0f;
+float Racer::rearSpringK = 26000.0f;
+float Racer::frontSpringK = 25000.0f;
+float Racer::rearDamperC = 10200.0f;
+float Racer::frontDamperC = 10000.0f;
+
 
 Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerType)
 {
 	index = -1;
-
-	xID = 0;
-	yID = 1;
-	zID = 2;
-
-	xAxis = hkVector4(1.0f, 0.0f, 0.0f);
-	yAxis = hkVector4(0.0f, 1.0f, 0.0f);
-	zAxis = hkVector4(0.0f, 0.0f, 1.0f);
-
-	attachFL = hkVector4(-1.15f, -0.5f, 1.5f);
-	attachFR = hkVector4(1.15f, -0.5f, 1.5f);
-	attachRL = hkVector4(-1.15f, -0.5f, -2.0f);
-	attachRR = hkVector4(1.15f, -0.5f, -2.0f);
-	
-	chassisMass = 800.0f;
-
-	accelerationScale = 18.0f;
-	torqueScale = 180.0f;
-	centripScale = 140.0f;
 
 	currentSteering = 0.0f;
 
@@ -51,16 +51,15 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 	info.m_shape = new hkpBoxShape(halfExtent);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL;
 	info.m_restitution = 1.0f;
-	info.m_gravityFactor = 3.0f;
-	info.m_angularDamping = 3.0f;
+	
 	hkpMassProperties massProperties;
 	hkpInertiaTensorComputer::computeBoxVolumeMassProperties(halfExtent, chassisMass, massProperties);
+	massProperties.m_centerOfMass = hkVector4(0.0f, 0.0f, -1.0f);	// Move the centre of mass back a bit
 	info.setMassProperties(massProperties);
 	info.m_collisionFilterInfo = hkpGroupFilter::calcFilterInfo(hkpGroupFilterSetup::LAYER_AI, collisionGroupFilter);
 	body = new hkpRigidBody(info);		//Create rigid body
 	body->setLinearVelocity(hkVector4(0, 0, 0));
 	info.m_shape->removeReference();
-	
 
 	index = r->addDrawable(drawable);
 	p->addRigidBody(body);
@@ -70,47 +69,67 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 	wheelFL = new FrontWheel(device, collisionGroupFilter);
 	r->addDrawable(wheelFL->drawable);
 	p->addRigidBody(wheelFL->body);
+	
+	WheelListener* listenFL = new WheelListener(&(wheelFL->touchingGround));
+	wheelFL->body->addContactListener(listenFL);
 
+	
 	wheelFR = new FrontWheel(device, collisionGroupFilter);
 	r->addDrawable(wheelFR->drawable);
 	p->addRigidBody(wheelFR->body);
+
+	WheelListener* listenFR = new WheelListener(&(wheelFR->touchingGround));
+	wheelFL->body->addContactListener(listenFR);
+	
+
 
 	wheelRL = new RearWheel(device, collisionGroupFilter);
 	r->addDrawable(wheelRL->drawable);
 	p->addRigidBody(wheelRL->body);
 
+	WheelListener* listenRL = new WheelListener(&(wheelRL->touchingGround));
+	wheelFL->body->addContactListener(listenRL);
+
+
 	wheelRR = new RearWheel(device, collisionGroupFilter);
 	r->addDrawable(wheelRR->drawable);
 	p->addRigidBody(wheelRR->body);
-
+	
+	WheelListener* listenRR = new WheelListener(&(wheelRR->touchingGround));
+	wheelFL->body->addContactListener(listenRR);
 
 	// Now constrain the tires
-	hkpGenericConstraintData* constraint = new hkpGenericConstraintData();
-	buildConstraint(&attachFL, constraint);
-	hkpConstraintInstance* constraintInst = new hkpConstraintInstance(wheelFL->body, body, constraint);
+	hkpGenericConstraintData* constraint;
+	hkpConstraintInstance* constraintInst;
+
+	constraint = new hkpGenericConstraintData();
+	buildConstraint(&attachFL, constraint, FRONT);
+	constraintInst = new hkpConstraintInstance(wheelFL->body, body, constraint);
+	p->world->addConstraint(constraintInst);
+	constraint->removeReference();
+
+	constraint = new hkpGenericConstraintData();
+	buildConstraint(&attachFR, constraint, FRONT);
+	constraintInst = new hkpConstraintInstance(wheelFR->body, body, constraint);
 	p->world->addConstraint(constraintInst);
 	constraint->removeReference();
 	
 	constraint = new hkpGenericConstraintData();
-	buildConstraint(&attachFR, constraint);
-	hkpConstraintInstance* constraintInstFR = new hkpConstraintInstance(wheelFR->body, body, constraint);
-	p->world->addConstraint(constraintInstFR);
-	constraint->removeReference();
-	
-	constraint = new hkpGenericConstraintData();
-	buildConstraint(&attachRL, constraint);
+	buildConstraint(&attachRL, constraint, REAR);
 	constraintInst = new hkpConstraintInstance(wheelRL->body, body, constraint);
 	p->world->addConstraint(constraintInst);
 	constraint->removeReference();
 
 	constraint = new hkpGenericConstraintData();
-	buildConstraint(&attachRR, constraint);
+	buildConstraint(&attachRR, constraint, REAR);
 	constraintInst = new hkpConstraintInstance(wheelRR->body, body, constraint);
 	p->world->addConstraint(constraintInst);
 	constraint->removeReference();
 
 	
 	hkpConstraintStabilizationUtil::stabilizeRigidBodyInertia(body);
+
+	reset();
 }
 
 
@@ -195,7 +214,7 @@ int Racer::getIndex()
 }
 
 
-void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* constraint)
+void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* constraint, WheelType type)
 {
 	hkpConstraintConstructionKit* kit = new hkpConstraintConstructionKit();
 	kit->begin(constraint);
@@ -216,8 +235,15 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 
 	kit->constrainToAngularDof(xID);
 
-	
-	kit->setLinearLimit(yID, -0.75f, -0.1f);
+	if (type == FRONT)
+	{
+		kit->setLinearLimit(yID, -0.5f, 0.5f);
+	}
+	else
+	{
+		kit->setLinearLimit(yID, -0.7f, 0.7f);
+	}
+
 	kit->end();
 
 	constraint->setSolvingMethod(hkpConstraintAtom::METHOD_STABILIZED);
@@ -226,20 +252,30 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 // between -1.0 and 1.0 (backwards is negative)
 void Racer::accelerate(float seconds, float value)
 {
-	if (value == 0.0f)
+	if ((value == 0.0f) || ( !(wheelRL->touchingGround) && !(wheelRR->touchingGround)))
 		return;
 
 	hkVector4 forward = drawable->getZhkVector();
+	hkVector4 vel = body->getMotion()->getLinearVelocity();
+	float dot = vel.dot3(drawable->getZhkVector());
+
+	if ((dot > 0.0f) && (value < 0.0f))
+		value *= 2.0f;
+
 	forward.mul(value * chassisMass * accelerationScale);
 	
+
 	hkVector4 leftPoint = hkVector4(body->getPosition());
 	leftPoint.add4(attachRL);
 
 	hkVector4 rightPoint = hkVector4(body->getPosition());
 	rightPoint.add4(attachRR);
 	
-	body->applyForce(seconds, forward, leftPoint);
-	body->applyForce(seconds, forward, rightPoint);
+	if (wheelRL->touchingGround)
+		body->applyForce(seconds, forward, leftPoint);
+
+	if (wheelRR->touchingGround)
+		body->applyForce(seconds, forward, rightPoint);
 }
 
 
@@ -248,28 +284,200 @@ void Racer::steer(float seconds, float value)
 {
 	currentSteering = value;
 
-	if (value == 0.0f)
+	if (!(wheelFL->touchingGround) && !(wheelFR->touchingGround))
 		return;
 
-	currentSteering = value;
-
 	hkVector4 vel = body->getMotion()->getLinearVelocity();
+	float dot = vel.dot3(drawable->getZhkVector());
+
+	bool negative = false;
+
+	if (dot < 0.0f)
+	{
+		negative = true;
+		dot *= -1;
+	}
+	
+	float torqueScale = 0.0f;
+	float centripScale = 0.0f;
+
+	// Now adjust forces
+	if (dot < 5.0f)
+	{
+		torqueScale = 25.0f;
+		centripScale = 10.0f;
+	}
+	else if (dot < 10.0f)
+	{
+		torqueScale = 50.0f;
+		centripScale = 30.0f;
+	}
+	else if (dot < 15.0f)
+	{
+		torqueScale = 50.0f;
+		centripScale = 40.0f;
+	}
+	else if (dot < 20.0f)
+	{
+		torqueScale = 60.0f;
+		centripScale = 50.0f;
+	}
+	else if (dot < 30.0f)
+	{
+		torqueScale = 65.0f;
+		centripScale = 50.0f;
+	}
+	else if (dot < 35.0f)
+	{
+		torqueScale = 70.0f;
+		centripScale = 50.0f;
+	}
+	else if (dot < 40.0f)
+	{
+		torqueScale = 75.0f;
+		centripScale = 60.0f;
+	}
+	else if (dot < 45.0f)
+	{
+		torqueScale = 80.0f;
+		centripScale = 70.0f;
+	}
+	else if (dot < 60.0f)
+	{
+		torqueScale = 130.0f;
+		centripScale = 85.0f;
+	}
+	else if (dot >= 60.0f)
+	{
+		torqueScale = 150.0f;
+		centripScale = 100.0f;
+	}
+	else
+	{
+		torqueScale = 25.0f;
+		centripScale = 10.0f;
+	}
+
+	if (negative)
+	{
+		torqueScale *= -1;
+		centripScale *= -1;
+	}
 
 	hkVector4 force = drawable->getYhkVector();
-	hkReal dot = vel.dot3(drawable->getZhkVector());
-	hkReal denom = vel.length3();
-	if (denom != 0)
-		dot /= vel.length3();		// This is slow! not good, see note below
-
-	// These values build up too slowly, and shoot up too quickly after a while
-	// Really needs to be modified. The slides given to us by Radical suggest
-	// building a table of values to use depending on the velocity.
-
-
-	force.mul(value * chassisMass * torqueScale * dot);
+	force.mul(value * chassisMass * torqueScale);
 	body->applyTorque(seconds, force);
 	
 	force = drawable->getXhkVector();
-	force.mul(value * chassisMass * centripScale * dot);
+	force.mul(value * chassisMass * centripScale);
 	body->applyForce(seconds, force);
+}
+
+
+void Racer::reset()
+{
+	hkVector4 reset = hkVector4(0.0f, 0.0f, 0.0f);
+	setPosAndRot(0.0f, 10.0f, 0.0f, 0, 0, 0);
+	body->setLinearVelocity(reset);
+	wheelFL->body->setLinearVelocity(reset);
+	wheelFR->body->setLinearVelocity(reset);
+	wheelRL->body->setLinearVelocity(reset);
+	wheelRR->body->setLinearVelocity(reset);
+}
+
+
+void Racer::applySprings(float seconds)
+{
+	// Applies springs and dampers using the helper function getForce()
+	hkVector4 force, point;
+	D3DXMATRIX transMat;
+	(body->getTransform()).get4x4ColumnMajor(transMat);
+	hkVector4 upVector = hkVector4(transMat._21, transMat._22, transMat._23);
+
+	if (wheelFL->touchingGround)
+	{
+		force = getForce(&upVector,  wheelFL->body, &attachFL, FRONT);
+		point.setTransformedPos(body->getTransform(), attachFL);
+		body->applyForce(seconds, force, point);
+	}
+
+	if (wheelFR->touchingGround)
+	{
+		force = getForce(&upVector,  wheelFR->body, &attachFR, FRONT);
+		point.setTransformedPos(body->getTransform(), attachFR);
+		body->applyForce(seconds, force, point);
+	}
+
+	if (wheelRL->touchingGround)
+	{
+		force = getForce(&upVector,  wheelRL->body, &attachRL, REAR);
+		point.setTransformedPos(body->getTransform(), attachRL);
+		body->applyForce(seconds, force, point);
+	}
+
+	if (wheelRR->touchingGround)
+	{
+		force = getForce(&upVector,  wheelRR->body, &attachRR, REAR);
+		point.setTransformedPos(body->getTransform(), attachRR);
+		body->applyForce(seconds, force, point);
+	}
+}
+
+
+hkVector4 Racer::getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach, WheelType type)
+{
+	hkVector4 actualPos, restPos, force, damperForce, pointVel;
+	float displacement, speedOfDisplacement;
+
+	float k, c;
+
+	if (type == FRONT)
+	{
+		k = frontSpringK;
+		c = frontDamperC;
+	}
+	else
+	{
+		k = rearSpringK;
+		c = rearDamperC;
+	}
+
+
+	actualPos = wheel->getPosition();
+	restPos.setTransformedPos(body->getTransform(), *attach);
+	actualPos.sub3clobberW(restPos);
+
+	displacement = actualPos.dot3(*up);
+
+	force = hkVector4(*up);
+	force.mul(k * displacement);
+
+	body->getPointVelocity(restPos, pointVel);
+
+	speedOfDisplacement = pointVel.dot3(*up);
+
+	damperForce = hkVector4(*up);
+	damperForce.mul(c * -speedOfDisplacement);
+
+	force.add3clobberW(damperForce);
+
+	return force;
+}
+
+
+WheelListener::WheelListener(bool* touchingGround)
+{
+	touching = touchingGround;
+}
+
+
+// Wheel listener callback setup
+void WheelListener::collisionAddedCallback(const hkpCollisionEvent& ev)
+{
+	*touching = true;
+}
+
+void WheelListener::collisionRemovedCallback(const hkpCollisionEvent& ev)
+{
+	*touching = false;
 }

@@ -3,6 +3,8 @@
 
 RearWheel::RearWheel(IDirect3DDevice9* device, int filter)
 {
+	touchingGround = false;
+
 	drawable = new Drawable(REARWHEEL, "tire.dds", device);
 
 	hkVector4 startAxis = hkVector4(-0.4f, 0, 0);
@@ -13,8 +15,8 @@ RearWheel::RearWheel(IDirect3DDevice9* device, int filter)
 	hkpRigidBodyCinfo info;
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);
 	info.m_restitution = 1.0f;
-	info.m_friction = 4.0f;
-	info.m_angularDamping = 4.0f;
+	info.m_friction = 8.0f;
+	
 	hkReal wheelMass = 150.0f;
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL; 
 	hkpMassProperties massProperties;
@@ -24,9 +26,6 @@ RearWheel::RearWheel(IDirect3DDevice9* device, int filter)
 	body = new hkpRigidBody(info);		//Create rigid body
 	body->setLinearVelocity(hkVector4(0, 0, 0));
 	info.m_shape->removeReference();
-
-
-	
 }
 
 

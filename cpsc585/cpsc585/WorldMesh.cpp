@@ -50,35 +50,35 @@ void WorldMesh::initialize(IDirect3DDevice9* device)
 	
 	Vertex tmp1[] =
      {
-        { D3DXVECTOR3(-100.0f, -3.0f, 100.0f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 0, 1},    // side 1
-         { D3DXVECTOR3(100.0f, -3.0f, 100.0f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 1, 1},
-         { D3DXVECTOR3(-100.0f, 3.0f, 100.0f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 0, 0},
-         { D3DXVECTOR3(100.0f, 3.0f, 100.0f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 0, 1},
+        { D3DXVECTOR3(-200.0f, -3.0f, 200.0f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 0, 1},    // side 1
+         { D3DXVECTOR3(200.0f, -3.0f, 200.0f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 1, 1},
+         { D3DXVECTOR3(-200.0f, 3.0f, 200.0f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 0, 0},
+         { D3DXVECTOR3(200.0f, 3.0f, 200.0f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 0, 1},
 
-         { D3DXVECTOR3(-100.0f, -3.0f, -100.0f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 0, 1},    // side 2
-         { D3DXVECTOR3(-100.0f, 3.0f, -100.0f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 1, 1},
-         { D3DXVECTOR3(100.0f, -3.0f, -100.0f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 0, 0},
-         { D3DXVECTOR3(100.0f, 3.0f, -100.0f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 0, 1},
+         { D3DXVECTOR3(-200.0f, -3.0f, -200.0f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 0, 1},    // side 2
+         { D3DXVECTOR3(-200.0f, 3.0f, -200.0f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 1, 1},
+         { D3DXVECTOR3(200.0f, -3.0f, -200.0f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 0, 0},
+         { D3DXVECTOR3(200.0f, 3.0f, -200.0f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 0, 1},
 
-         { D3DXVECTOR3(-100.0f, 3.0f, -100.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 0, 4},    // side 3
-         { D3DXVECTOR3(-100.0f, 3.0f, 100.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 4, 4},
-         { D3DXVECTOR3(100.0f, 3.0f, -100.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 0, 0},
-         { D3DXVECTOR3(100.0f, 3.0f, 100.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 0, 4},
+         { D3DXVECTOR3(-200.0f, 3.0f, -200.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 0, 4},    // side 3
+         { D3DXVECTOR3(-200.0f, 3.0f, 200.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 4, 4},
+         { D3DXVECTOR3(200.0f, 3.0f, -200.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 0, 0},
+         { D3DXVECTOR3(200.0f, 3.0f, 200.0f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 0, 4},
 
-         { D3DXVECTOR3(-100.0f, -3.0f, -100.0f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 0, 1},    // side 4
-         { D3DXVECTOR3(100.0f, -3.0f, -100.0f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 1, 1},
-         { D3DXVECTOR3(-100.0f, -3.0f, 100.0f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 0, 0},
-         { D3DXVECTOR3(100.0f, -3.0f, 100.0f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 0, 1},
+         { D3DXVECTOR3(-200.0f, -3.0f, -200.0f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 0, 1},    // side 4
+         { D3DXVECTOR3(200.0f, -3.0f, -200.0f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 1, 1},
+         { D3DXVECTOR3(-200.0f, -3.0f, 200.0f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 0, 0},
+         { D3DXVECTOR3(200.0f, -3.0f, 200.0f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 0, 1},
 
-         { D3DXVECTOR3(100.0f, -3.0f, -100.0f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 0, 1},    // side 5
-         { D3DXVECTOR3(100.0f, 3.0f, -100.0f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 1, 1},
-         { D3DXVECTOR3(100.0f, -3.0f, 100.0f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 0, 0},
-         { D3DXVECTOR3(100.0f, 3.0f, 100.0f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 0, 1},
+         { D3DXVECTOR3(200.0f, -3.0f, -200.0f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 0, 1},    // side 5
+         { D3DXVECTOR3(200.0f, 3.0f, -200.0f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 1, 1},
+         { D3DXVECTOR3(200.0f, -3.0f, 200.0f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 0, 0},
+         { D3DXVECTOR3(200.0f, 3.0f, 200.0f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 0, 1},
 
-         { D3DXVECTOR3(-100.0f, -3.0f, -100.0f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 0, 1},    // side 6
-         { D3DXVECTOR3(-100.0f, -3.0f, 100.0f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 1, 1},
-         { D3DXVECTOR3(-100.0f, 3.0f, -100.0f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 0, 0},
-         { D3DXVECTOR3(-100.0f, 3.0f, 100.0f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 0, 1}
+         { D3DXVECTOR3(-200.0f, -3.0f, -200.0f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 0, 1},    // side 6
+         { D3DXVECTOR3(-200.0f, -3.0f, 200.0f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 1, 1},
+         { D3DXVECTOR3(-200.0f, 3.0f, -200.0f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 0, 0},
+         { D3DXVECTOR3(-200.0f, 3.0f, 200.0f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 0, 1}
      };
 
 	memcpy(vertices, tmp1, sizeof(tmp1));
