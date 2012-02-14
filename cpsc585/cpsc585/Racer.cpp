@@ -392,6 +392,19 @@ void Racer::reset()
 	wheelFR->body->setLinearVelocity(reset);
 	wheelRL->body->setLinearVelocity(reset);
 	wheelRR->body->setLinearVelocity(reset);
+
+	//Reread config file
+	config.loadFile();
+	body->setMass(config.chassisMass);
+	wheelFL->body->setMass(config.frontWheelMass);
+	wheelFR->body->setMass(config.frontWheelMass);
+	wheelRL->body->setMass(config.rearWheelMass);
+	wheelRR->body->setMass(config.rearWheelMass);
+	accelerationScale = config.accelerationScale;
+	rearSpringK = config.kRear;
+	frontSpringK = config.kFront;
+	rearDamperC = config.rearDamping;
+	frontDamperC = config.frontDamping;
 }
 
 
