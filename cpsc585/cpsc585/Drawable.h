@@ -14,7 +14,7 @@
 #include <string>
 
 
-enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL };
+enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT };
 
 class Drawable
 {

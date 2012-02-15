@@ -9,8 +9,11 @@ AI::AI(void)
 
 
 	player = NULL;
+	ai1 = NULL;
+	ai2 = NULL;
+	ai3 = NULL;
+	ai4 = NULL;
 	world = NULL;
-	enemy = NULL;
 }
 
 
@@ -25,13 +28,31 @@ void AI::shutdown()
 		delete player;
 		player = NULL;
 	}
-
-	if (enemy)
+	
+	if (ai1)
 	{
-		delete enemy;
-		enemy = NULL;
+		delete ai1;
+		ai1 = NULL;
+	}
+	
+	if(ai2)
+	{
+		delete ai2;
+		ai2 = NULL;
 	}
 
+	if(ai3)
+	{
+		delete ai3;
+		ai3 = NULL;
+	}
+
+	if(ai4)
+	{
+		delete ai4;
+		ai4 = NULL;
+	}
+	
 	if (world)
 	{
 		delete world;
@@ -53,23 +74,89 @@ void AI::initialize(Renderer* r, Input* i)
 	count = 25;
 	fps = 0;
 
+	// You no longer have to manually add objects to the physics and renderer
+
 	//Initialize physics
 	physics = new Physics();
 	physics->initialize(5);
 
+	//Initialize player
+	player = new Racer(r->getDevice(), renderer, physics, PLAYER);
+	player->setPosAndRot(-40.0f, 5.0f, -40.0f, 0.0f, 0.0f, 0.0f);
 
-	// You no longer have to manually add objects to the physics and renderer
+	//Initialize world
 	world = new World(r->getDevice(), renderer, physics);
 	world->setPosAndRot(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-	player = new Racer(r->getDevice(), renderer, physics, PLAYER);
-	player->setPosAndRot(0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	//Initialize AI-Racers
+	initializeAIRacers();
 
-	enemy = new Racer(r->getDevice(), renderer, physics, AI1);
-	enemy->setPosAndRot(10.0f, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f);
+	//Initialize Waypoints
+	initializeWaypoints();
 
 	// This is how you set an object for the camera to focus on!
 	renderer->setFocus(player->getIndex());
+}
+
+void AI::initializeAIRacers()
+{
+	ai1 = new Racer(renderer->getDevice(), renderer, physics, AI1);
+	ai1->setPosAndRot(-40.0f, 5.0f, -30.0f, 0.0f, 0.0f, 0.0f);
+	aiMind1 = new AIMind(ai1);
+	
+	ai2 = new Racer(renderer->getDevice(), renderer, physics, AI2);
+	ai2->setPosAndRot(15.0f, 5.0f, 15.0f, 0.0f, 0.0f, 0.0f);
+	aiMind2 = new AIMind(ai2);
+
+	ai3 = new Racer(renderer->getDevice(), renderer, physics, AI3);
+	ai3->setPosAndRot(-10.0f, 5.0f, 30.0f, 0.0f, 0.0f, 0.0f);
+	aiMind3 = new AIMind(ai3);
+
+	ai4 = new Racer(renderer->getDevice(), renderer, physics, AI4);
+	ai4->setPosAndRot(10.0f, 5.0f, 30.0f, 0.0f, 0.0f, 0.0f);
+	aiMind4 = new AIMind(ai4);
+	
+	enemies[0] = ai1;
+	enemies[1] = ai2;
+	enemies[2] = ai3;
+	enemies[3] = ai4;
+
+	racerMinds[0] = aiMind1;
+	racerMinds[1] = aiMind2;
+	racerMinds[2] = aiMind3;
+	racerMinds[3] = aiMind4;
+}
+
+void AI::initializeWaypoints()
+{
+	wp1 = new Waypoint(renderer->getDevice());
+	renderer->addDrawable(wp1->drawable);
+	wp1->setPosAndRot(-40.0f, 5.0f, 40.0f, 0.0f, 0.0f, 0.0f);
+
+	wp2 = new Waypoint(renderer->getDevice());
+	renderer->addDrawable(wp2->drawable);
+	wp2->setPosAndRot(40.0f, 5.0f, 40.0f, 0.0f, 0.0f, 0.0f);
+
+	wp3 = new Waypoint(renderer->getDevice());
+	renderer->addDrawable(wp3->drawable);
+	wp3->setPosAndRot(40.0f, 5.0f, -40.0f, 0.0f, 0.0f, 0.0f);
+
+	wp4 = new Waypoint(renderer->getDevice());
+	renderer->addDrawable(wp4->drawable);
+	wp4->setPosAndRot(-40.0f, 5.0f, -40.0f, 0.0f, 0.0f, 0.0f);
+	/*
+	waypoints[0] = wp4;
+	waypoints[1] = wp3;
+	waypoints[2] = wp2;
+	waypoints[3] = wp1;
+	*/
+	
+	waypoints[0] = wp1;
+	waypoints[1] = wp2;
+	waypoints[2] = wp3;
+	waypoints[3] = wp4;
+	
+	currentWaypoint = 0;
 }
 
 void AI::simulate(float seconds)
@@ -78,8 +165,164 @@ void AI::simulate(float seconds)
 	Intention intention = input->getIntention();
 
 	// Debugging Information ---------------------------------------
-	if(input->debugging())
+	if(input->debugging()){
+		displayDebugInfo(intention, seconds * 1000.0f);
+	}
+	else{
+		std::string stringArray[] = {""};
+		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
+	}
+	// ---------------------------------------------------------------
+	
+
+
+	// To manipulate a Racer, you should use the methods Racer::accelerate(float) and Racer::steer(float)
+	// Both inputs should be between -1.0 and 1.0. negative means backward or left, positive is forward or right.
+
+	player->steer(seconds, intention.steering);
+	player->accelerate(seconds, intention.acceleration);
+
+
+
+	for(int i = 0; i < 4; i++){
+		if(!waypoints[enemies[i]->currentWaypoint]->withinWaypoint(&enemies[i]->body->getPosition())){
+			enemies[i]->accelerate(seconds, 1);
+		}
+		else{
+			if(enemies[i]->currentWaypoint == 3){
+				enemies[i]->currentWaypoint = 0;
+			}
+			else{
+				enemies[i]->currentWaypoint += 1;
+			}
+		}
+	}
+
+	//blarg = &ai1->body->getPosition();
+
+
+	/*
+	if(!waypoints[currentWaypoint]->withinWaypoint(blarg)){
+		ai1->accelerate(seconds, 1);
+	}
+	else{
+
+		if(currentWaypoint == 3){
+			currentWaypoint = 0;
+		}
+		else{
+			currentWaypoint += 1;
+		}
+	}
+	*/
+	for(int i = 0; i < 4; i++){
+		hkVector4 A = enemies[i]->drawable->getZhkVector();
+		hkVector4 C = enemies[i]->body->getPosition();
+		hkVector4 B = waypoints[enemies[i]->currentWaypoint]->body->getPosition();
+		B.sub4(C);
+		float Ax = A.getComponent(0); float Ay = A.getComponent(1); float Az = A.getComponent(2);
+		float Bx = B.getComponent(0); float By = B.getComponent(1); float Bz = B.getComponent(2);
+		float AB = Ax*Bx+Ay*By+Az*Bz;
+		float Ad = sqrt(Ax*Ax + Ay*Ay + Az*Az);
+		float Bd = sqrt(Bx*Bx + By*By + Bz*Bz);
+		float angle = acos(AB/(Ad*Bd));
+
+		float sign = B.dot3(enemies[i]->drawable->getXhkVector());
+		/*
+		char buf1[33];
+		_itoa_s(B.dot3(player->drawable->getXhkVector()), buf1, 10);
+		std::string stringArray[] = { std::string("Angle to Current Waypoint: ").append(buf1) };
+		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
+		*/
+
+		if(angle > 0.34906 && sign > 0){
+			enemies[i]->steer(seconds, 1.0f);
+		}
+		else if(angle > 0.34906 && sign < 0){
+			enemies[i]->steer(seconds, -1.0f);
+		}
+	}
+
+
+	player->applySprings(seconds);
+	
+	for(int i = 0; i < 4; i++){
+		enemies[i]->applySprings(seconds);
+	}
+
+	physics->step(seconds);
+	player->update();
+
+	for(int i = 0; i < 4; i++){
+		enemies[i]->update();
+	}
+
+	wp1->update();
+	wp2->update();
+	wp3->update();
+	wp4->update();
+
+	updateHUD(intention);
+
+
+	// Switch focus (A for player, X for AI)
+	if (intention.aPressed)
+		renderer->setFocus(player->getIndex());
+	else if (intention.xPressed)
+		renderer->setFocus(ai1->getIndex());
+
+	// Reset the player (in case you fall over)
+	if (intention.yPressed)
 	{
+		D3DXVECTOR3 pos = player->drawable->getPosition();
+		player->reset();
+	}
+
+
+
+	return;
+}
+
+
+void AI::updateHUD(Intention intention)
+{
+	// Code for updating the speedometer
+
+	// Code for updating the Radial menu
+
+	// Code for updating the checkpoint timer
+}
+
+
+std::string AI::getFPSString(float milliseconds)
+{
+	count++;
+
+	if (count > 20)
+	{
+		fps = (int) floor(1000.0f / milliseconds);
+		count = 0;
+	}
+	
+	char tmp[5];
+
+	_itoa_s(fps, tmp, 5, 10);
+
+	return std::string("FPS: ").append((const char*) tmp);
+}
+
+std::string AI::boolToString(bool boolean)
+{
+	if(boolean == true){
+		return "True";
+	}
+	else {
+		return "False";
+	}
+}
+
+void AI::displayDebugInfo(Intention intention, float seconds)
+{
 		char buf1[33];
 		_itoa_s(intention.rightTrig, buf1, 10);
 		char buf2[33];
@@ -121,81 +364,4 @@ void AI::simulate(float seconds)
 			std::string("Accel. Scale: ").append(buf9)};
 	
 		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
-	}
-	else{
-		std::string stringArray[] = {""};
-		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
-	}
-
-	// ---------------------------------------------------------------
-	
-
-
-	// To manipulate a Racer, you should use the methods Racer::accelerate(float) and Racer::steer(float)
-	// Both inputs should be between -1.0 and 1.0. negative means backward or left, positive is forward or right.
-
-	player->steer(seconds, intention.steering);
-	player->accelerate(seconds, intention.acceleration);
-
-	hkVector4 vel = enemy->body->getLinearVelocity();
-	
-	enemy->steer(seconds, -0.4f);
-
-	if (vel.length3() < 20.0f)
-		enemy->accelerate(seconds, 0.5f);
-	else
-		enemy->accelerate(seconds, -1.0f);
-
-
-	player->applySprings(seconds);
-	enemy->applySprings(seconds);
-
-	physics->step(seconds);
-	player->update();
-	enemy->update();
-
-	// Switch focus (A for player, X for AI)
-	if (intention.aPressed)
-		renderer->setFocus(player->getIndex());
-	else if (intention.xPressed)
-		renderer->setFocus(enemy->getIndex());
-
-	// Reset the player (in case you fall over)
-	if (intention.yPressed)
-	{
-		D3DXVECTOR3 pos = player->drawable->getPosition();
-		player->reset();
-	}
-
-
-
-	return;
-}
-
-
-std::string AI::getFPSString(float milliseconds)
-{
-	count++;
-
-	if (count > 20)
-	{
-		fps = (int) floor(1000.0f / milliseconds);
-		count = 0;
-	}
-	
-	char tmp[5];
-
-	_itoa_s(fps, tmp, 5, 10);
-
-	return std::string("FPS: ").append((const char*) tmp);
-}
-
-std::string AI::boolToString(bool boolean)
-{
-	if(boolean == true){
-		return "True";
-	}
-	else {
-		return "False";
-	}
 }
