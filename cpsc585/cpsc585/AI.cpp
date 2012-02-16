@@ -115,11 +115,6 @@ void AI::initializeAIRacers()
 	ai4 = new Racer(renderer->getDevice(), renderer, physics, AI4);
 	ai4->setPosAndRot(10.0f, 5.0f, 30.0f, 0.0f, 0.0f, 0.0f);
 	aiMind4 = new AIMind(ai4);
-	
-	enemies[0] = ai1;
-	enemies[1] = ai2;
-	enemies[2] = ai3;
-	enemies[3] = ai4;
 
 	racerMinds[0] = aiMind1;
 	racerMinds[1] = aiMind2;
@@ -144,13 +139,7 @@ void AI::initializeWaypoints()
 	wp4 = new Waypoint(renderer->getDevice());
 	renderer->addDrawable(wp4->drawable);
 	wp4->setPosAndRot(-40.0f, 5.0f, -40.0f, 0.0f, 0.0f, 0.0f);
-	/*
-	waypoints[0] = wp4;
-	waypoints[1] = wp3;
-	waypoints[2] = wp2;
-	waypoints[3] = wp1;
-	*/
-	
+
 	waypoints[0] = wp1;
 	waypoints[1] = wp2;
 	waypoints[2] = wp3;
@@ -182,88 +171,18 @@ void AI::simulate(float seconds)
 	player->steer(seconds, intention.steering);
 	player->accelerate(seconds, intention.acceleration);
 
-
-
-	for(int i = 0; i < 4; i++){
-		if(!waypoints[enemies[i]->currentWaypoint]->withinWaypoint(&enemies[i]->body->getPosition())){
-			enemies[i]->accelerate(seconds, 1);
-		}
-		else{
-			if(enemies[i]->currentWaypoint == 3){
-				enemies[i]->currentWaypoint = 0;
-			}
-			else{
-				enemies[i]->currentWaypoint += 1;
-			}
-		}
-	}
-
-	//blarg = &ai1->body->getPosition();
-
-
-	/*
-	if(!waypoints[currentWaypoint]->withinWaypoint(blarg)){
-		ai1->accelerate(seconds, 1);
-	}
-	else{
-
-		if(currentWaypoint == 3){
-			currentWaypoint = 0;
-		}
-		else{
-			currentWaypoint += 1;
-		}
-	}
-	*/
-	for(int i = 0; i < 4; i++){
-		hkVector4 A = enemies[i]->drawable->getZhkVector();
-		hkVector4 C = enemies[i]->body->getPosition();
-		hkVector4 B = waypoints[enemies[i]->currentWaypoint]->body->getPosition();
-		B.sub4(C);
-		float Ax = A.getComponent(0); float Ay = A.getComponent(1); float Az = A.getComponent(2);
-		float Bx = B.getComponent(0); float By = B.getComponent(1); float Bz = B.getComponent(2);
-		float AB = Ax*Bx+Ay*By+Az*Bz;
-		float Ad = sqrt(Ax*Ax + Ay*Ay + Az*Az);
-		float Bd = sqrt(Bx*Bx + By*By + Bz*Bz);
-		float angle = acos(AB/(Ad*Bd));
-
-		float sign = B.dot3(enemies[i]->drawable->getXhkVector());
-		/*
-		char buf1[33];
-		_itoa_s(B.dot3(player->drawable->getXhkVector()), buf1, 10);
-		std::string stringArray[] = { std::string("Angle to Current Waypoint: ").append(buf1) };
-		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
-		*/
-
-		if(angle > 0.34906 && sign > 0){
-			enemies[i]->steer(seconds, 1.0f);
-		}
-		else if(angle > 0.34906 && sign < 0){
-			enemies[i]->steer(seconds, -1.0f);
-		}
-	}
-
-
 	player->applySprings(seconds);
-	
-	for(int i = 0; i < 4; i++){
-		enemies[i]->applySprings(seconds);
-	}
-
-	physics->step(seconds);
 	player->update();
 
 	for(int i = 0; i < 4; i++){
-		enemies[i]->update();
+		racerMinds[i]->update(seconds, waypoints);
+	}
+	
+	for(int i = 0; i < 4; i++){
+		waypoints[i]->update();
 	}
 
-	wp1->update();
-	wp2->update();
-	wp3->update();
-	wp4->update();
-
 	updateHUD(intention);
-
 
 	// Switch focus (A for player, X for AI)
 	if (intention.aPressed)
@@ -278,7 +197,7 @@ void AI::simulate(float seconds)
 		player->reset();
 	}
 
-
+	physics->step(seconds);
 
 	return;
 }

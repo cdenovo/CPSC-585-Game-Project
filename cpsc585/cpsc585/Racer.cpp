@@ -31,9 +31,6 @@ float Racer::frontDamperC = config.frontDamping;
 
 Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerType)
 {
-	// REMEMBER TO REMOVE THIS WAYPOINT CODE:
-	currentWaypoint = 0;
-
 	index = -1;
 
 	currentSteering = 0.0f;

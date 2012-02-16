@@ -38,9 +38,6 @@ public:
 	hkpRigidBody* body;
 	static float accelerationScale;
 
-	// Remeber to take this out!!!!
-	int currentWaypoint;
-
 
 private:
 	int index;
