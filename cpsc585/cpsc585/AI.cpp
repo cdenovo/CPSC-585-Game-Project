@@ -166,7 +166,7 @@ void AI::simulate(float seconds)
 
 	// Debugging Information ---------------------------------------
 	if(input->debugging()){
-		displayDebugInfo(intention, seconds * 1000.0f);
+		displayDebugInfo(intention, seconds);
 	}
 	else{
 		std::string stringArray[] = {""};
