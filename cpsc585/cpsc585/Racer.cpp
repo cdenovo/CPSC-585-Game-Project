@@ -225,7 +225,7 @@ void Racer::update()
 
 			wheelFL->setPosAndRot(intersect.getComponent(0),intersect.getComponent(1),intersect.getComponent(2),0,0,0);
 		}
-		/*if(collectors[1].hasHit())
+		if(collectors[1].hasHit())
 		{
 			hkVector4 intersect;
 			intersect.setInterpolate4(inputs[1].m_from, inputs[1].m_to, collectors[1].getHit().m_hitFraction );
@@ -260,7 +260,7 @@ void Racer::update()
 			intersect.add(wheelRad);
 
 			wheelFL->setPosAndRot(intersect.getComponent(0),intersect.getComponent(1),intersect.getComponent(2),0,0,0);
-		}*/
+		}
 
 		D3DXMATRIX transMat;
 		(body->getTransform()).get4x4ColumnMajor(transMat);
