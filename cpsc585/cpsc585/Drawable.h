@@ -14,7 +14,7 @@
 #include <string>
 
 
-enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL };
+enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT };
 
 class Drawable
 {
@@ -29,6 +29,7 @@ public:
 	D3DXVECTOR3 getYVector();
 	D3DXVECTOR3 getZVector();
 	D3DXVECTOR3 getPosition();
+	hkVector4 gethkPosition();
 
 	hkVector4 getXhkVector();
 	hkVector4 getYhkVector();

@@ -46,6 +46,10 @@ void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevic
 			mesh = RearWheelMesh::getInstance(device);
 			break;
 		}
+	case WAYPOINT:
+		{
+			mesh = RacerMesh::getInstance(device);
+		}
 	default:
 		mesh = NULL;
 	}
@@ -106,6 +110,11 @@ D3DXVECTOR3 Drawable::getZVector()
 D3DXVECTOR3 Drawable::getPosition()
 {
 	return D3DXVECTOR3(transform._41, transform._42, transform._43);
+}
+
+hkVector4 Drawable::gethkPosition()
+{
+	return hkVector4(transform._41, transform._42, transform._43);
 }
 
 hkVector4 Drawable::getXhkVector()

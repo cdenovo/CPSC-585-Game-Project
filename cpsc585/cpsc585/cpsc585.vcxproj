@@ -79,6 +79,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AI.cpp" />
+    <ClCompile Include="AIMind.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="ConfigReader.cpp" />
@@ -98,11 +99,13 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Sound.cpp" />
+    <ClCompile Include="Waypoint.cpp" />
     <ClCompile Include="World.cpp" />
     <ClCompile Include="WorldMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AI.h" />
+    <ClInclude Include="AIMind.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="ConfigReader.h" />
@@ -123,6 +126,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="Sound.h" />
+    <ClInclude Include="Waypoint.h" />
     <ClInclude Include="World.h" />
     <ClInclude Include="WorldMesh.h" />
   </ItemGroup>

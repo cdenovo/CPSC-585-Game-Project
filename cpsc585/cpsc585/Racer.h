@@ -8,7 +8,7 @@
 #include "RearWheel.h"
 #include "ConfigReader.h"
 
-enum RacerType { PLAYER, AI1, AI2, AI3 };
+enum RacerType { PLAYER, AI1, AI2, AI3, AI4 };
 enum WheelType { FRONT, REAR };
 
 class Racer
@@ -38,6 +38,7 @@ public:
 	hkpRigidBody* body;
 	static float accelerationScale;
 
+
 private:
 	int index;
 	FrontWheel* wheelFL;
@@ -45,6 +46,8 @@ private:
 
 	RearWheel* wheelRL;
 	RearWheel* wheelRR;
+
+	Physics* physics;
 
 	float currentSteering;
 

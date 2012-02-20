@@ -3,6 +3,7 @@
 #include "Drawable.h"
 #include "Physics.h"
 
+#define REARWHEELRAD 0.7f
 
 class RearWheel
 {
