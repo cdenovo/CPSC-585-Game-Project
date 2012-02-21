@@ -24,6 +24,8 @@ public:
 	float steeringScale;
 	float torqueScale;
 
+	void loadFile();
+
 private:
 	std::ifstream file;
 

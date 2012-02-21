@@ -47,6 +47,8 @@ private:
 	RearWheel* wheelRL;
 	RearWheel* wheelRR;
 
+	Physics* physics;
+
 	float currentSteering;
 
 

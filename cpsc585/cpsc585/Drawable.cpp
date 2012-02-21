@@ -117,6 +117,11 @@ D3DXVECTOR3 Drawable::getPosition()
 	return D3DXVECTOR3(transform._41, transform._42, transform._43);
 }
 
+hkVector4 Drawable::gethkPosition()
+{
+	return hkVector4(transform._41, transform._42, transform._43);
+}
+
 hkVector4 Drawable::getXhkVector()
 {
 	return hkVector4(transform._11, transform._12, transform._13);

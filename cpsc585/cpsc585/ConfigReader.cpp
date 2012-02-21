@@ -4,20 +4,7 @@
 
 ConfigReader::ConfigReader()
 {
-	file.open("config.txt");
-
-	if(file.is_open())
-	{
-		while(!file.eof())
-		{
-			char line[BUFFERSIZE];
-			file.getline(line,BUFFERSIZE);
-
-			parseLine(line);
-		}
-
-		file.close();
-	}
+	loadFile();
 }
 
 ConfigReader::~ConfigReader()
@@ -86,5 +73,23 @@ void ConfigReader::parseLine(std::string line)
 			ss >> torqueScale; //Convert to float
 		}
 
+	}
+}
+
+void ConfigReader::loadFile()
+{
+	file.open("config.txt");
+
+	if(file.is_open())
+	{
+		while(!file.eof())
+		{
+			char line[BUFFERSIZE];
+			file.getline(line,BUFFERSIZE);
+
+			parseLine(line);
+		}
+
+		file.close();
 	}
 }

@@ -28,6 +28,9 @@ float Racer::frontSpringK = config.kFront;
 float Racer::rearDamperC = config.rearDamping;
 float Racer::frontDamperC = config.frontDamping;
 
+const float FRONTWHEELYCONSTRAINT = 0.5f;
+const float REARWHEELYCONSTRAINT = 0.7f;
+
 
 Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerType)
 {
@@ -48,7 +51,7 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 		drawable = new Drawable(RACER, "bricks.dds", device);
 	}
 
-	
+	physics = p;
 
 
 	// Set up filter group (so the car doesn't collide with the wheels)
@@ -178,6 +181,87 @@ void Racer::update()
 {
 	if (drawable && body)
 	{
+		//Ceate structures for raycast from wheel attach pos to ground
+		hkpWorldRayCastInput inputs[4];
+		hkpClosestRayHitCollector collectors[4];
+		hkpWorldRayCastInput input;
+
+		hkVector4 down = drawable->getYhkVector();
+		down.mul(-1);
+		down.normalize3();
+
+		//Set ray parameters for raycast
+
+		hkVector4 pos = drawable->gethkPosition();
+		hkVector4 attachPos = attachFL;
+		attachPos.add(pos);
+		inputs[0].m_from = attachPos;
+		inputs[0].m_to.setAddMul4(attachPos, down, FRONTWHEELYCONSTRAINT+FRONTWHEELRAD);
+		attachPos = attachFR;
+		attachPos.add(pos);
+		inputs[1].m_from = attachPos;
+		inputs[1].m_to.setAddMul4(attachPos, down, FRONTWHEELYCONSTRAINT+FRONTWHEELRAD);
+		attachPos = attachRL;
+		attachPos.add(pos);
+		inputs[2].m_from = attachPos;
+		inputs[2].m_to.setAddMul4(attachPos, down, REARWHEELYCONSTRAINT+FRONTWHEELRAD);
+		attachPos = attachRR;
+		attachPos.add(pos);
+		inputs[3].m_from = attachPos;
+		inputs[3].m_to.setAddMul4(attachPos, down, REARWHEELYCONSTRAINT+FRONTWHEELRAD);
+
+		hkpWorldRayCaster rayCaster;
+		rayCaster.castRayGroup(*(physics->world)->getBroadPhase(), inputs, 4, physics->world->getCollisionFilter(), collectors, sizeof(collectors[0]) ); 
+
+		if(collectors[0].hasHit())
+		{
+			hkVector4 intersect;
+			intersect.setInterpolate4(inputs[0].m_from, inputs[0].m_to, collectors[0].getHit().m_hitFraction );
+
+			hkVector4 wheelRad = drawable->getYhkVector();
+			wheelRad.normalize3();
+			wheelRad.mul(FRONTWHEELRAD);
+			intersect.add(wheelRad);
+
+			wheelFL->setPosAndRot(intersect.getComponent(0),intersect.getComponent(1),intersect.getComponent(2),0,0,0);
+		}
+		if(collectors[1].hasHit())
+		{
+			hkVector4 intersect;
+			intersect.setInterpolate4(inputs[1].m_from, inputs[1].m_to, collectors[1].getHit().m_hitFraction );
+
+			hkVector4 wheelRad = drawable->getYhkVector();
+			wheelRad.normalize3();
+			wheelRad.mul(FRONTWHEELRAD);
+			intersect.add(wheelRad);
+
+			wheelFL->setPosAndRot(intersect.getComponent(0),intersect.getComponent(1),intersect.getComponent(2),0,0,0);
+		}
+		if(collectors[2].hasHit())
+		{
+			hkVector4 intersect;
+			intersect.setInterpolate4(inputs[2].m_from, inputs[2].m_to, collectors[2].getHit().m_hitFraction );
+
+			hkVector4 wheelRad = drawable->getYhkVector();
+			wheelRad.normalize3();
+			wheelRad.mul(FRONTWHEELRAD);
+			intersect.add(wheelRad);
+
+			wheelFL->setPosAndRot(intersect.getComponent(0),intersect.getComponent(1),intersect.getComponent(2),0,0,0);
+		}
+		if(collectors[3].hasHit())
+		{
+			hkVector4 intersect;
+			intersect.setInterpolate4(inputs[3].m_from, inputs[3].m_to, collectors[3].getHit().m_hitFraction );
+
+			hkVector4 wheelRad = drawable->getYhkVector();
+			wheelRad.normalize3();
+			wheelRad.mul(FRONTWHEELRAD);
+			intersect.add(wheelRad);
+
+			wheelFL->setPosAndRot(intersect.getComponent(0),intersect.getComponent(1),intersect.getComponent(2),0,0,0);
+		}
+
 		D3DXMATRIX transMat;
 		(body->getTransform()).get4x4ColumnMajor(transMat);
 		drawable->setTransform(&transMat);
@@ -246,11 +330,11 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 
 	if (type == FRONT)
 	{
-		kit->setLinearLimit(yID, -0.5f, 0.5f);
+		kit->setLinearLimit(yID, -FRONTWHEELYCONSTRAINT, FRONTWHEELYCONSTRAINT);
 	}
 	else
 	{
-		kit->setLinearLimit(yID, -0.7f, 0.7f);
+		kit->setLinearLimit(yID, -REARWHEELYCONSTRAINT, REARWHEELYCONSTRAINT);
 	}
 
 	kit->end();
@@ -392,6 +476,19 @@ void Racer::reset()
 	wheelFR->body->setLinearVelocity(reset);
 	wheelRL->body->setLinearVelocity(reset);
 	wheelRR->body->setLinearVelocity(reset);
+
+	//Reread config file
+	config.loadFile();
+	body->setMass(config.chassisMass);
+	wheelFL->body->setMass(config.frontWheelMass);
+	wheelFR->body->setMass(config.frontWheelMass);
+	wheelRL->body->setMass(config.rearWheelMass);
+	wheelRR->body->setMass(config.rearWheelMass);
+	accelerationScale = config.accelerationScale;
+	rearSpringK = config.kRear;
+	frontSpringK = config.kFront;
+	rearDamperC = config.rearDamping;
+	frontDamperC = config.frontDamping;
 }
 
 

@@ -39,7 +39,7 @@ void World::setPosAndRot(float posX, float posY, float posZ,
 	hkQuaternion quat;
 	quat.setAxisAngle(hkVector4(1.0f, 0.0f, 0.0f), rotX);
 	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotY));
-	quat.mul(hkQuaternion(hkVector4(0.0f, .0f, 1.0f), rotZ));
+	quat.mul(hkQuaternion(hkVector4(0.0f, 0.0f, 1.0f), rotZ));
 
 	body->setPositionAndRotation(hkVector4(posX, posY, posZ), quat);
 }

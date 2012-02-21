@@ -32,6 +32,11 @@
 #include <Physics/Dynamics/Constraint/Util/hkpConstraintStabilizationUtil.h>
 #include <Physics/Dynamics/Collide/ContactListener/hkpContactListener.h>
 
+#include <Physics/Collide/Query/CastUtil/hkpWorldRayCastInput.h>
+#include <Physics/Collide/Query/CastUtil/hkpWorldRayCastOutput.h>
+#include <Physics/Collide/Query/CastUtil/hkpWorldRayCaster.h>
+#include <Physics/Collide/Query/Collector/RayCollector/hkpClosestRayHitCollector.h>
+
 
 
 static void HK_CALL errorReport(const char* msg, void* userContext);

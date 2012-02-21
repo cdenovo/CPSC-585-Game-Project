@@ -3,6 +3,7 @@
 #include "Drawable.h"
 #include "Physics.h"
 
+#define FRONTWHEELRAD 0.5f
 
 class FrontWheel
 {
