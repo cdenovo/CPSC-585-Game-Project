@@ -12,6 +12,7 @@
 #include "World.h"
 #include "Waypoint.h"
 #include "AIMind.h"
+#include "HUD.h"
 
 
 class AI
@@ -25,7 +26,6 @@ public:
 	void initializeAIRacers();
 	void simulate(float milliseconds);
 	void displayDebugInfo(Intention intention, float milliseconds);
-	void updateHUD(Intention intention);
 	std::string boolToString(bool boolean);
 
 private:
@@ -34,6 +34,7 @@ private:
 	Renderer* renderer;
 	Input* input;
 	Physics* physics;
+	HUD* hud;
 	int count;
 	int fps;
 	int currentWaypoint;

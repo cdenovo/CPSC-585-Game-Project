@@ -6,7 +6,7 @@ AI::AI(void)
 	renderer = NULL;
 	input = NULL;
 	physics = NULL;
-
+	hud = NULL;
 
 	player = NULL;
 	ai1 = NULL;
@@ -65,6 +65,13 @@ void AI::shutdown()
 		delete physics;
 		physics = NULL;
 	}
+
+	if(hud)
+	{
+		//hud->shutdown();
+		delete hud;
+		hud = NULL;
+	}
 }
 
 void AI::initialize(Renderer* r, Input* i)
@@ -79,6 +86,10 @@ void AI::initialize(Renderer* r, Input* i)
 	//Initialize physics
 	physics = new Physics();
 	physics->initialize(5);
+
+	hud = new HUD(r->getDevice(), RADIALMENU);
+	renderer->addDrawable(hud->drawable);
+	hud->setPosAndRot(-40.0f, 10.0f, -30.0f, 0.0f, 0.0f, 0.0f);
 
 	//Initialize player
 	player = new Racer(r->getDevice(), renderer, physics, PLAYER);
@@ -181,8 +192,8 @@ void AI::simulate(float seconds)
 	for(int i = 0; i < 4; i++){
 		waypoints[i]->update();
 	}
-
-	updateHUD(intention);
+	// Update Heads Up Display
+	hud->update(intention);//, renderer->getCameraPosition());
 
 	// Switch focus (A for player, X for AI)
 	if (intention.aPressed)
@@ -200,16 +211,6 @@ void AI::simulate(float seconds)
 	physics->step(seconds);
 
 	return;
-}
-
-
-void AI::updateHUD(Intention intention)
-{
-	// Code for updating the speedometer
-
-	// Code for updating the Radial menu
-
-	// Code for updating the checkpoint timer
 }
 
 

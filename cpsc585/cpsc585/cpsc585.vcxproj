@@ -86,6 +86,7 @@
     <ClCompile Include="Drawable.cpp" />
     <ClCompile Include="FrontWheel.cpp" />
     <ClCompile Include="FrontWheelMesh.cpp" />
+    <ClCompile Include="HUD.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Intention.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -113,6 +114,7 @@
     <ClInclude Include="FrontWheel.h" />
     <ClInclude Include="FrontWheelMesh.h" />
     <ClInclude Include="Havok.h" />
+    <ClInclude Include="HUD.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Intention.h" />
     <ClInclude Include="Main.h" />
