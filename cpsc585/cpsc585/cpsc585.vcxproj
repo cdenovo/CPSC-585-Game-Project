@@ -91,7 +91,6 @@
     <ClCompile Include="Intention.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Racer.cpp" />
     <ClCompile Include="RacerMesh.cpp" />
@@ -101,6 +100,7 @@
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="Waypoint.cpp" />
+    <ClCompile Include="WaypointMesh.cpp" />
     <ClCompile Include="World.cpp" />
     <ClCompile Include="WorldMesh.cpp" />
   </ItemGroup>
@@ -119,7 +119,6 @@
     <ClInclude Include="Intention.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Model.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Racer.h" />
     <ClInclude Include="RacerMesh.h" />
@@ -129,6 +128,7 @@
     <ClInclude Include="Server.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="Waypoint.h" />
+    <ClInclude Include="WaypointMesh.h" />
     <ClInclude Include="World.h" />
     <ClInclude Include="WorldMesh.h" />
   </ItemGroup>

@@ -22,23 +22,23 @@ public:
 	~AI(void);
 	void shutdown();
 	void initialize(Renderer* renderer, Input* input);
-	void initializeWaypoints();
-	void initializeAIRacers();
 	void simulate(float milliseconds);
 	void displayDebugInfo(Intention intention, float milliseconds);
-	std::string boolToString(bool boolean);
 
 private:
 	std::string getFPSString(float milliseconds);
+	void initializeWaypoints();
+	void initializeAIRacers();
+	std::string boolToString(bool boolean);
 
 	Renderer* renderer;
 	Input* input;
 	Physics* physics;
 	HUD* hud;
+
 	int count;
 	int fps;
 	int currentWaypoint;
-	const hkVector4* blarg;
 
 	// Player
 	Racer* player;

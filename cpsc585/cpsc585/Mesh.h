@@ -2,6 +2,8 @@
 
 #include <d3dx9.h>
 #include <string>
+#include <iostream>
+#include <fstream>
 
 class Mesh
 {
@@ -21,9 +23,12 @@ protected:
 	IDirect3DVertexBuffer9* vertexBuffer;
 	IDirect3DIndexBuffer9* indexBuffer;
 
+	void loadMesh(std::string filename);
+
+public:
+	Vertex* vertices;
+	unsigned long* indices;
+
 	int vertexCount;
 	int indexCount;
-
-	void loadMesh(std::string filename);
 };
-

@@ -53,38 +53,25 @@ void ConfigReader::parseLine(std::string line)
 		{
 			ss >> rearDamping; //Convert to float
 		}
-		else if(key == "FRONTRESTLEN")
+		else if(key == "FRONTEXTENTS")
 		{
-			ss >> frontRestLength; //Convert to float
+			ss >> frontExtents; //Convert to float
 		}
-		else if(key == "REARRESTLEN")
+		else if(key == "REAREXTENTS")
 		{
-			ss >> rearRestLength; //Convert to float
+			ss >> rearExtents; //Convert to float
 		}
 		else if(key == "CHASSISMASS")
 		{
 			ss >> chassisMass; //Convert to float
 		}
-		else if(key == "FRONTWHEELMASS")
-		{
-			ss >> frontWheelMass; //Convert to float
-		}
-		else if(key == "REARWHEELMASS")
-		{
-			ss >> rearWheelMass; //Convert to float
-		}
 		else if(key == "ACCELERATIONSCALE")
 		{
 			ss >> accelerationScale; //Convert to float
 		}
-		else if(key == "STEERINGSCALE")
+		else if(key == "SPRINGFORCECAP")
 		{
-			ss >> steeringScale; //Convert to float
+			ss >> springForceCap; //Convert to float
 		}
-		else if(key == "TORQUESCALE")
-		{
-			ss >> torqueScale; //Convert to float
-		}
-
 	}
 }

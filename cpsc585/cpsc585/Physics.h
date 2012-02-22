@@ -31,7 +31,10 @@
 #include <Physics/Dynamics/Constraint/hkpConstraintInstance.h>
 #include <Physics/Dynamics/Constraint/Util/hkpConstraintStabilizationUtil.h>
 #include <Physics/Dynamics/Collide/ContactListener/hkpContactListener.h>
-
+#include <Physics/Collide/Shape/Compound/Tree/Mopp/hkpMoppUtility.h>
+#include <Physics/Collide/Shape/Compound/Tree/Mopp/hkpMoppBvTreeShape.h>
+#include <Physics/Collide/Shape/Compound/Collection/ExtendedMeshShape/hkpExtendedMeshShape.h>
+#include <Physics/Collide/Util/Welding/hkpMeshWeldingUtility.h>
 
 
 static void HK_CALL errorReport(const char* msg, void* userContext);

@@ -282,4 +282,3 @@ void errorPopup(LPCTSTR errorMsg)
 {
 	MessageBox(hwnd, errorMsg, NULL, MB_OK);
 }
-

@@ -1,27 +1,19 @@
 #include "RearWheel.h"
 
 
-RearWheel::RearWheel(IDirect3DDevice9* device, int filter, float mass)
+RearWheel::RearWheel(IDirect3DDevice9* device, int filter)
 {
 	touchingGround = false;
 
 	drawable = new Drawable(REARWHEEL, "tire.dds", device);
 
-	hkVector4 startAxis = hkVector4(-0.4f, 0, 0);
-	hkVector4 endAxis = hkVector4(0.4f, 0, 0);
-	hkReal radius = 0.7f;
-
+	hkVector4 startAxis = hkVector4(-0.2f, 0, 0);
+	hkVector4 endAxis = hkVector4(0.2f, 0, 0);
+	hkReal radius = 0.42f;
 
 	hkpRigidBodyCinfo info;
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);
-	info.m_restitution = 1.0f;
-	info.m_friction = 8.0f;
-	
-	hkReal wheelMass = mass;
-	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL; 
-	hkpMassProperties massProperties;
-	hkpInertiaTensorComputer::computeCylinderVolumeMassProperties(startAxis, endAxis, radius, wheelMass, massProperties);
-	info.setMassProperties(massProperties);
+	info.m_qualityType = HK_COLLIDABLE_QUALITY_MOVING;
 	info.m_collisionFilterInfo = hkpGroupFilter::calcFilterInfo(hkpGroupFilterSetup::LAYER_DYNAMIC, filter);
 	body = new hkpRigidBody(info);		//Create rigid body
 	body->setLinearVelocity(hkVector4(0, 0, 0));
@@ -46,7 +38,7 @@ void RearWheel::setPosAndRot(float posX, float posY, float posZ,
 	hkQuaternion quat;
 	quat.setAxisAngle(hkVector4(1.0f, 0.0f, 0.0f), rotX);
 	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotY));
-	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotZ));
+	quat.mul(hkQuaternion(hkVector4(0.0f, 0.0f, 1.0f), rotZ));
 
 	hkVector4 pos = hkVector4(posX, posY, posZ);
 

@@ -32,7 +32,7 @@ void AIMind::update(float seconds, Waypoint* waypoints[]){
 
 	hkVector4 A = racer->drawable->getZhkVector();
 	hkVector4 C = racer->body->getPosition();
-	hkVector4 B = waypoints[currentWaypoint]->body->getPosition();
+	hkVector4 B = hkVector4(waypoints[currentWaypoint]->wpPosition);
 	B.sub4(C);
 	float Ax = A.getComponent(0); float Ay = A.getComponent(1); float Az = A.getComponent(2);
 	float Bx = B.getComponent(0); float By = B.getComponent(1); float Bz = B.getComponent(2);
@@ -56,7 +56,7 @@ void AIMind::update(float seconds, Waypoint* waypoints[]){
 		racer->steer(seconds, -1.0f);
 	}
 
-	racer->applySprings(seconds);
+	racer->applyForces(seconds);
 	
 	racer->update();
 }

@@ -26,12 +26,15 @@ public:
 	int getIndex();
 	void reset();	// Reset position and set velocity/momentum to 0
 
-	void applySprings(float seconds);	// Call this every frame BEFORE stepping physics!
+	void applyForces(float seconds);	// Call this every frame BEFORE stepping physics!
 
 private:
 	void buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* constraint, WheelType type);
 	hkVector4 getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach, WheelType type);
-
+	void applySprings(float seconds);
+	void applyFriction(float seconds);
+	void applyFrictionToTire(hkVector4* attachPoint, hkpRigidBody* wheelBody,
+		hkVector4* xVector, hkVector4* zVector, float xFrictionForce, float zFrictionForce, float seconds);
 
 public:
 	Drawable* drawable;
@@ -69,6 +72,9 @@ private:
 	static float frontSpringK;
 	static float rearDamperC;
 	static float frontDamperC;
+	static float rearExtents;
+	static float frontExtents;
+	static float springForceCap;
 	
 	static ConfigReader config;
 };

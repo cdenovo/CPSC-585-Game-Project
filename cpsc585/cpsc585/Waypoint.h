@@ -22,6 +22,5 @@ private:
 
 public:
 	Drawable* drawable;
-	hkpRigidBody* body;
+	hkVector4 wpPosition;
 };
-

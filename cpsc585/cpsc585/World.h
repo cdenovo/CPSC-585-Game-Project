@@ -13,11 +13,9 @@ public:
 		float rotX, float rotY, float rotZ);	// In Radians
 
 private:
-
-
+	
 
 public:
 	Drawable* drawable;
 	hkpRigidBody* body;
 };
-

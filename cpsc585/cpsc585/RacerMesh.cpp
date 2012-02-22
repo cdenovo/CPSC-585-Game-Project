@@ -34,83 +34,29 @@ void RacerMesh::render(IDirect3DDevice9* device)
 
 void RacerMesh::initialize(IDirect3DDevice9* device)
 {
-	Vertex* vertices;
-	unsigned long* indices;
+	Vertex* verts;
+	unsigned long* inds;
 
-	vertexCount = 24;
-	indexCount = 36;
-	//vertices = new Vertex[vertexCount];
-	//indices = new unsigned long[indexCount];
+	loadMesh("racer.ese");
 
 	device->CreateVertexBuffer(sizeof(Vertex) * vertexCount, D3DUSAGE_WRITEONLY, D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX2,
 		D3DPOOL_MANAGED, &vertexBuffer, NULL);
 
 
-	vertexBuffer->Lock(0, sizeof(Vertex) * vertexCount, (void**) &vertices, NULL);
+	vertexBuffer->Lock(0, sizeof(Vertex) * vertexCount, (void**) &verts, NULL);
 
-	
-	Vertex tmp1[] =
-     {
-        { D3DXVECTOR3(-1.0f, -0.75f, 2.5f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 0, 1},    // side 1
-         { D3DXVECTOR3(1.0f, -0.75f, 2.5f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 1, 1},
-         { D3DXVECTOR3(-1.0f, 0.75f, 2.5f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 0, 0},
-         { D3DXVECTOR3(1.0f, 0.75f, 2.5f), D3DXVECTOR3(0.0f, 0.0f, 1.0f), 1, 0},
-
-         { D3DXVECTOR3(-1.0f, -0.75f, -2.5f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 0, 1},    // side 2
-         { D3DXVECTOR3(-1.0f, 0.75f, -2.5f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 1, 1},
-         { D3DXVECTOR3(1.0f, -0.75f, -2.5f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 0, 0},
-         { D3DXVECTOR3(1.0f, 0.75f, -2.5f), D3DXVECTOR3(0.0f, 0.0f, -1.0f), 1, 0},
-
-         { D3DXVECTOR3(-1.0f, 0.75f, -2.5f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 0, 1},    // side 3
-         { D3DXVECTOR3(-1.0f, 0.75f, 2.5f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 1, 1},
-         { D3DXVECTOR3(1.0f, 0.75f, -2.5f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 0, 0},
-         { D3DXVECTOR3(1.0f, 0.75f, 2.5f), D3DXVECTOR3(0.0f, 1.0f, 0.0f), 1, 0},
-
-         { D3DXVECTOR3(-1.0f, -0.75f, -2.5f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 0, 1},    // side 4
-         { D3DXVECTOR3(1.0f, -0.75f, -2.5f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 1, 1},
-         { D3DXVECTOR3(-1.0f, -0.75f, 2.5f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 0, 0},
-         { D3DXVECTOR3(1.0f, -0.75f, 2.5f), D3DXVECTOR3(0.0f, -1.0f, 0.0f), 1, 0},
-
-         { D3DXVECTOR3(1.0f, -0.75f, -2.5f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 0, 1},    // side 5
-         { D3DXVECTOR3(1.0f, 0.75f, -2.5f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 1, 1},
-         { D3DXVECTOR3(1.0f, -0.75f, 2.5f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 0, 0},
-         { D3DXVECTOR3(1.0f, 0.75f, 2.5f), D3DXVECTOR3(1.0f, 0.0f, 0.0f), 1, 0},
-
-         { D3DXVECTOR3(-1.0f, -0.75f, -2.5f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 0, 1},    // side 6
-         { D3DXVECTOR3(-1.0f, -0.75f, 2.5f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 1, 1},
-         { D3DXVECTOR3(-1.0f, 0.75f, -2.5f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 0, 0},
-         { D3DXVECTOR3(-1.0f, 0.75f, 2.5f), D3DXVECTOR3(-1.0f, 0.0f, 0.0f), 1, 0}
-     };
-
-	memcpy(vertices, tmp1, sizeof(tmp1));
+	memcpy(verts, vertices, sizeof(Vertex) * vertexCount);
 
 	vertexBuffer->Unlock();
 
 	device->CreateIndexBuffer(sizeof(unsigned long) * indexCount, D3DUSAGE_WRITEONLY, D3DFMT_INDEX32,
 		D3DPOOL_MANAGED, &indexBuffer, NULL);
 
-	indexBuffer->Lock(0, sizeof(unsigned long) * indexCount, (void**) &indices, NULL);
+	indexBuffer->Lock(0, sizeof(unsigned long) * indexCount, (void**) &inds, NULL);
 
-	unsigned long tmp2[] =
-     {
-         0, 1, 2,    // side 1
-         2, 1, 3,
-         4, 5, 6,    // side 2
-         6, 5, 7,
-         8, 9, 10,    // side 3
-         10, 9, 11,
-         12, 13, 14,    // side 4
-         14, 13, 15,
-         16, 17, 18,    // side 5
-         18, 17, 19,
-         20, 21, 22,    // side 6
-         22, 21, 23,
-     };
-
-	memcpy(indices, tmp2, sizeof(tmp2));
+	memcpy(inds, indices, sizeof(unsigned long) * indexCount);
 
 	indexBuffer->Unlock();
-	
 
 	return;
 }

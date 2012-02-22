@@ -13,16 +13,13 @@ public:
 
 	float kFront;
 	float kRear;
-	float frontRestLength;
-	float rearRestLength;
+	float frontExtents;
+	float rearExtents;
 	float frontDamping;
 	float rearDamping;
 	float chassisMass;
-	float frontWheelMass;
-	float rearWheelMass;
 	float accelerationScale;
-	float steeringScale;
-	float torqueScale;
+	float springForceCap;
 
 private:
 	std::ifstream file;

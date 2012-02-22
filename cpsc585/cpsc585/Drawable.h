@@ -10,6 +10,7 @@
 #include "WorldMesh.h"
 #include "FrontWheelMesh.h"
 #include "RearWheelMesh.h"
+#include "WaypointMesh.h"
 
 #include <string>
 
@@ -41,9 +42,9 @@ private:
 
 
 public:
+	Mesh* mesh;
 
 private:
-	Mesh* mesh;
 	D3DXMATRIX transform;
 	IDirect3DTexture9* texture;
 };

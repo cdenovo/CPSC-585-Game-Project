@@ -7,6 +7,7 @@ public:
 	static WorldMesh* getInstance(IDirect3DDevice9* device);
 	~WorldMesh(void);
 	void render(IDirect3DDevice9* device);
+
 protected:
 	WorldMesh(IDirect3DDevice9* device);
 

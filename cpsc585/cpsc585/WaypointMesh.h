@@ -1,15 +1,15 @@
 #pragma once
 #include "Mesh.h"
-class RacerMesh :
+class WaypointMesh :
 	public Mesh
 {
 public:
-	static RacerMesh* getInstance(IDirect3DDevice9* device);
-	~RacerMesh(void);
+	static WaypointMesh* getInstance(IDirect3DDevice9* device);
+	~WaypointMesh(void);
 	void render(IDirect3DDevice9* device);
 
 protected:
-	RacerMesh(IDirect3DDevice9* device);
+	WaypointMesh(IDirect3DDevice9* device);
 
 private:
 	void initialize(IDirect3DDevice9* device);
@@ -18,5 +18,5 @@ private:
 public:
 
 private:
-	static RacerMesh* mesh;
+	static WaypointMesh* mesh;
 };

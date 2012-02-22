@@ -35,4 +35,3 @@ private:
 	SOCKET clientSocks[MAXCLIENTS];
 	int numClients;
 };
-

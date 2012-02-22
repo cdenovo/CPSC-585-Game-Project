@@ -1,29 +1,29 @@
-#include "WorldMesh.h"
+#include "WaypointMesh.h"
 
-WorldMesh* WorldMesh::mesh = NULL;
+WaypointMesh* WaypointMesh::mesh = NULL;
 
-WorldMesh* WorldMesh::getInstance(IDirect3DDevice9* device)
+WaypointMesh* WaypointMesh::getInstance(IDirect3DDevice9* device)
 {
 	if (mesh == NULL)
 	{
-		mesh = new WorldMesh(device);
+		mesh = new WaypointMesh(device);
 	}
 
 	return mesh;
 }
 
 
-WorldMesh::WorldMesh(IDirect3DDevice9* device)
+WaypointMesh::WaypointMesh(IDirect3DDevice9* device)
 {
 	initialize(device);
 }
 
 
-WorldMesh::~WorldMesh(void)
+WaypointMesh::~WaypointMesh(void)
 {
 }
 
-void WorldMesh::render(IDirect3DDevice9* device)
+void WaypointMesh::render(IDirect3DDevice9* device)
 {
 	device->SetStreamSource(0, vertexBuffer, 0, sizeof(Vertex));
 	device->SetFVF(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX2);
@@ -32,12 +32,12 @@ void WorldMesh::render(IDirect3DDevice9* device)
 }
 
 
-void WorldMesh::initialize(IDirect3DDevice9* device)
+void WaypointMesh::initialize(IDirect3DDevice9* device)
 {
 	Vertex* verts;
 	unsigned long* inds;
 
-	loadMesh("world.ese");
+	loadMesh("waypoint.ese");
 
 	device->CreateVertexBuffer(sizeof(Vertex) * vertexCount, D3DUSAGE_WRITEONLY, D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX2,
 		D3DPOOL_MANAGED, &vertexBuffer, NULL);

@@ -7,6 +7,7 @@ public:
 	static FrontWheelMesh* getInstance(IDirect3DDevice9* device);
 	~FrontWheelMesh(void);
 	void render(IDirect3DDevice9* device);
+
 protected:
 	FrontWheelMesh(IDirect3DDevice9* device);
 
@@ -19,4 +20,3 @@ public:
 private:
 	static FrontWheelMesh* mesh;
 };
-

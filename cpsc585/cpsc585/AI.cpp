@@ -87,9 +87,11 @@ void AI::initialize(Renderer* r, Input* i)
 	physics = new Physics();
 	physics->initialize(5);
 
+	
 	hud = new HUD(r->getDevice(), RADIALMENU);
 	renderer->addDrawable(hud->drawable);
 	hud->setPosAndRot(-40.0f, 10.0f, -30.0f, 0.0f, 0.0f, 0.0f);
+	
 
 	//Initialize player
 	player = new Racer(r->getDevice(), renderer, physics, PLAYER);
@@ -131,6 +133,11 @@ void AI::initializeAIRacers()
 	racerMinds[1] = aiMind2;
 	racerMinds[2] = aiMind3;
 	racerMinds[3] = aiMind4;
+
+	enemies[0] = ai1;
+	enemies[1] = ai2;
+	enemies[2] = ai3;
+	enemies[3] = ai4;
 }
 
 void AI::initializeWaypoints()
@@ -182,8 +189,7 @@ void AI::simulate(float seconds)
 	player->steer(seconds, intention.steering);
 	player->accelerate(seconds, intention.acceleration);
 
-	player->applySprings(seconds);
-	player->update();
+	player->applyForces(seconds);
 
 	for(int i = 0; i < 4; i++){
 		racerMinds[i]->update(seconds, waypoints);
@@ -209,6 +215,8 @@ void AI::simulate(float seconds)
 	}
 
 	physics->step(seconds);
+
+	player->update();
 
 	return;
 }
