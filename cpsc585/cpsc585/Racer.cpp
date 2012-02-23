@@ -53,7 +53,7 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 		drawable = new Drawable(RACER, "racer2.dds", device);
 		break;
 	default:
-		drawable = new Drawable(RACER, "bricks.dds", device);
+		drawable = new Drawable(RACER, "racer2.dds", device);
 	}
 
 
