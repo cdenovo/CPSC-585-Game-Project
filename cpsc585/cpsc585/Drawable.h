@@ -36,6 +36,7 @@ public:
 	hkVector4 getXhkVector();
 	hkVector4 getYhkVector();
 	hkVector4 getZhkVector();
+	hkVector4 gethkPosition();
 
 private:
 	void initialize(MeshType type, std::string textureName, IDirect3DDevice9* device);

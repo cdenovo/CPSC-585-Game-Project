@@ -2,6 +2,9 @@
 
 #include <stdlib.h>
 #include <math.h>
+#include <process.h>
+#include <Windows.h>
+#include <stdio.h>
 
 #include "Renderer.h"
 #include "Input.h"
@@ -13,6 +16,8 @@
 #include "Waypoint.h"
 #include "AIMind.h"
 #include "HUD.h"
+#include "Server.h"
+#include "Client.h"
 
 
 class AI
@@ -30,6 +35,10 @@ private:
 	void initializeWaypoints();
 	void initializeAIRacers();
 	std::string boolToString(bool boolean);
+
+	//Networking functions
+	static unsigned __stdcall staticGetIP(void * pThis);
+	void getIP();
 
 	Renderer* renderer;
 	Input* input;
@@ -66,4 +75,10 @@ private:
 	Waypoint* wp2;
 	Waypoint* wp3;
 	Waypoint* wp4;
+
+	//Networking
+	std::string hostName;
+	HANDLE   hth1;
+	Server server;
+	Client client;
 };

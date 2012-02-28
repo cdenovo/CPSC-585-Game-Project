@@ -1,6 +1,5 @@
 #include "AI.h"
 
-
 AI::AI(void)
 {
 	renderer = NULL;
@@ -14,6 +13,8 @@ AI::AI(void)
 	ai3 = NULL;
 	ai4 = NULL;
 	world = NULL;
+
+	hostName = "";
 }
 
 
@@ -72,6 +73,10 @@ void AI::shutdown()
 		delete hud;
 		hud = NULL;
 	}
+
+	//Clean up networking stuff
+	CloseHandle( hth1 ); //Close the handle to the thread that finds the IP address
+	WSACleanup();
 }
 
 void AI::initialize(Renderer* r, Input* i)
@@ -109,6 +114,16 @@ void AI::initialize(Renderer* r, Input* i)
 
 	// This is how you set an object for the camera to focus on!
 	renderer->setFocus(player->getIndex());
+
+	//Initialize winsock
+	WSAData wsaData;
+	if (WSAStartup(MAKEWORD(1, 1), &wsaData) != 0) {
+		//return 255;
+	}
+
+	server.setupWSA();
+	server.setupTCPSocket(); //for game lobby
+	server.setupUDPSocket();
 }
 
 void AI::initializeAIRacers()
@@ -166,6 +181,50 @@ void AI::initializeWaypoints()
 	currentWaypoint = 0;
 }
 
+unsigned __stdcall AI::staticGetIP(void * pThis)
+{
+    AI * pthX = (AI*)pThis;   // the tricky cast
+    pthX->getIP();           // now call the true entry-point-function
+
+    // A thread terminates automatically if it completes execution,
+    // or it can terminate itself with a call to _endthread().
+
+    return 1;          // the thread exit code
+}
+
+void AI::getIP()
+{
+    // This is the desired entry-point-function but to get
+    // here we have to use a 2 step procedure involving
+    // the ThreadStaticEntryPoint() function.
+	//Get IP address
+	char ac[80];
+	in_addr addr;
+	std::stringstream ss;
+	if (gethostname(ac, sizeof(ac)) == SOCKET_ERROR)
+	{
+		ss << "Error " << WSAGetLastError() <<
+				" when getting local host name.";
+	}
+	else
+	{
+		struct hostent *phe = gethostbyname(ac);
+		if (phe == 0)
+		{
+			ss << "Bad host lookup.";
+		}
+		else
+		{
+			memcpy(&addr, phe->h_addr_list[0], sizeof(struct in_addr));
+		}
+	}
+	if(ss.str().length() == 0)
+	{
+		ss << "Your IP address is " << inet_ntoa(addr) << ".";
+	}
+	hostName = ss.str();
+}
+
 void AI::simulate(float seconds)
 {
 	_ASSERT(seconds > 0.0f);
@@ -175,14 +234,67 @@ void AI::simulate(float seconds)
 	if(input->debugging()){
 		displayDebugInfo(intention, seconds);
 	}
-	else{
+	else if(input->networking())
+	{
+		if(input->isServer())
+		{
+			if(hostName == "")
+			{
+				unsigned  uiThread1ID;
+
+				hth1 = (HANDLE)_beginthreadex( NULL,         // security
+                                   0,            // stack size
+                                   AI::staticGetIP,  // entry-point-function
+                                   this,           // arg list holding the "this" pointer
+                                   0,  // so we can later call ResumeThread()
+                                   &uiThread1ID );
+
+				hth1 = hth1;
+			}
+			else if(!server.gameStarted)
+			{
+				server.lobbyListen();
+			}
+			else
+			{
+				server.raceListen();
+			}
+			std::string stringArray[] = {"You are a server.",hostName};
+			renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
+		}
+		else if(input->isClient())
+		{
+			std::string readyStatus = "";
+
+			if(!client.start)
+			{
+				if(!client.isReady)
+				{
+					readyStatus = "Press the right bumper when you are ready.";
+				}
+				else
+				{
+					readyStatus = "Ready. Waiting for game to start.";
+				}
+			}
+
+			std::string stringArray[] = {"You are a client.",readyStatus};
+			renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
+		}
+		else
+		{
+			std::string stringArray[] = {"Press 'C' to become a client, or 'V' to become a server."};
+			renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
+		}
+	}
+	else
+	{
 		std::string stringArray[] = {""};
 		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
 	}
 	// ---------------------------------------------------------------
 	
-
-
+	
 	// To manipulate a Racer, you should use the methods Racer::accelerate(float) and Racer::steer(float)
 	// Both inputs should be between -1.0 and 1.0. negative means backward or left, positive is forward or right.
 

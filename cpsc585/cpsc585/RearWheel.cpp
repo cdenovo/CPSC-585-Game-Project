@@ -9,7 +9,7 @@ RearWheel::RearWheel(IDirect3DDevice9* device, int filter)
 
 	hkVector4 startAxis = hkVector4(-0.2f, 0, 0);
 	hkVector4 endAxis = hkVector4(0.2f, 0, 0);
-	hkReal radius = 0.42f;
+	hkReal radius = REARWHEELRAD;
 
 	hkpRigidBodyCinfo info;
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);

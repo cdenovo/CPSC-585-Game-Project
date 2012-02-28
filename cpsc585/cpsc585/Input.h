@@ -16,9 +16,15 @@ public:
 	bool update();
 	Intention getIntention();
 	bool debugging();
+	bool networking();
+	bool isServer();
+	bool isClient();
 
 private:
 	bool quit;
+	bool network;
+	bool client;
+	bool server;
 	bool debug;
 	Intention intention;
 	bool controllerAvailable;

@@ -119,6 +119,7 @@
     <ClInclude Include="Intention.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="NetworkInfo.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Racer.h" />
     <ClInclude Include="RacerMesh.h" />

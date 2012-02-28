@@ -170,5 +170,8 @@
     <ClInclude Include="WaypointMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NetworkInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

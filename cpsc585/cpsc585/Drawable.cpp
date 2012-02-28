@@ -132,3 +132,8 @@ hkVector4 Drawable::getZhkVector()
 {
 	return hkVector4(transform._31, transform._32, transform._33);
 }
+
+hkVector4 Drawable::gethkPosition()
+{
+	return hkVector4(transform._41, transform._42, transform._43);
+}

@@ -33,8 +33,11 @@ private:
 	hkVector4 getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach, WheelType type);
 	void applySprings(float seconds);
 	void applyFriction(float seconds);
+	void applyCounterSpin(float seconds);
 	void applyFrictionToTire(hkVector4* attachPoint, hkpRigidBody* wheelBody,
 		hkVector4* xVector, hkVector4* zVector, float xFrictionForce, float zFrictionForce, float seconds);
+
+	void raycastWheels();
 
 public:
 	Drawable* drawable;
@@ -52,6 +55,7 @@ private:
 
 	float currentSteering;
 
+	Physics *physics;
 
 	// Static elements that are common between all Racers
 	static int xID;

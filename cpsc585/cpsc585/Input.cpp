@@ -5,6 +5,9 @@ Input::Input(void)
 {
 	quit = false;
 	debug = false;
+	network = false;
+	client = false;
+	server = false;
 
 	XINPUT_CAPABILITIES cap;
 	
@@ -32,73 +35,111 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 {
 	if ((umessage == WM_KEYDOWN) && (wparam == 'Q'))
 		quit = true;
-	else if ((umessage == WM_KEYDOWN) && (wparam == 'D'))
+	else if ((umessage == WM_KEYDOWN) && (wparam == 'B'))
+	{
 		debug = !debug;
+		network = false;
+	}
+	else if ((umessage == WM_KEYDOWN) && (wparam == 'N'))
+	{
+		debug = false;
+		network = !network;
+	}
+	else if ((umessage == WM_KEYDOWN) && (wparam == 'C') && network && !server)
+		client = true;
+	else if ((umessage == WM_KEYDOWN) && (wparam == 'V') && network && !client)
+		server = true;
 	else
 	{
-		// Process input
 		if (umessage == WM_KEYDOWN)
 		{
-			switch (wparam)
+			// Process input
+			if((wparam == 'A'))
 			{
-			case VK_UP:
+				intention.leftStick = -25000;
+			}
+			else if(wparam == 'D')
+			{
+				intention.leftStick = 25000;
+			}
+			else
+			{
+				switch (wparam)
 				{
-					intention.rightStickY = 25000;
-					break;
-				}
-			case VK_DOWN:
-				{
-					intention.rightStickY = -25000;
-					break;
-				}
-			case VK_LEFT:
-				{
-					intention.rightStickX = -25000;
-					break;
-				}
-			case VK_RIGHT:
-				{
-					intention.rightStickX = 25000;
-					break;
-				}
-			case VK_SPACE:
-				{
-					intention.rightTrig = 255;
-					break;
+				case VK_UP:
+					{
+						intention.rightStickY = 25000;
+						break;
+					}
+				case VK_DOWN:
+					{
+						intention.rightStickY = -25000;
+						break;
+					}
+				case VK_LEFT:
+					{
+						intention.rightStickX = -25000;
+						break;
+					}
+				case VK_RIGHT:
+					{
+						intention.rightStickX = 25000;
+						break;
+					}
+				case VK_SPACE:
+					{
+						intention.rightTrig = 255;
+						break;
+					}
 				}
 			}
 		}
 		else if (umessage == WM_KEYUP)
 		{
-			switch (wparam)
+			// Process input
+			if((wparam == 'A'))
 			{
-			case VK_UP:
+				intention.leftStick = 0;
+			}
+			else if(wparam == 'D')
+			{
+				intention.leftStick = 0;
+			}
+			else
+			{
+				switch (wparam)
 				{
-					intention.rightStickY = 0;
-					break;
-				}
-			case VK_DOWN:
-				{
-					intention.rightStickY = 0;
-					break;
-				}
-			case VK_LEFT:
-				{
-					intention.rightStickX = 0;
-					break;
-				}
-			case VK_RIGHT:
-				{
-					intention.rightStickX = 0;
-					break;
-				}
-			case VK_SPACE:
-				{
-					intention.rightTrig = 0;
-					break;
+				case VK_UP:
+					{
+						intention.rightStickY = 0;
+						break;
+					}
+				case VK_DOWN:
+					{
+						intention.rightStickY = 0;
+						break;
+					}
+				case VK_LEFT:
+					{
+						intention.rightStickX = 0;
+						break;
+					}
+				case VK_RIGHT:
+					{
+						intention.rightStickX = 0;
+						break;
+					}
+				case VK_SPACE:
+					{
+						intention.rightTrig = 0;
+						break;
+					}
 				}
 			}
 		}
+		// Compute acceleration and steering (between -1.0 and 1.0)
+		intention.acceleration = (intention.rightTrig - intention.leftTrig) / (float) (255 - XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
+		intention.steering = intention.leftStick / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
 	}
 	return;
 }
@@ -240,4 +281,19 @@ Intention Input::getIntention()
 bool Input::debugging()
 {
 	return debug;
+}
+
+bool Input::networking()
+{
+	return network;
+}
+
+bool Input::isClient()
+{
+	return client;
+}
+
+bool Input::isServer()
+{
+	return server;
 }

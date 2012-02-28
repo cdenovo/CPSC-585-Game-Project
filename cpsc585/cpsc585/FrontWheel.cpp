@@ -9,7 +9,7 @@ FrontWheel::FrontWheel(IDirect3DDevice9* device, int filter)
 
 	hkVector4 startAxis = hkVector4(-0.15f, 0, 0);
 	hkVector4 endAxis = hkVector4(0.15f, 0, 0);
-	hkReal radius = 0.35f;
+	hkReal radius = FRONTWHEELRAD;
 
 	hkpRigidBodyCinfo info;
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);
