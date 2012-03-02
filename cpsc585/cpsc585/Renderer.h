@@ -10,6 +10,7 @@
 
 #include "Camera.h"
 #include "Drawable.h"
+#include "HUD.h"
 
 
 class Renderer
@@ -24,6 +25,7 @@ public:
 	int addDrawable(Drawable* drawable);
 	void setFocus(int drawableIndex);
 	IDirect3DDevice9* getDevice();
+	HUD* getHUD();
 	
 private:
 	void writeText(std::string text, int line);
@@ -45,4 +47,6 @@ private:
 	int numDrawables;
 	int currentDrawable;
 	Drawable** drawables;
+
+	HUD* hud;
 };

@@ -19,7 +19,7 @@ AIMind::~AIMind(void)
 
 void AIMind::update(float seconds, Waypoint* waypoints[]){
 	if(!waypoints[currentWaypoint]->withinWaypoint(&racer->body->getPosition())){
-			racer->accelerate(seconds, 0.8);
+			racer->accelerate(seconds, 0.8f);
 		}
 		else{
 			if(currentWaypoint == 3){

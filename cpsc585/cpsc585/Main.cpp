@@ -271,9 +271,6 @@ bool mainLoop()
 
 	prevTime = currentTime;
 
-	if (quit)
-		ai->shutdown();
-
 	return quit;
 }
 

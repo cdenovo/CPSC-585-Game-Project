@@ -65,13 +65,6 @@ void AI::shutdown()
 		delete physics;
 		physics = NULL;
 	}
-
-	if(hud)
-	{
-		//hud->shutdown();
-		delete hud;
-		hud = NULL;
-	}
 }
 
 void AI::initialize(Renderer* r, Input* i)
@@ -88,11 +81,8 @@ void AI::initialize(Renderer* r, Input* i)
 	physics->initialize(5);
 
 	
-	hud = new HUD(r->getDevice(), RADIALMENU);
-	renderer->addDrawable(hud->drawable);
-	hud->setPosAndRot(-40.0f, 10.0f, -30.0f, 0.0f, 0.0f, 0.0f);
+	hud = renderer->getHUD();
 	
-
 	//Initialize player
 	player = new Racer(r->getDevice(), renderer, physics, PLAYER);
 	player->setPosAndRot(-40.0f, 5.0f, -40.0f, 0.0f, 0.0f, 0.0f);
@@ -198,8 +188,9 @@ void AI::simulate(float seconds)
 	for(int i = 0; i < 4; i++){
 		waypoints[i]->update();
 	}
+
 	// Update Heads Up Display
-	hud->update(intention);//, renderer->getCameraPosition());
+	hud->update(intention);
 
 	// Switch focus (A for player, X for AI)
 	if (intention.aPressed)

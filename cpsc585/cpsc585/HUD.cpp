@@ -5,78 +5,179 @@ HUD::~HUD(void)
 {
 }
 
-HUD::HUD(IDirect3DDevice9* _device, HUDType hudType)
+HUD::HUD()
 {
-	device = _device;
-	selectedAbilityIndex = 1;
+	radialEnabled = false;
+	selectedAbility = LASER;
+	sprite = NULL;
+	radialMenuTexture = NULL;
 
-	laserTexture = NULL; speedTexture = NULL; leftTexture = NULL; rightTexture = NULL;
-	std::string laser = "LaserSelected.dds";
-	std::string speed = "SpeedSelected.dds";
-	std::string left = "LeftSelected.dds";
-	std::string right = "RightSelected.dds";
-	D3DXCreateTextureFromFile(device, laser.c_str(), &laserTexture);
-	D3DXCreateTextureFromFile(device, speed.c_str(), &speedTexture);
-	D3DXCreateTextureFromFile(device, left.c_str(), &leftTexture);
-	D3DXCreateTextureFromFile(device, right.c_str(), &rightTexture);
+	laserRect = new RECT();
+	speedRect = new RECT();
+	leftRect = new RECT();
+	rightRect = new RECT();
 
-	
-	switch (hudType)
+	laserRect->top = 0;
+	laserRect->bottom = 300;
+	laserRect->right = 300;
+	laserRect->left = 0;
+
+	speedRect->top = 0;
+	speedRect->bottom = 300;
+	speedRect->right = 600;
+	speedRect->left = 300;
+
+	leftRect->top = 300;
+	leftRect->bottom = 600;
+	leftRect->right = 300;
+	leftRect->left = 0;
+
+	rightRect->top = 300;
+	rightRect->bottom = 600;
+	rightRect->right = 600;
+	rightRect->left = 300;
+
+	currentRect = laserRect;
+
+
+	radialPos = new D3DXVECTOR3();
+	radialPos->x = 50.0f;
+	radialPos->y = 20.0f;
+	radialPos->z = 0.0f;
+}
+
+void HUD::initialize(IDirect3DDevice9* device)
+{
+	D3DXCreateTextureFromFile(device, "radialMenu.dds", &radialMenuTexture);
+	D3DXCreateSprite(device, &sprite);
+}
+
+void HUD::shutdown()
+{
+	currentRect = NULL;
+
+	if (radialPos)
 	{
-	case RADIALMENU:
-		drawable = new Drawable(RACER, "LaserSelected.dds", device);
+		delete radialPos;
+		radialPos = NULL;
+	}
+
+	if (laserRect)
+	{
+		delete laserRect;
+		laserRect = NULL;
+	}
+
+	if (speedRect)
+	{
+		delete speedRect;
+		speedRect = NULL;
+	}
+
+	if (leftRect)
+	{
+		delete leftRect;
+		leftRect = NULL;
+	}
+
+	if (rightRect)
+	{
+		delete rightRect;
+		rightRect = NULL;
+	}
+
+	if (radialMenuTexture)
+	{
+		radialMenuTexture->Release();
+		radialMenuTexture = NULL;
+	}
+
+	if (sprite)
+	{
+		sprite->Release();
+		sprite = NULL;
+	}
+}
+
+
+void HUD::showRadial(bool enabled)
+{
+	radialEnabled = enabled;
+}
+
+void HUD::setSelectedAbility(AbilityType ability)
+{
+	selectedAbility = ability;
+
+	switch (ability)
+	{
+	case LASER:
+		currentRect = laserRect;
 		break;
-	case SPEEDOMETER:
-		drawable = new Drawable(RACER, "LaserSelected.dds", device);
+	case SPEED:
+		currentRect = speedRect;
+		break;
+	case LEFT:
+		currentRect = leftRect;
+		break;
+	case RIGHT:
+		currentRect = rightRect;
 		break;
 	default:
-		drawable = new Drawable(RACER, "LaserSelected.dds", device);
+		currentRect = laserRect;
 	}
-	
-}
-
-void HUD::setPosAndRot(float posX, float posY, float posZ,
-		float rotX, float rotY, float rotZ)	// In Radians
-{
-	drawable->setPosAndRot(posX, posY, posZ,
-		rotX, rotY, rotZ);
-
-	hkQuaternion quat;
-	quat.setAxisAngle(hkVector4(1.0f, 0.0f, 0.0f), rotX);
-	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotY));
-	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotZ));
-}
-
-void HUD::setSelectedAbility(int index)
-{
-	selectedAbilityIndex = index;
 }
 
 void HUD::update(Intention intention)//, D3DXVECTOR3 cameraPosition)
 {
-	//D3DXVECTOR3 camPos = cameraPosition;
-	//setPosAndRot(camPos.x, camPos.y, camPos.z+5.0f, 0.0f, 3*3.141592f, 2*3.141592f);
-
 	// Code for updating the speedometer
 
 	// Code for updating the Radial menu
-	if(intention.rightStickY > 0 && intention.rightStickX > -20000 && intention.rightStickX < 20000){ // UP
-		drawable->changeTexture(laserTexture);
-	}
+	if (intention.lbumpPressed)
+	{
+		radialEnabled = true;
 
-	else if(intention.rightStickY < 0 && intention.rightStickX > -20000 && intention.rightStickX < 20000){ // DOWN
-		drawable->changeTexture(speedTexture);
+		if(intention.rightStickY > 0 && intention.rightStickX > -20000 && intention.rightStickX < 20000){ // UP
+			setSelectedAbility(LASER);
+		}
+		else if(intention.rightStickY < 0 && intention.rightStickX > -20000 && intention.rightStickX < 20000){ // DOWN
+			setSelectedAbility(SPEED);
+		}
+		else if(intention.rightStickX > 0 && intention.rightStickY < 10000 && intention.rightStickY > -10000){ // RIGHT
+			setSelectedAbility(RIGHT);
+		}
+		else if(intention.rightStickX < 0 && intention.rightStickY < 10000 && intention.rightStickY > -10000){ //LEFT
+			setSelectedAbility(LEFT);
+		}
 	}
-
-	else if(intention.rightStickX > 0 && intention.rightStickY < 10000 && intention.rightStickY > -10000){ // RIGHT
-		drawable->changeTexture(rightTexture);
+	else
+	{
+		radialEnabled = false;
 	}
-
-	else if(intention.rightStickX < 0 && intention.rightStickY < 10000 && intention.rightStickY > -10000){ //LEFT
-		drawable->changeTexture(leftTexture);
-	}
+	
 
 
 	// Code for updating the checkpoint timer
 
+}
+
+
+void HUD::render()
+{
+	sprite->Begin(D3DXSPRITE_ALPHABLEND);
+
+	// Draw speedometer
+
+
+	// Draw radial menu
+	if (radialEnabled)
+	{
+		sprite->Draw(radialMenuTexture, currentRect, NULL, radialPos, 0xFFFFFFFF);
+	}
+
+
+	// Draw checkpoint timer
+
+
+	sprite->End();
 }

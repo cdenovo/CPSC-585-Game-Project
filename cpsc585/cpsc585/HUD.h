@@ -2,27 +2,35 @@
 #include "Intention.h"
 #include "Drawable.h"
 
-enum HUDType { RADIALMENU, SPEEDOMETER };
+enum AbilityType { LASER, SPEED, LEFT, RIGHT };
 
 class HUD
 {
 public:
-	HUD(IDirect3DDevice9* _device, HUDType hudType);
+	HUD();
 	~HUD(void);
-	void setPosAndRot(float posX, float posY, float posZ,
-		float rotX, float rotY, float rotZ);	// In Radians
-	void setSelectedAbility(int index);
-	void update(Intention intention);//, D3DXVECTOR3 cameraPosition);
-
-	Drawable* drawable;
-	hkpRigidBody* body;
+	void initialize(IDirect3DDevice9* device);
+	void setSelectedAbility(AbilityType ability);
+	void update(Intention intention);
+	void render();
+	void shutdown();
 
 private:
-	int selectedAbilityIndex;
-	IDirect3DDevice9* device;
-	IDirect3DTexture9* laserTexture;
-	IDirect3DTexture9* speedTexture;
-	IDirect3DTexture9* leftTexture;
-	IDirect3DTexture9* rightTexture;
+	void showRadial(bool enabled);
+
+	AbilityType selectedAbility;
+	ID3DXSprite* sprite;
+	IDirect3DTexture9* radialMenuTexture;
+
+	RECT* laserRect;
+	RECT* speedRect;
+	RECT* leftRect;
+	RECT* rightRect;
+	
+	RECT* currentRect;
+
+	D3DXVECTOR3* radialPos;
+
+	bool radialEnabled;
 };
 
