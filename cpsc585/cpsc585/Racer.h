@@ -8,7 +8,7 @@
 #include "RearWheel.h"
 #include "ConfigReader.h"
 
-enum RacerType { PLAYER, AI1, AI2, AI3, AI4 };
+enum RacerType { RACER1, RACER2, RACER3, RACER4, RACER5, RACER6, RACER7, RACER8 };
 enum WheelType { FRONT, REAR };
 
 class Racer

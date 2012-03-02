@@ -14,17 +14,6 @@ hkVector4 Racer::attachFR = hkVector4(0.8f, -0.6f, 1.5f);
 hkVector4 Racer::attachRL = hkVector4(-0.8f, -0.53f, -1.2f);
 hkVector4 Racer::attachRR = hkVector4(0.8f, -0.53f, -1.2f);
 
-/*hkReal Racer::chassisMass = 1500.0f;
-float Racer::accelerationScale = 25.0f;
-float Racer::frontSpringK = 75000.0f;
-float Racer::rearSpringK = 75000.0f;
-float Racer::frontDamperC = 8000.0f;
-float Racer::rearDamperC = 8000.0f;
-
-float Racer::frontExtents = 0.35f;
-float Racer::rearExtents = 0.42f;
-float Racer::springForceCap = 320000.0f;*/
-
 hkReal Racer::chassisMass = config.chassisMass;
 float Racer::accelerationScale = config.accelerationScale;
 float Racer::frontSpringK = config.kFront;
@@ -46,10 +35,10 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 
 	switch (racerType)
 	{
-	case PLAYER:
+	case RACER1:
 		drawable = new Drawable(RACER, "racer1.dds", device);
 		break;
-	case AI1:
+	case RACER2:
 		drawable = new Drawable(RACER, "racer2.dds", device);
 		break;
 	default:
@@ -64,7 +53,7 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 	hkVector4 halfExtent(0.9f, 0.7f, 2.3f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL;
-	info.m_centerOfMass = hkVector4(0.0f, -0.4f, -1.2f);	// move CM a bit
+	info.m_centerOfMass = hkVector4(0.0f, -0.4f, 0.0f);	// lower CM a bit
 	info.m_restitution = 0.1f;
 	hkpMassProperties massProperties;
 	hkpInertiaTensorComputer::computeBoxVolumeMassProperties(halfExtent, chassisMass, massProperties);

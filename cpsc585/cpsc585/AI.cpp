@@ -84,7 +84,7 @@ void AI::initialize(Renderer* r, Input* i)
 	hud = renderer->getHUD();
 	
 	//Initialize player
-	player = new Racer(r->getDevice(), renderer, physics, PLAYER);
+	player = new Racer(r->getDevice(), renderer, physics, RACER1);
 	player->setPosAndRot(-40.0f, 5.0f, -40.0f, 0.0f, 0.0f, 0.0f);
 
 	//Initialize world
@@ -103,19 +103,19 @@ void AI::initialize(Renderer* r, Input* i)
 
 void AI::initializeAIRacers()
 {
-	ai1 = new Racer(renderer->getDevice(), renderer, physics, AI1);
+	ai1 = new Racer(renderer->getDevice(), renderer, physics, RACER2);
 	ai1->setPosAndRot(-40.0f, 5.0f, -30.0f, 0.0f, 0.0f, 0.0f);
 	aiMind1 = new AIMind(ai1);
 	
-	ai2 = new Racer(renderer->getDevice(), renderer, physics, AI2);
+	ai2 = new Racer(renderer->getDevice(), renderer, physics, RACER3);
 	ai2->setPosAndRot(15.0f, 5.0f, 15.0f, 0.0f, 0.0f, 0.0f);
 	aiMind2 = new AIMind(ai2);
 
-	ai3 = new Racer(renderer->getDevice(), renderer, physics, AI3);
+	ai3 = new Racer(renderer->getDevice(), renderer, physics, RACER4);
 	ai3->setPosAndRot(-10.0f, 5.0f, 30.0f, 0.0f, 0.0f, 0.0f);
 	aiMind3 = new AIMind(ai3);
 
-	ai4 = new Racer(renderer->getDevice(), renderer, physics, AI4);
+	ai4 = new Racer(renderer->getDevice(), renderer, physics, RACER5);
 	ai4->setPosAndRot(10.0f, 5.0f, 30.0f, 0.0f, 0.0f, 0.0f);
 	aiMind4 = new AIMind(ai4);
 
