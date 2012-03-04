@@ -28,7 +28,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 
 	drawables = new Drawable*[numToDraw];
 	
-	hud = new HUD();
+	hud = new HUD(width, height);
 
 	d3dObject = Direct3DCreate9(D3D_SDK_VERSION);
 	

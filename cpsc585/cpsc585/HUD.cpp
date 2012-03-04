@@ -5,12 +5,13 @@ HUD::~HUD(void)
 {
 }
 
-HUD::HUD()
+HUD::HUD(int width, int height)
 {
 	radialEnabled = false;
 	selectedAbility = LASER;
 	sprite = NULL;
 	radialMenuTexture = NULL;
+	reticuleTexture = NULL;
 
 	laserRect = new RECT();
 	speedRect = new RECT();
@@ -44,11 +45,17 @@ HUD::HUD()
 	radialPos->x = 50.0f;
 	radialPos->y = 20.0f;
 	radialPos->z = 0.0f;
+
+	centre = new D3DXVECTOR3();
+	centre->x = width / 2.0f;
+	centre->y = height / 2.0f;
+	centre->z = 0.0f;
 }
 
 void HUD::initialize(IDirect3DDevice9* device)
 {
 	D3DXCreateTextureFromFile(device, "radialMenu.dds", &radialMenuTexture);
+	D3DXCreateTextureFromFile(device, "reticule.dds", &reticuleTexture);
 	D3DXCreateSprite(device, &sprite);
 }
 
@@ -60,6 +67,12 @@ void HUD::shutdown()
 	{
 		delete radialPos;
 		radialPos = NULL;
+	}
+
+	if (centre)
+	{
+		delete centre;
+		centre = NULL;
 	}
 
 	if (laserRect)
@@ -90,6 +103,12 @@ void HUD::shutdown()
 	{
 		radialMenuTexture->Release();
 		radialMenuTexture = NULL;
+	}
+
+	if (reticuleTexture)
+	{
+		reticuleTexture->Release();
+		reticuleTexture = NULL;
 	}
 
 	if (sprite)
@@ -166,8 +185,11 @@ void HUD::render()
 {
 	sprite->Begin(D3DXSPRITE_ALPHABLEND);
 
-	// Draw speedometer
+	// Draw reticule
+	sprite->Draw(reticuleTexture, NULL, &(D3DXVECTOR3(16,16,0)), centre, D3DXCOLOR(1.0f, 0.0f, 0.0f, 0.4f));
 
+	// Draw speedometer
+	
 
 	// Draw radial menu
 	if (radialEnabled)
@@ -177,7 +199,6 @@ void HUD::render()
 
 
 	// Draw checkpoint timer
-
 
 	sprite->End();
 }

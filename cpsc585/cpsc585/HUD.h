@@ -7,7 +7,7 @@ enum AbilityType { LASER, SPEED, LEFT, RIGHT };
 class HUD
 {
 public:
-	HUD();
+	HUD(int width, int height);
 	~HUD(void);
 	void initialize(IDirect3DDevice9* device);
 	void setSelectedAbility(AbilityType ability);
@@ -21,6 +21,7 @@ private:
 	AbilityType selectedAbility;
 	ID3DXSprite* sprite;
 	IDirect3DTexture9* radialMenuTexture;
+	IDirect3DTexture9* reticuleTexture;
 
 	RECT* laserRect;
 	RECT* speedRect;
@@ -30,6 +31,7 @@ private:
 	RECT* currentRect;
 
 	D3DXVECTOR3* radialPos;
+	D3DXVECTOR3* centre;
 
 	bool radialEnabled;
 };
