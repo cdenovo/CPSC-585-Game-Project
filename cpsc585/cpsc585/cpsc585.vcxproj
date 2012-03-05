@@ -89,6 +89,7 @@
     <ClCompile Include="HUD.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Intention.cpp" />
+    <ClCompile Include="LaserModel.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Physics.cpp" />
@@ -117,6 +118,7 @@
     <ClInclude Include="HUD.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Intention.h" />
+    <ClInclude Include="LaserModel.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Physics.h" />

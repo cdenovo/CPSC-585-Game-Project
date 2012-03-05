@@ -13,6 +13,7 @@ hkVector4 Racer::attachFL = hkVector4(-0.8f, -0.7f, 1.5f);
 hkVector4 Racer::attachFR = hkVector4(0.8f, -0.7f, 1.5f);
 hkVector4 Racer::attachRL = hkVector4(-0.8f, -0.67f, -1.2f);
 hkVector4 Racer::attachRR = hkVector4(0.8f, -0.67f, -1.2f);
+hkVector4 Racer::attachLaser = hkVector4(0.0f, 0.1f, 1.8f);
 
 hkReal Racer::chassisMass = config.chassisMass;
 float Racer::accelerationScale = config.accelerationScale;
@@ -28,6 +29,14 @@ float Racer::springForceCap = config.springForceCap;
 
 Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerType)
 {
+	laserDraw = new Drawable(LASERMODEL, "laser.dds", device);
+	r->addDrawable(laserDraw);
+
+	health = 100;
+	kills = 0;
+	laserTime = 5.0f;
+	laserReady = true;
+
 	index = -1;
 
 	currentSteering = 0.0f;
@@ -160,9 +169,30 @@ void Racer::update()
 {
 	if (drawable && body)
 	{
+		hkpPropertyValue val;
+		val = body->getProperty(0);
+
+		if (val.getPtr() != NULL)
+		{
+			giveDamage((Racer*) val.getPtr(), 50);
+			val.setPtr(NULL);
+			body->setProperty(0, val);
+		}
+
+		if ((laserReady) || (laserTime < 4.0f))
+		{
+			((LaserModel*)(laserDraw->mesh))->drawLaser = false;
+		}
+		else
+		{
+			((LaserModel*)(laserDraw->mesh))->drawLaser = true;
+		}
+
 		D3DXMATRIX transMat;
 		(body->getTransform()).get4x4ColumnMajor(transMat);
 		drawable->setTransform(&transMat);
+		laserDraw->setTransform(&transMat);
+		
 		
 		// Now update wheels
 		(wheelRL->body->getTransform()).get4x4ColumnMajor(transMat);
@@ -484,6 +514,17 @@ void Racer::applyForces(float seconds)
 	applyFriction(seconds);
 	applyTireRaycast();
 	applySprings(seconds);
+
+	if (!laserReady)
+	{
+		laserTime -= seconds;
+
+		if (laserTime < 0.0f)
+		{
+			laserTime = 5.0f;
+			laserReady = true;
+		}
+	}
 }
 
 
@@ -704,12 +745,12 @@ void Racer::applyFrictionToTire(hkVector4* attachPoint, hkpRigidBody* wheelBody,
 
 	float dot = velocity.dot3(xForce);
 
-	if (dot > 0.2f)
+	if (dot > 0.25f)
 	{
 		xForce.mul(xFrictionForce);
 		body->applyForce(seconds, xForce, point);
 	}
-	else if (dot < -0.2f)
+	else if (dot < -0.25f)
 	{
 		xForce.mul(-xFrictionForce);
 		body->applyForce(seconds, xForce, point);
@@ -725,12 +766,12 @@ void Racer::applyFrictionToTire(hkVector4* attachPoint, hkpRigidBody* wheelBody,
 		
 	dot = velocity.dot3(zForce);
 
-	if (dot > 0.2f)
+	if (dot > 0.25f)
 	{
 		zForce.mul(zFrictionForce);
 		body->applyForce(seconds, zForce, point);
 	}
-	else if (dot < -0.2f)
+	else if (dot < -0.25f)
 	{
 		zForce.mul(-zFrictionForce);
 		body->applyForce(seconds, zForce, point);
@@ -739,5 +780,71 @@ void Racer::applyFrictionToTire(hkVector4* attachPoint, hkpRigidBody* wheelBody,
 	{
 		zForce.mul(zFrictionForce * dot);
 		body->applyForce(seconds, zForce, point);
+	}
+}
+
+void Racer::fireLaser()
+{
+	if (!laserReady)
+		return;
+	else
+	{
+		laserReady = false;
+	}
+
+	hkpWorldRayCastInput input;
+	hkpWorldRayCastOutput output;
+	hkVector4 from;
+	hkVector4 to;
+	hkVector4 raycastDir = drawable->getZhkVector();
+	hkTransform transform = body->getTransform();
+
+
+	// Raycast
+	input = hkpWorldRayCastInput();
+	output = hkpWorldRayCastOutput();
+	
+	from.setTransformedPos(transform, attachLaser);
+	to = hkVector4(raycastDir);
+	to.mul(20.0f);	// Laser length
+	to.add3clobberW(from);
+
+	input.m_from = hkVector4(from);
+	input.m_to = hkVector4(to);
+
+	physicsWorld->castRay(input, output);
+
+	if (output.hasHit())
+	{
+		hkpRigidBody* hitBody = (hkpRigidBody*) output.m_rootCollidable->getOwner();
+		hkpPropertyValue val;
+		val.setPtr(this);
+		
+		hitBody->setProperty(0, val);
+	}
+}
+
+void Racer::respawn()
+{
+	hkVector4 deathPos = body->getPosition();
+	hkQuaternion deathRot = body->getRotation();
+
+	reset();
+
+	deathPos(1) += 5.0f;
+	body->setPositionAndRotation(deathPos, deathRot);
+
+	//update();
+}
+
+void Racer::giveDamage(Racer* attacker, int damage)
+{
+	health -= damage;
+
+	if (health <= 0)
+	{
+		health = 100;
+		respawn();
+		attacker->kills += 1;
 	}
 }

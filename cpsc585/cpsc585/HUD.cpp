@@ -202,3 +202,9 @@ void HUD::render()
 
 	sprite->End();
 }
+
+
+AbilityType HUD::getSelectedAbility()
+{
+	return selectedAbility;
+}

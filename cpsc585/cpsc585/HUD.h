@@ -11,6 +11,7 @@ public:
 	~HUD(void);
 	void initialize(IDirect3DDevice9* device);
 	void setSelectedAbility(AbilityType ability);
+	AbilityType getSelectedAbility();
 	void update(Intention intention);
 	void render();
 	void shutdown();

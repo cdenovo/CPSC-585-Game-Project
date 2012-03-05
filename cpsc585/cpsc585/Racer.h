@@ -7,6 +7,7 @@
 #include "FrontWheel.h"
 #include "RearWheel.h"
 #include "ConfigReader.h"
+#include "LaserModel.h"
 
 enum RacerType { RACER1, RACER2, RACER3, RACER4, RACER5, RACER6, RACER7, RACER8 };
 enum WheelType { FRONT, REAR };
@@ -28,6 +29,9 @@ public:
 
 	void applyForces(float seconds);	// Call this every frame BEFORE stepping physics!
 
+	void fireLaser();
+	void giveDamage(Racer* attacker, int damage);
+
 private:
 	void buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* constraint, WheelType type);
 	hkVector4 getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach, WheelType type);
@@ -36,14 +40,21 @@ private:
 	void applyFrictionToTire(hkVector4* attachPoint, hkpRigidBody* wheelBody,
 		hkVector4* xVector, hkVector4* zVector, float xFrictionForce, float zFrictionForce, float seconds);
 	void applyTireRaycast();
+	void respawn();
 
 public:
 	Drawable* drawable;
 	hkpRigidBody* body;
 	static float accelerationScale;
+	bool laserReady;
 
+	int health;
+	int kills;
+	float laserTime;
 
 private:
+	Drawable* laserDraw;
+
 	int index;
 	FrontWheel* wheelFL;
 	FrontWheel* wheelFR;
@@ -67,6 +78,7 @@ private:
 	static hkVector4 attachFR;
 	static hkVector4 attachRL;
 	static hkVector4 attachRR;
+	static hkVector4 attachLaser;
 
 	static hkReal chassisMass;
 

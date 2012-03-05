@@ -231,8 +231,6 @@ void Renderer::render()
 
 	device->BeginScene();
 
-	
-
 	for (int i = 0; i < currentDrawable; i++)
 	{
 		drawables[i]->render(device);

@@ -205,6 +205,11 @@ void AI::simulate(float seconds)
 		player->reset();
 	}
 
+	if ((hud->getSelectedAbility() == LASER) && (intention.rightTrig > 0.0f))
+	{
+		player->fireLaser();
+	}
+
 	physics->step(seconds);
 
 	player->update();
@@ -264,6 +269,9 @@ void AI::displayDebugInfo(Intention intention, float seconds)
 
 		char buf9[33];
 		_itoa_s((int) (Racer::accelerationScale), buf9, 10);
+
+		char buf10[33];
+		_itoa_s((int) (player->kills), buf10, 10);
 		
 		std::string stringArray[] = { getFPSString(seconds * 1000.0f), 
 			"X: " + boolToString(intention.xPressed),
@@ -280,7 +288,8 @@ void AI::displayDebugInfo(Intention intention, float seconds)
 			std::string("Acceleration: ").append(buf6),
 			std::string("Steering: ").append(buf7),
 			std::string("Velocity: ").append(buf8),
-			std::string("Accel. Scale: ").append(buf9)};
+			std::string("Accel. Scale: ").append(buf9),
+			std::string("Kills: ").append(buf10)};
 	
 		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
 }
