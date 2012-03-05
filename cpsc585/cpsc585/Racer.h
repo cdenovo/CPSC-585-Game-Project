@@ -35,6 +35,7 @@ private:
 	void applyFriction(float seconds);
 	void applyFrictionToTire(hkVector4* attachPoint, hkpRigidBody* wheelBody,
 		hkVector4* xVector, hkVector4* zVector, float xFrictionForce, float zFrictionForce, float seconds);
+	void applyTireRaycast();
 
 public:
 	Drawable* drawable;
@@ -52,6 +53,7 @@ private:
 
 	float currentSteering;
 
+	hkpWorld* physicsWorld;
 
 	// Static elements that are common between all Racers
 	static int xID;
@@ -77,14 +79,4 @@ private:
 	static float springForceCap;
 	
 	static ConfigReader config;
-};
-
-class WheelListener : public hkpContactListener
-{
-public:
-	void collisionAddedCallback(const hkpCollisionEvent& ev);
-	void collisionRemovedCallback(const hkpCollisionEvent& ev);
-
-	WheelListener(bool* touchingGround);
-	bool* touching;
 };

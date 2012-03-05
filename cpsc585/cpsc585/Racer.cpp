@@ -9,10 +9,10 @@ ConfigReader Racer::config = ConfigReader();
 hkVector4 Racer::xAxis = hkVector4(1.0f, 0.0f, 0.0f);
 hkVector4 Racer::yAxis = hkVector4(0.0f, 1.0f, 0.0f);
 hkVector4 Racer::zAxis = hkVector4(0.0f, 0.0f, 1.0f);
-hkVector4 Racer::attachFL = hkVector4(-0.8f, -0.6f, 1.5f);
-hkVector4 Racer::attachFR = hkVector4(0.8f, -0.6f, 1.5f);
-hkVector4 Racer::attachRL = hkVector4(-0.8f, -0.53f, -1.2f);
-hkVector4 Racer::attachRR = hkVector4(0.8f, -0.53f, -1.2f);
+hkVector4 Racer::attachFL = hkVector4(-0.8f, -0.7f, 1.5f);
+hkVector4 Racer::attachFR = hkVector4(0.8f, -0.7f, 1.5f);
+hkVector4 Racer::attachRL = hkVector4(-0.8f, -0.67f, -1.2f);
+hkVector4 Racer::attachRR = hkVector4(0.8f, -0.67f, -1.2f);
 
 hkReal Racer::chassisMass = config.chassisMass;
 float Racer::accelerationScale = config.accelerationScale;
@@ -31,6 +31,8 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 	index = -1;
 
 	currentSteering = 0.0f;
+
+	physicsWorld = p->world;
 
 
 	switch (racerType)
@@ -53,7 +55,7 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 	hkVector4 halfExtent(0.9f, 0.7f, 2.3f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL;
-	info.m_centerOfMass = hkVector4(0.0f, -0.4f, 0.0f);	// lower CM a bit
+	info.m_centerOfMass = hkVector4(0.0f, -0.7f, 0.0f);	// lower CM a bit
 	info.m_restitution = 0.1f;
 	hkpMassProperties massProperties;
 	hkpInertiaTensorComputer::computeBoxVolumeMassProperties(halfExtent, chassisMass, massProperties);
@@ -71,34 +73,21 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 	wheelFL = new FrontWheel(device, collisionGroupFilter);
 	r->addDrawable(wheelFL->drawable);
 	p->addRigidBody(wheelFL->body);
-	
-	WheelListener* listenFL = new WheelListener(&(wheelFL->touchingGround));
-	wheelFL->body->addContactListener(listenFL);
 
 	
 	wheelFR = new FrontWheel(device, collisionGroupFilter);
 	r->addDrawable(wheelFR->drawable);
 	p->addRigidBody(wheelFR->body);
 
-	WheelListener* listenFR = new WheelListener(&(wheelFR->touchingGround));
-	wheelFL->body->addContactListener(listenFR);
-	
-
 
 	wheelRL = new RearWheel(device, collisionGroupFilter);
 	r->addDrawable(wheelRL->drawable);
 	p->addRigidBody(wheelRL->body);
 
-	WheelListener* listenRL = new WheelListener(&(wheelRL->touchingGround));
-	wheelFL->body->addContactListener(listenRL);
-
 
 	wheelRR = new RearWheel(device, collisionGroupFilter);
 	r->addDrawable(wheelRR->drawable);
 	p->addRigidBody(wheelRR->body);
-	
-	WheelListener* listenRR = new WheelListener(&(wheelRR->touchingGround));
-	wheelFL->body->addContactListener(listenRR);
 
 	// Now constrain the tires
 	hkpGenericConstraintData* constraint;
@@ -235,16 +224,15 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 	kit->constrainLinearDof(xID);
 	kit->constrainLinearDof(zID);
 	
-	//kit->constrainToAngularDof(xID);
 	kit->constrainAllAngularDof();
 
 	if (type == FRONT)
 	{
-		kit->setLinearLimit(yID, -0.15f, 0.35f);
+		kit->setLinearLimit(yID, -frontExtents, frontExtents);
 	}
 	else
 	{
-		kit->setLinearLimit(yID, -0.15f, 0.42f);
+		kit->setLinearLimit(yID, -rearExtents, rearExtents);
 	}
 
 	kit->end();
@@ -315,28 +303,6 @@ void Racer::accelerate(float seconds, float value)
 void Racer::steer(float seconds, float value)
 {
 	currentSteering = value;
-	/*
-	D3DXMATRIX transMat;
-	(wheelFL->body->getTransform()).get4x4ColumnMajor(transMat);
-
-		D3DXMATRIX rot1, rot2, trans1;
-		D3DXVECTOR3 scale, trans;
-		D3DXQUATERNION rot;
-		
-		D3DXMatrixDecompose(&scale, &rot, &trans, &transMat);
-		
-		D3DXMatrixRotationQuaternion(&rot1, &rot);
-		D3DXMatrixRotationAxis(&rot2, &(drawable->getYVector()), currentSteering * 1.11f);
-		D3DXMatrixTranslation(&trans1, trans.x, trans.y, trans.z);
-		
-		D3DXMatrixMultiply(&transMat, &rot1, &rot2);
-		D3DXMatrixMultiply(&transMat, &transMat, &trans1);
-
-		hkTransform transform;
-		transform.set4x4ColumnMajor(transMat);
-		wheelFL->body->setTransform(transform);
-		*/
-
 	
 	if (!(wheelFL->touchingGround) && !(wheelFR->touchingGround))
 		return;
@@ -393,6 +359,12 @@ void Racer::reset()
 	wheelFR->body->setLinearVelocity(reset);
 	wheelRL->body->setLinearVelocity(reset);
 	wheelRR->body->setLinearVelocity(reset);
+
+	body->setAngularVelocity(reset);
+	wheelFL->body->setAngularVelocity(reset);
+	wheelFR->body->setAngularVelocity(reset);
+	wheelRL->body->setAngularVelocity(reset);
+	wheelRR->body->setAngularVelocity(reset);
 }
 
 
@@ -509,15 +481,187 @@ hkVector4 Racer::getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach,
 
 void Racer::applyForces(float seconds)
 {
-	applySprings(seconds);
 	applyFriction(seconds);
+	applyTireRaycast();
+	applySprings(seconds);
 }
 
+
+// Raycasts tires and adjusts their positions
+void Racer::applyTireRaycast()
+{
+	hkpWorldRayCastInput input;
+	hkpWorldRayCastOutput output;
+	hkVector4 from;
+	hkVector4 to;
+	hkVector4 raycastDir = drawable->getYhkVector();
+	raycastDir.mul(-1);
+	hkTransform transform = body->getTransform();
+
+
+	// Raycast and reposition each tire
+	input = hkpWorldRayCastInput();
+	output = hkpWorldRayCastOutput();
+
+	// FRONT LEFT TIRE
+	from.setTransformedPos(transform, attachFL);
+	to = hkVector4(raycastDir);
+	to.mul(frontExtents + 0.35f);
+	to.add3clobberW(from);
+
+	input.m_from = hkVector4(from);
+	input.m_to = hkVector4(to);
+
+	physicsWorld->castRay(input, output);
+
+	if (output.hasHit())
+	{
+		wheelFL->touchingGround = true;
+		to.sub3clobberW(from);
+		to.mul(output.m_hitFraction);
+		raycastDir.mul(-0.35f);
+
+		to.add3clobberW(from);
+		to.add3clobberW(raycastDir);
+
+		wheelFL->body->setPosition(to);
+	}
+	else
+	{
+		wheelFL->touchingGround = false;
+		to.sub3clobberW(from);
+		raycastDir.mul(-0.35f);
+
+		to.add3clobberW(from);
+		to.add3clobberW(raycastDir);
+
+		wheelFL->body->setPosition(to);
+	}
+
+	input = hkpWorldRayCastInput();
+	output = hkpWorldRayCastOutput();
+
+	raycastDir = drawable->getYhkVector();
+	raycastDir.mul(-1);
+
+	// FRONT RIGHT TIRE
+	from.setTransformedPos(transform, attachFR);
+	to = hkVector4(raycastDir);
+	to.mul(frontExtents + 0.35f);
+	to.add3clobberW(from);
+
+	input.m_from = hkVector4(from);
+	input.m_to = hkVector4(to);
+
+	physicsWorld->castRay(input, output);
+
+	if (output.hasHit())
+	{
+		wheelFR->touchingGround = true;
+		to.sub3clobberW(from);
+		to.mul(output.m_hitFraction);
+		raycastDir.mul(-0.35f);
+
+		to.add3clobberW(from);
+		to.add3clobberW(raycastDir);
+
+		wheelFR->body->setPosition(to);
+	}
+	else
+	{
+		wheelFR->touchingGround = false;
+		to.sub3clobberW(from);
+		raycastDir.mul(-0.35f);
+
+		to.add3clobberW(from);
+		to.add3clobberW(raycastDir);
+
+		wheelFR->body->setPosition(to);
+	}
+
+	input = hkpWorldRayCastInput();
+	output = hkpWorldRayCastOutput();
+
+	raycastDir = drawable->getYhkVector();
+	raycastDir.mul(-1);
+
+	// REAR LEFT TIRE
+	from.setTransformedPos(transform, attachRL);
+	to = hkVector4(raycastDir);
+	to.mul(rearExtents + 0.42f);
+	to.add3clobberW(from);
+
+	input.m_from = hkVector4(from);
+	input.m_to = hkVector4(to);
+
+	physicsWorld->castRay(input, output);
+
+	if (output.hasHit())
+	{
+		wheelRL->touchingGround = true;
+		to.sub3clobberW(from);
+		to.mul(output.m_hitFraction);
+		raycastDir.mul(-0.42f);
+
+		to.add3clobberW(from);
+		to.add3clobberW(raycastDir);
+
+		wheelRL->body->setPosition(to);
+	}
+	else
+	{
+		wheelRL->touchingGround = false;
+		raycastDir.mul(-0.42f);
+		
+		to.add3clobberW(raycastDir);
+
+		wheelRL->body->setPosition(to);
+	}
+
+	input = hkpWorldRayCastInput();
+	output = hkpWorldRayCastOutput();
+
+	raycastDir = drawable->getYhkVector();
+	raycastDir.mul(-1);
+
+	// REAR RIGHT TIRE
+	from.setTransformedPos(transform, attachRR);
+	to = hkVector4(raycastDir);
+	to.mul(rearExtents + 0.42f);
+	to.add3clobberW(from);
+
+	input.m_from = hkVector4(from);
+	input.m_to = hkVector4(to);
+
+	physicsWorld->castRay(input, output);
+
+	if (output.hasHit())
+	{
+		wheelRR->touchingGround = true;
+		to.sub3clobberW(from);
+		to.mul(output.m_hitFraction);
+		raycastDir.mul(-0.42f);
+
+		to.add3clobberW(from);
+		to.add3clobberW(raycastDir);
+
+		wheelRR->body->setPosition(to);
+	}
+	else
+	{
+		wheelRR->touchingGround = false;
+		raycastDir.mul(-0.42f);
+		
+		to.add3clobberW(raycastDir);
+
+		wheelRR->body->setPosition(to);
+	}
+}
 
 
 void Racer::applyFriction(float seconds)
 {
-	float xFrictionForce = 3.0f * 20 * -chassisMass / 4.0f;
+	float xFrictionForce = 3.5f * 20 * -chassisMass / 4.0f;
 	float zFrictionForce = 1.5f * 20 * -chassisMass / 4.0f;
 
 	hkVector4 point;
@@ -557,58 +701,43 @@ void Racer::applyFrictionToTire(hkVector4* attachPoint, hkpRigidBody* wheelBody,
 	velocity = wheelBody->getLinearVelocity();
 
 	xForce = hkVector4(*xVector);
-	float xThreshold = 0.3f;
-	float zThreshold = 0.3f;
 
 	float dot = velocity.dot3(xForce);
 
-	if (dot < -xThreshold)
-	{
-		xForce.mul(-xFrictionForce);
-		
-		body->applyForce(seconds, xForce, point);
-	}
-	else if (dot > xThreshold)
+	if (dot > 0.2f)
 	{
 		xForce.mul(xFrictionForce);
 		body->applyForce(seconds, xForce, point);
 	}
+	else if (dot < -0.2f)
+	{
+		xForce.mul(-xFrictionForce);
+		body->applyForce(seconds, xForce, point);
+	}
+	else
+	{
+		xForce.mul(xFrictionForce * dot);
+		body->applyForce(seconds, xForce, point);
+	}
+
 
 	zForce = hkVector4(*zVector);
 		
 	dot = velocity.dot3(zForce);
 
-	if (dot < -zThreshold)
-	{
-		zForce.mul(-zFrictionForce);
-		body->applyForce(seconds, zForce, point);
-	}
-	else if (dot > zThreshold)
+	if (dot > 0.2f)
 	{
 		zForce.mul(zFrictionForce);
 		body->applyForce(seconds, zForce, point);
 	}
-}
-
-
-
-
-
-
-
-WheelListener::WheelListener(bool* touchingGround)
-{
-	touching = touchingGround;
-}
-
-
-// Wheel listener callback setup
-void WheelListener::collisionAddedCallback(const hkpCollisionEvent& ev)
-{
-	*touching = true;
-}
-
-void WheelListener::collisionRemovedCallback(const hkpCollisionEvent& ev)
-{
-	*touching = false;
+	else if (dot < -0.2f)
+	{
+		zForce.mul(-zFrictionForce);
+		body->applyForce(seconds, zForce, point);
+	}
+	else
+	{
+		zForce.mul(zFrictionForce * dot);
+		body->applyForce(seconds, zForce, point);
+	}
 }

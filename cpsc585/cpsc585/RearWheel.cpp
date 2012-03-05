@@ -12,6 +12,7 @@ RearWheel::RearWheel(IDirect3DDevice9* device, int filter)
 	hkReal radius = 0.42f;
 
 	hkpRigidBodyCinfo info;
+	info.m_gravityFactor = 0.0f;
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_MOVING;
 	info.m_collisionFilterInfo = hkpGroupFilter::calcFilterInfo(hkpGroupFilterSetup::LAYER_DYNAMIC, filter);
