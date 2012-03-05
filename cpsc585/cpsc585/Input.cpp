@@ -5,6 +5,7 @@ Input::Input(void)
 {
 	quit = false;
 	debug = false;
+	placeWaypoint = false;
 
 	XINPUT_CAPABILITIES cap;
 	
@@ -34,6 +35,8 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 		quit = true;
 	else if ((umessage == WM_KEYDOWN) && (wparam == 'D'))
 		debug = !debug;
+	else if ((umessage == WM_KEYUP) && (wparam == 'X'))
+		placeWaypoint = true;
 	else
 	{
 		// Process input
@@ -240,4 +243,14 @@ Intention Input::getIntention()
 bool Input::debugging()
 {
 	return debug;
+}
+
+bool Input::placingWaypoint()
+{
+	return placeWaypoint;
+}
+
+void Input::setPlaceWaypointFalse()
+{
+	placeWaypoint = false;
 }

@@ -16,10 +16,13 @@ public:
 	bool update();
 	Intention getIntention();
 	bool debugging();
+	bool placingWaypoint();
+	void setPlaceWaypointFalse();
 
 private:
 	bool quit;
 	bool debug;
 	Intention intention;
 	bool controllerAvailable;
+	bool placeWaypoint;
 };

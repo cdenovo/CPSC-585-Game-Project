@@ -26,7 +26,7 @@ public:
 	void steer(float seconds, float value);			// between -1.0 and 1.0 (left is negative)
 
 	int getIndex();
-	void reset();	// Reset position and set velocity/momentum to 0
+	void reset(hkVector4* resetPos);	// Reset position and set velocity/momentum to 0
 
 	void applyForces(float seconds);	// Call this every frame BEFORE stepping physics!
 

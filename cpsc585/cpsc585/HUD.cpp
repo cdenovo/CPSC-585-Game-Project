@@ -156,16 +156,16 @@ void HUD::update(Intention intention)//, D3DXVECTOR3 cameraPosition)
 	{
 		radialEnabled = true;
 
-		if(intention.rightStickY > 0 && intention.rightStickX > -20000 && intention.rightStickX < 20000){ // UP
+		if(intention.rightStickY > 10000 && intention.rightStickX > -20000 && intention.rightStickX < 20000){ // UP
 			setSelectedAbility(LASER);
 		}
-		else if(intention.rightStickY < 0 && intention.rightStickX > -20000 && intention.rightStickX < 20000){ // DOWN
+		else if(intention.rightStickY < -10000 && intention.rightStickX > -20000 && intention.rightStickX < 20000){ // DOWN
 			setSelectedAbility(SPEED);
 		}
-		else if(intention.rightStickX > 0 && intention.rightStickY < 10000 && intention.rightStickY > -10000){ // RIGHT
+		else if(intention.rightStickX > 10000 && intention.rightStickY < 10000 && intention.rightStickY > -10000){ // RIGHT
 			setSelectedAbility(RIGHT);
 		}
-		else if(intention.rightStickX < 0 && intention.rightStickY < 10000 && intention.rightStickY > -10000){ //LEFT
+		else if(intention.rightStickX < -10000 && intention.rightStickY < 10000 && intention.rightStickY > -10000){ //LEFT
 			setSelectedAbility(LEFT);
 		}
 	}

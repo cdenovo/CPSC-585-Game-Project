@@ -1,10 +1,27 @@
 #include "Waypoint.h"
 
-
-
-Waypoint::Waypoint(IDirect3DDevice9* device)
+Waypoint::Waypoint(IDirect3DDevice9* device, WPType _wpType)
 {
-	radius = 20;
+	wpType = _wpType;
+	switch(wpType)
+	{
+	case WAY_POINT:
+		radius = 20;
+		checkPointTime = 0;
+		break;
+	case CHECK_POINT:
+		radius = 20;
+		checkPointTime = 3;
+	case LAP_POINT:
+		radius = 20;
+		checkPointTime = 3;
+	case TURN_POINT:
+		radius = 20;
+		checkPointTime = 3;
+	case SHARP_POINT:
+		radius = 20;
+		checkPointTime = 3;
+	}
 
 	drawable = new Drawable(WAYPOINT, "checker.dds", device);
 
@@ -44,6 +61,16 @@ void Waypoint::setRadius(float newRadius)
 	radius = newRadius;
 }
 
+int Waypoint::getCheckPointTime()
+{
+	return checkPointTime;
+}
+
+void Waypoint::setCheckPointTime(int seconds) 
+{
+	checkPointTime = seconds;
+}
+
 bool Waypoint::withinWaypoint(const hkVector4* position)
 {
 	hkSimdReal distance = wpPosition.distanceTo(*position);
@@ -55,4 +82,8 @@ bool Waypoint::withinWaypoint(const hkVector4* position)
 	else{
 		return false;
 	}
+}
+
+WPType Waypoint::getWaypointType(){
+	return wpType;
 }

@@ -91,11 +91,6 @@ void Drawable::render(IDirect3DDevice9* device)
 	mesh->render(device);
 }
 
-void Drawable::changeTexture(IDirect3DTexture9* newTexture)
-{
-	texture = newTexture;
-}
-
 void Drawable::setTransform(D3DXMATRIX* input)
 {
 	D3DXMatrixIdentity(&transform);

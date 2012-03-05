@@ -27,7 +27,6 @@ public:
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians
 	void setTransform(D3DXMATRIX* input);
-	void changeTexture(IDirect3DTexture9* newTexture);
 
 	D3DXVECTOR3 getXVector();
 	D3DXVECTOR3 getYVector();

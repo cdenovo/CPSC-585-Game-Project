@@ -138,7 +138,7 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 	val.setPtr(NULL);
 	body->addProperty(0, val);
 
-	reset();
+	reset(&(hkVector4(0, 0, 0, 0)));
 }
 
 
@@ -358,11 +358,16 @@ void Racer::steer(float seconds, float value)
 	float torqueScale = 0.0f;
 	float centripScale = 0.0f;
 
-	// Now adjust forces
-	if (dot < 1.0f)
+	// Now adjust forces (will need to tweak these values later)
+	if (dot < 15.0f)
 	{
-		torqueScale = 80.0f;
+		torqueScale = 40.0f;
 		centripScale = 50.0f;
+	}
+	else if (dot < 25.0f)
+	{
+		torqueScale = 50.0f;
+		centripScale = 70.0f;
 	}
 	else
 	{
@@ -387,10 +392,10 @@ void Racer::steer(float seconds, float value)
 }
 
 
-void Racer::reset()
+void Racer::reset(hkVector4* resetPos)
 {
 	hkVector4 reset = hkVector4(0.0f, 0.0f, 0.0f);
-	setPosAndRot(0.0f, 10.0f, 0.0f, 0, 0, 0);
+	setPosAndRot((float)resetPos->getComponent(0), (float)resetPos->getComponent(1), (float)resetPos->getComponent(2), 0, 0, 0);
 	body->setLinearVelocity(reset);
 	wheelFL->body->setLinearVelocity(reset);
 	wheelFR->body->setLinearVelocity(reset);
@@ -815,7 +820,7 @@ void Racer::fireLaser()
 	
 	from.setTransformedPos(transform, attachLaser);
 	to = hkVector4(raycastDir);
-	to.mul(20.0f);	// Laser length
+	to.mul(30.0f);	// Laser length
 	to.add3clobberW(from);
 
 	input.m_from = hkVector4(from);
@@ -838,7 +843,7 @@ void Racer::respawn()
 	hkVector4 deathPos = body->getPosition();
 	hkQuaternion deathRot = body->getRotation();
 
-	reset();
+	reset(&(hkVector4(0, 0, 0, 0)));
 
 	deathPos(1) += 5.0f;
 	body->setPositionAndRotation(deathPos, deathRot);
