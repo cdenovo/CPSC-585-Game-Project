@@ -5,8 +5,8 @@
 #include <sstream>
 #include "Intention.h"
 #include "NetworkInfo.h"
+#include "Racer.h"
 
-#define MAXCLIENTS 7
 #define NETWORK_PORT 5869
 
 class Server
@@ -32,10 +32,15 @@ public:
 	void getUDPMessages();
 	int sendLobbyInfo();
 	int sendTCPMessage(const char* message, int length, int clientID);
-	int sendUDPMessage(std::string message, int clientID);
+	int sendUDPMessage(const char* message, int length, int clientID);
+	int sendUDPMessage(const char* message, int length);
 	int sendID(int);
 	
-	int update(std::string worldState);
+	int update(Racer *racers[], int numRacers);
+
+	Intention intents[MAXCLIENTS];
+	int numClients;
+	ClientInfo clients[MAXCLIENTS];
 
 private:
 
@@ -45,14 +50,9 @@ private:
 	SOCKET sUDP; //for the udp socket
 	WSADATA w; //holds winsock info
 
-	
-	ClientInfo clients[MAXCLIENTS];
-	int numClients;
-
 	bool wsa_ready;
 	bool tcp_ready;
 	bool udp_ready;
 	char in_buffer[100];
-	Intention intents[MAXCLIENTS];
 };
 

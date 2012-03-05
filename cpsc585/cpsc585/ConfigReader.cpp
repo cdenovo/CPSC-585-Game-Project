@@ -1,6 +1,6 @@
 #include "ConfigReader.h"
 
-#define BUFFERSIZE 32
+#define BUFFERSIZE 500
 
 ConfigReader::ConfigReader()
 {
@@ -72,6 +72,10 @@ void ConfigReader::parseLine(std::string line)
 		else if(key == "SPRINGFORCECAP")
 		{
 			ss >> springForceCap; //Convert to float
+		}
+		else if(key == "SERVERIP")
+		{
+			ss >> serverIP;
 		}
 	}
 }

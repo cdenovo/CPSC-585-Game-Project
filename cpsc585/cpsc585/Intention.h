@@ -17,6 +17,8 @@ public:
 
 	std::string toStr();
 
+	bool equals(Intention intent);
+
 	// Buttons Pressed State
 	bool xPressed;
 	bool yPressed;

@@ -6,6 +6,9 @@
 
 #include "Intention.h"
 #include "NetworkInfo.h"
+#include "Racer.h"
+
+#define NETWORK_PORT 5869
 
 class Client
 {
@@ -17,18 +20,25 @@ public:
 	void getTCPMessages();
 	void getUDPMessages();
 
+	int setupWSA();
+	int setupUDPSocket();
+
 	int ready();
 	int unready();
 	int setColor(int color);
 
 	int sendButtonState(Intention intention);
 
-	std::string world;
 	std::string track;
 	bool isReady;
 	bool start;
 	int id;
 	bool end;
+	bool newWorldInfo;
+	int numClients;
+	ClientInfo clients[MAXCLIENTS];
+	char world[MAXCLIENTS][RACERSIZE];
+
 
 private:
 	int sendTCPMessage(std::string message);
@@ -38,9 +48,9 @@ private:
 
 	SOCKET sTCP;
 	SOCKET sUDP;
-	SOCKADDR_IN target; //Socket address info
-
-	ClientInfo clients[MAXCLIENTS];
-	int numClients;
+	SOCKADDR_IN target; //Socket address info	
+	bool udp_ready;
+	bool wsa_ready;
+	WSADATA w; //holds winsock info
 };
 

@@ -20,6 +20,7 @@ public:
 	float chassisMass;
 	float accelerationScale;
 	float springForceCap;
+	std::string serverIP;
 
 private:
 	std::ifstream file;

@@ -192,7 +192,7 @@ void Racer::raycastWheels()
 	down.normalize3();
 
 	//Set ray parameters for raycast
-	hkVector4 pos = drawable->gethkPosition();
+	hkVector4 pos = body->getPosition();
 	hkVector4 attachPosFL = pos;
 	hkVector4 xComp = drawable->getXhkVector();
 	hkVector4 yComp = drawable->getYhkVector();
@@ -601,6 +601,11 @@ void Racer::reset()
 	wheelFR->body->setLinearVelocity(reset);
 	wheelRL->body->setLinearVelocity(reset);
 	wheelRR->body->setLinearVelocity(reset);
+	body->setAngularVelocity(reset);
+	wheelFL->body->setAngularVelocity(reset);
+	wheelFR->body->setAngularVelocity(reset);
+	wheelRL->body->setAngularVelocity(reset);
+	wheelRR->body->setAngularVelocity(reset);
 }
 
 
@@ -719,7 +724,7 @@ void Racer::applyForces(float seconds)
 {
 	applySprings(seconds);
 	applyFriction(seconds);
-	applyCounterSpin(seconds);
+	//applyCounterSpin(seconds);
 }
 
 void Racer::applyCounterSpin(float seconds)
@@ -821,8 +826,62 @@ void Racer::applyFrictionToTire(hkVector4* attachPoint, hkpRigidBody* wheelBody,
 	}
 }
 
+/**
+ * Serializes the racer to send over the net
+ * Order:
+ * Position
+ * Rotation
+ * Linear Velocity
+ * Angular Velocity
+ * Wheel FL Position
+ * Wheel FR Position
+ * Wheel RL Position
+ * Wheel RR Position
+ */
+void Racer::serialize(char buff[])
+{
+	memcpy(buff,&body->getPosition(),sizeof(hkVector4)); //Position
+	memcpy(buff+sizeof(hkVector4),&body->getRotation(),sizeof(hkQuaternion)); //Rotation
+	memcpy(buff+sizeof(hkVector4)+sizeof(hkQuaternion),&body->getLinearVelocity(),sizeof(hkVector4)); //Linear Velocity
+	memcpy(buff+sizeof(hkVector4)*2+sizeof(hkQuaternion),&body->getAngularVelocity(),sizeof(hkVector4)); //Angular Velocity
+	memcpy(buff+sizeof(hkVector4)*3+sizeof(hkQuaternion),&wheelFL->body->getPosition(),sizeof(hkVector4)); //FL wheel
+	memcpy(buff+sizeof(hkVector4)*4+sizeof(hkQuaternion),&wheelFR->body->getPosition(),sizeof(hkVector4)); //FR wheel
+	memcpy(buff+sizeof(hkVector4)*5+sizeof(hkQuaternion),&wheelRL->body->getPosition(),sizeof(hkVector4)); //RL wheel
+	memcpy(buff+sizeof(hkVector4)*6+sizeof(hkQuaternion),&wheelRR->body->getPosition(),sizeof(hkVector4)); //RR wheel
+}
 
+void Racer::unserialize(char buff[])
+{
+	hkVector4 data;
+	hkQuaternion rot;
+	memcpy(&data,buff,sizeof(hkVector4)); //Position
+	body->setPosition(data);
 
+	memcpy(&rot,buff+sizeof(hkVector4),sizeof(hkQuaternion)); //Rotation
+	body->setRotation(rot);
+
+	memcpy(&data,buff+sizeof(hkVector4)+sizeof(hkQuaternion),sizeof(hkVector4)); //Linear velocity
+	body->setLinearVelocity(data);
+
+	memcpy(&data,buff+sizeof(hkVector4)*2+sizeof(hkQuaternion),sizeof(hkVector4)); //Angular Velocity
+	body->setAngularVelocity(data);
+
+	memcpy(&data,buff+sizeof(hkVector4)*3+sizeof(hkQuaternion),sizeof(hkVector4)); //FL wheel
+	wheelFL->body->setPosition(data);
+	wheelFL->body->setRotation(rot);
+
+	memcpy(&data,buff+sizeof(hkVector4)*4+sizeof(hkQuaternion),sizeof(hkVector4)); //FR wheel
+	wheelFR->body->setPosition(data);
+	wheelFR->body->setRotation(rot);
+
+	memcpy(&data,buff+sizeof(hkVector4)*5+sizeof(hkQuaternion),sizeof(hkVector4)); //RL wheel
+	wheelRL->body->setPosition(data);
+	wheelRL->body->setRotation(rot);
+
+	memcpy(&data,buff+sizeof(hkVector4)*6+sizeof(hkQuaternion),sizeof(hkVector4)); //RR wheel
+	wheelRR->body->setPosition(data);
+	wheelRR->body->setRotation(rot);
+}
 
 
 

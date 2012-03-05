@@ -5,10 +5,91 @@ Client::Client()
 	start = false;
 	end = false;
 	isReady = false;
+	id = -1;
+	numClients = 0;
+	newWorldInfo = false;
+	udp_ready = false;
+	wsa_ready = false;
 }
 
 Client::~Client()
 {
+}
+
+int Client::setupWSA()
+{
+	if (wsa_ready){
+		std::cout << "Error: Attempting to setup Winsock but it is already setup!" << std::endl;
+		return 0;
+	}
+
+	int error = WSAStartup(0x0202, &w); //Fill in WSA info
+
+	if (error)
+	{
+		std::cout << "Error: error when calling WSAStartup()" << std::endl;
+		wsa_ready = false;
+		return error;
+	}
+
+	if(w.wVersion != 0x0202) //Wrong winsock version?
+	{
+		std::cout << "Error: Invalid version of Winsock, need 2.2." << std::endl;
+		wsa_ready = false;
+		WSACleanup();
+		return 0;
+	} 
+	
+	wsa_ready = true;
+	std::cout << "WSA successfully setup." << std::endl;
+	return 0;
+}
+
+int Client::setupUDPSocket()
+{
+	if (udp_ready)
+	{
+		std::cout << "Error: Attempting to setup a UDP socket when one is already setup!" << std::endl;
+		return 0;
+	}
+
+	/*if (!wsa_ready){
+		std::cout << "Error: Attempting to setup a UDP socket when WSA is not ready." << std::endl;
+		return 0;
+	}*/
+
+	SOCKADDR_IN addr; //The address struct for TCP socket
+
+	addr.sin_family = AF_INET; //Set address family
+	addr.sin_port = htons(NETWORK_PORT); //Assign port to socket
+	addr.sin_addr.s_addr = htonl(INADDR_ANY); //Accept connection from any IP
+	sUDP = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP); // Create socket
+
+	if (sUDP == INVALID_SOCKET)
+	{
+		std::cout << "Error: Failed to create a valid UDP socket." << std::endl;
+		//udp_ready = false;
+		return 0;
+	}
+
+	if(bind(sUDP, (LPSOCKADDR)&addr, sizeof(addr)) == SOCKET_ERROR)
+	{
+		std::cout << "Error: Failed to bind UDP socket." << std::endl;
+		//udp_ready = false;
+		return 0;
+	}
+
+	u_long iMode=1; //set FIONBIO arg to 1, which means making these sockets NON-BLOCKING
+	if (ioctlsocket(sUDP,FIONBIO,&iMode) != 0){
+		std::cout << "Error: Failed to make UDP socket non-blocking." << std::endl;
+		//udp_ready = false;
+		return 0;
+	}
+
+	//success
+	//udp_ready = true;
+	std::cout << "UDP socket successfully created." << std::endl;
+	return 0; 
 }
 
 /**
@@ -34,12 +115,25 @@ bool Client::connectToServer(int port, std::string ipAddress)
 		target.sin_port = htons(port); //Port to connect on
 		target.sin_addr.s_addr = inet_addr(ipAddress.c_str());
 
-		sTCP = socket(AF_INET, SOCK_STREAM, 0); //Create UDP socket
-		sUDP = socket(AF_INET, SOCK_DGRAM, 0); // Create UDP socket
+		sTCP = socket(AF_INET, SOCK_STREAM, 0); //Create TCP socket
+		//setupUDPSocket();
+		//sUDP = socket(AF_INET, SOCK_DGRAM, 0); // Create UDP socket
 
 		if(sTCP != INVALID_SOCKET) //If we could create socket
 		{
 			//Try to connect
+			/*std::stringstream ss;
+			ss << port;
+
+			struct addrinfo hint;
+			struct addrinfo * result;
+			memset( &hint, 0, sizeof(addrinfo) );
+			hint.ai_family    = AF_UNSPEC;
+			hint.ai_socktype  = SOCK_STREAM;
+			hint.ai_flags     = AI_PASSIVE;*/
+
+			//int s = getaddrinfo(ipAddress.c_str(),ss.str().c_str(),hint);
+
 			if(connect(sTCP, (SOCKADDR*) &target, sizeof(target)) != SOCKET_ERROR)
 			{
 				std::cout << "Success!\n";
@@ -51,6 +145,7 @@ bool Client::connectToServer(int port, std::string ipAddress)
 				std::cout << "Fail!\n";
 			}
 
+			//Set to non-blocking
 			u_long iMode=1;
 			ioctlsocket(sTCP,FIONBIO,&iMode);
 			//ioctlsocket(sUDP,FIONBIO,&iMode);
@@ -65,6 +160,7 @@ bool Client::connectToServer(int port, std::string ipAddress)
  */
 void Client::getTCPMessages()
 {
+	char buff1[1000];
 	char buff[1000];
 
 	int err = 0;
@@ -107,19 +203,25 @@ void Client::getTCPMessages()
 				break;
 
 			case CLIENTINFO: //Get updated client info
-				memcpy(&numClients,buff+5,sizeof(int)); //Get number of clients
+				{
+				memcpy(reinterpret_cast<char *>(&numClients),buff+5,sizeof(int)); //Get number of clients
+
+				//numClients = 2; //Trying to debug memory error, this shouldn't actually be here
 
 				//Get clients
 				for(int i = 0; i < numClients; i++)
 				{
-					memcpy(&clients[i],buff+9+i*sizeof(ClientInfo),sizeof(ClientInfo));
+					memcpy(reinterpret_cast<char *>(&clients[i]),buff+9+i*sizeof(ClientInfo),sizeof(ClientInfo));
 				}
 				break;
+				}
 
 			case ID:
-				memcpy(&id,buff+5,sizeof(int)); //Get client's ID
+				{
+				memcpy(reinterpret_cast<char *>(&id),buff+5,sizeof(int)); //Get client's ID
 				std::cout << "Your ID is " << id << "\n";
 				break;
+				}
 
 			case END:
 				end = true;
@@ -130,7 +232,7 @@ void Client::getTCPMessages()
 }
 
 /**
- * Receives any TCP messages in the buffer
+ * Receives any UDP messages in the buffer
  */
 void Client::getUDPMessages()
 {
@@ -162,13 +264,17 @@ void Client::getUDPMessages()
 			switch(buff[0])
 			{
 			case WORLDSTATE: //Get updated world state
-				world = "";
-
-				for(int i = 3; i < size; i++)
 				{
-					world.append(1, buff[i]);
+					int numRacers;
+					memcpy(&numRacers,buff+5,sizeof(int)); //Get player's ID
+					for(int i = 0; i < numRacers; i++)
+					{
+						memcpy(world[i],buff+9+i*RACERSIZE,RACERSIZE); //Get the button presses
+					}
+
+					newWorldInfo = true;
+					break;
 				}
-				break;
 			}
 		}
 	}
@@ -281,6 +387,10 @@ void Client::closeConnection()
 	if(sTCP)
 	{
 		closesocket(sTCP);
+	}
+	if(sUDP)
+	{
+		closesocket(sUDP);
 	}
 
 	WSACleanup(); //Clean up Winsock

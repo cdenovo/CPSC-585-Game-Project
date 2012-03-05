@@ -19,6 +19,7 @@
 #include "Server.h"
 #include "Client.h"
 
+#define NUMRACERS 5
 
 class AI
 {
@@ -39,6 +40,9 @@ private:
 	//Networking functions
 	static unsigned __stdcall staticGetIP(void * pThis);
 	void getIP();
+	static unsigned __stdcall staticConnectToServer(void *pThis);
+	void connectToServer();
+	void runNetworking();
 
 	Renderer* renderer;
 	Input* input;
@@ -53,14 +57,14 @@ private:
 	Racer* player;
 
 	// Racers
-	Racer* enemies[4];
+	Racer* racers[NUMRACERS];
 	Racer* ai1;
 	Racer* ai2;
 	Racer* ai3;
 	Racer* ai4;
 
 	// Racer Minds
-	AIMind* racerMinds[4];
+	AIMind* racerMinds[NUMRACERS];
 	AIMind* aiMind1;
 	AIMind* aiMind2;
 	AIMind* aiMind3;
@@ -79,6 +83,15 @@ private:
 	//Networking
 	std::string hostName;
 	HANDLE   hth1;
+	HANDLE   hth2;
 	Server server;
 	Client client;
+	ConfigReader config;
+	bool clientConnected;
+	bool serverStarted;
+	bool tryToConnectToServer;
+	bool readyPressed;
+	Intention racerIntents[NUMRACERS];
+	bool readyStatus[NUMRACERS];
+	Intention prevIntent;
 };

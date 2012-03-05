@@ -41,6 +41,8 @@
 #include <Physics/Collide/Query/CastUtil/hkpWorldRayCaster.h>
 #include <Physics/Collide/Query/Collector/RayCollector/hkpClosestRayHitCollector.h>
 
+#include <Common\Serialize\Util\hkSerializeUtil.h>
+
 
 static void HK_CALL errorReport(const char* msg, void* userContext);
 

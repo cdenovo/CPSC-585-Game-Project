@@ -91,6 +91,26 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 						intention.rightTrig = 255;
 						break;
 					}
+				case VK_SHIFT:
+					{
+						intention.leftTrig = 255;
+						break;
+					}
+				case 'Z':
+					{
+						intention.yPressed = true;
+						break;
+					}
+				case 'R':
+					{
+						intention.rbumpPressed = true;
+						break;
+					}
+				case 'E':
+					{
+						intention.lbumpPressed = true;
+						break;
+					}
 				}
 			}
 		}
@@ -132,6 +152,26 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 				case VK_SPACE:
 					{
 						intention.rightTrig = 0;
+						break;
+					}
+				case VK_SHIFT:
+					{
+						intention.leftTrig = 0;
+						break;
+					}
+				case 'Z':
+					{
+						intention.yPressed = false;
+						break;
+					}
+				case 'R':
+					{
+						intention.rbumpPressed = false;
+						break;
+					}
+				case 'E':
+					{
+						intention.lbumpPressed = false;
 						break;
 					}
 				}

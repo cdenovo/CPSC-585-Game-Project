@@ -9,7 +9,8 @@ Server::Server()
 	gameStarted = false;
 	track = "Track1";
 
-	numClients = 0;
+	clients[0].id = 0;
+	numClients = 1;
 }
 
 Server::~Server()
@@ -172,8 +173,11 @@ int Server::lobbyListen()
 		clients[numClients].id = numClients;
 		clients[numClients].ready = false;
 		clients[numClients].color = numClients;
+		clients[numClients].addr.sin_family = AF_INET;
+		clients[numClients].addr.sin_port = htons(NETWORK_PORT);
 		sendID(numClients);
 		numClients++; //Increment the number of clients connected
+		sendLobbyInfo();
 	}
 
 	getTCPMessages();
@@ -205,6 +209,13 @@ void Server::closeConnection()
 	if(tcp_ready)
 	{
 		closesocket(sTCP);
+		for(int i = 0; i < numClients; i++)
+		{
+			if(clients[i].sock)
+			{
+				closesocket(clients[i].sock);
+			}
+		}
 	}
 
 	if(udp_ready)
@@ -229,9 +240,23 @@ int Server::sendTCPMessage(const char* message, int length, int clientID)
 /**
  * Sends the given message over UDP to the client with the given ID
  */
-int Server::sendUDPMessage(std::string message, int clientID)
+int Server::sendUDPMessage(const char* message, int length, int clientID)
 {
-	return sendto(sUDP, message.c_str(), message.length(), 0, (SOCKADDR*) &clients[clientID].addr, sizeof(clients[clientID].addr));
+	u_long iMode=0;
+	ioctlsocket(sUDP,FIONBIO,&iMode);
+	int err = sendto(sUDP, message, length, 0, (SOCKADDR*) &clients[clientID].addr, sizeof(clients[clientID].addr));
+	iMode=1;
+	ioctlsocket(sUDP,FIONBIO,&iMode);
+	return err;
+}
+
+int Server::sendUDPMessage(const char* message, int length)
+{
+	for(int i = 1; i < numClients; i++)
+	{
+		sendUDPMessage(message, length, i);
+	}
+	return true;
 }
 
 
@@ -338,20 +363,22 @@ int Server::sendLobbyInfo()
 /**
  * Server updates all clients with state of the world
  */
-int Server::update(std::string worldState)
+int Server::update(Racer *racers[], int numRacers)
 {
-	//Set up buffer to send
-	int size = worldState.length() + 5;
+	//Put data in buffer
+	int size = RACERSIZE*numRacers + 9;
 	char* buffer = new char[size];
-	buffer[0] = 'W';
+	buffer[0] = WORLDSTATE;
 	memcpy(buffer+1,&size,sizeof(int));
-	memcpy(buffer+5,worldState.c_str(),worldState.length());
-
-	//Send each client a message
-	for(int i = 0; i < numClients; i++)
+	memcpy(buffer+5,&numRacers,sizeof(int));
+	for(int i = 0; i < numRacers; i++)
 	{
-		sendTCPMessage(buffer,size,i); //Send the message
+		char sBuff[RACERSIZE];
+		racers[i]->serialize(sBuff);
+		memcpy(buffer+9+RACERSIZE*i,sBuff,RACERSIZE);
 	}
+
+	int err = sendUDPMessage(buffer,size); //Send message
 
 	delete[] buffer;
 
@@ -383,7 +410,7 @@ void Server::getTCPMessages()
 	char buff[1000];
 	bool changes = false;
 
-	for(int i = 0; i < numClients; i++)
+	for(int i = 1; i < numClients; i++)
 	{
 		int err = 0;
 
@@ -489,49 +516,46 @@ void Server::getUDPMessages()
 	char buff[1000];
 	bool changes = false;
 
-	for(int i = 0; i < numClients; i++)
-	{
-		int err = 0;
+	int err = 0;
 
-		while(err != WSAEWOULDBLOCK)
+	while(err != WSAEWOULDBLOCK)
+	{
+		//Find out the size of the message
+		err = recv(sUDP, buff, 5, MSG_PEEK);
+		if(err == -1)
 		{
-			//Find out the size of the message
-			err = recv(sUDP, buff, 5, MSG_PEEK);
+			err = WSAGetLastError();
+		}
+
+		if(err != WSAEWOULDBLOCK)
+		{
+			int size = *((int*)(buff+1)); //Get size
+
+			//Get the message
+			err = recv(sUDP, buff, size, 0);
 			if(err == -1)
 			{
 				err = WSAGetLastError();
 			}
 
-			if(err != WSAEWOULDBLOCK)
+			//Call the correct function depending on the message
+			switch(buff[0])
 			{
-				int size = *((int*)(buff+1)); //Get size
+			case BUTTON: //Message is button press
+				int id;
+				memcpy(&id,buff+5,sizeof(int)); //Get player's ID
+				memcpy(&intents[id],buff+9,sizeof(Intention)); //Get the button presses
+				std::cout << "Player " << id << " has the following button state:\n" << intents[id].toStr() << std::endl;
+				break;
 
-				//Get the message
-				err = recv(sUDP, buff, size, 0);
-				if(err == -1)
-				{
-					err = WSAGetLastError();
-				}
-
-				//Call the correct function depending on the message
-				switch(buff[0])
-				{
-				case BUTTON: //Message is button press
-					int id;
-					memcpy(&id,buff+5,sizeof(int)); //Get player's ID
-					memcpy(&intents[id],buff+9,sizeof(Intention)); //Get the button presses
-					std::cout << "Player " << id << " has the following button state:\n" << intents[id].toStr() << std::endl;
-					break;
-
-				default:
-					std::cout << "Not button.\n";
-					break;
-				}
+			default:
+				std::cout << "Not button.\n";
+				break;
 			}
-			else
-			{
-				//std::cout << "Buffer empty.\n";
-			}
+		}
+		else
+		{
+			//std::cout << "Buffer empty.\n";
 		}
 	}
 }

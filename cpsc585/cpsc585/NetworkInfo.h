@@ -1,8 +1,10 @@
 #pragma once
 
 #include <WinSock.h>
+#include <inaddr.h>
+//#include <WinSock2.h>
 
-#define MAXCLIENTS 7
+#define MAXCLIENTS 5
 
 //Client headers
 const char BUTTON = 'B';

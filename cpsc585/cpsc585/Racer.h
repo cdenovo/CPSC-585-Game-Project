@@ -11,6 +11,8 @@
 enum RacerType { PLAYER, AI1, AI2, AI3, AI4 };
 enum WheelType { FRONT, REAR };
 
+const int RACERSIZE = sizeof(hkVector4)*7 + sizeof(hkQuaternion);
+
 class Racer
 {
 public:
@@ -28,6 +30,9 @@ public:
 
 	void applyForces(float seconds);	// Call this every frame BEFORE stepping physics!
 
+	void serialize(char buff[]);
+	void unserialize(char buff[]);
+
 private:
 	void buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* constraint, WheelType type);
 	hkVector4 getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach, WheelType type);
@@ -43,7 +48,7 @@ public:
 	Drawable* drawable;
 	hkpRigidBody* body;
 	static float accelerationScale;
-
+	RacerType type;
 
 private:
 	int index;
