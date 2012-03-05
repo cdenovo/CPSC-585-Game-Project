@@ -3,8 +3,6 @@
 
 LaserModel* LaserModel::getInstance(IDirect3DDevice9* device)
 {
-	//mesh = new LaserModel(device);
-
 	return new LaserModel(device);
 }
 

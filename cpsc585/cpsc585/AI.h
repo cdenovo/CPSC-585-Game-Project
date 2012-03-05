@@ -21,7 +21,7 @@ public:
 	AI(void);
 	~AI(void);
 	void shutdown();
-	void initialize(Renderer* renderer, Input* input);
+	void initialize(Renderer* renderer, Input* input, Sound* sound);
 	void simulate(float milliseconds);
 	void displayDebugInfo(Intention intention, float milliseconds);
 
@@ -34,6 +34,7 @@ private:
 	Renderer* renderer;
 	Input* input;
 	Physics* physics;
+	Sound* sound;
 	HUD* hud;
 
 	int count;

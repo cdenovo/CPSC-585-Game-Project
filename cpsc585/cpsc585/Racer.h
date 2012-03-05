@@ -3,6 +3,7 @@
 #include "Drawable.h"
 #include "Physics.h"
 #include "Renderer.h"
+#include "Sound.h"
 
 #include "FrontWheel.h"
 #include "RearWheel.h"
@@ -15,7 +16,7 @@ enum WheelType { FRONT, REAR };
 class Racer
 {
 public:
-	Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerType);
+	Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerType racerType);
 	~Racer(void);
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians
@@ -64,7 +65,8 @@ private:
 
 	float currentSteering;
 
-	hkpWorld* physicsWorld;
+	static hkpWorld* physicsWorld;
+	static Sound* sound;
 
 	// Static elements that are common between all Racers
 	static int xID;

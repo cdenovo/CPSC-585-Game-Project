@@ -103,8 +103,8 @@ bool initialize()
 		return false;
 	}
 
-	ai->initialize(renderer, input);
-
+	ai->initialize(renderer, input, sound);
+	sound->initialize();
 
 	return true;
 }
@@ -154,6 +154,25 @@ void run()
 
 void shutdown()
 {
+	// TO DO: Shut down and free up ai, renderer, sound, input
+	if (ai)
+	{
+		ai->shutdown();
+		ai = NULL;
+	}
+
+	if (sound)
+	{
+		sound->shutdown();
+		sound = NULL;
+	}
+
+	if (renderer)
+	{
+		renderer->shutdown();
+		renderer = NULL;
+	}
+
 	ClipCursor(NULL);
 	ReleaseCapture();
 	ShowCursor(true);
@@ -163,16 +182,7 @@ void shutdown()
 
 	UnregisterClass(appName, hInstance);
 	hInstance = NULL;
-
-	// TO DO: Shut down and free up ai, renderer, sound, input
-
-	ai->shutdown();
-
-	ai = NULL;
-
-	renderer->shutdown();
 	
-	renderer = NULL;
 
 	ChangeDisplaySettings(&initialScreenSettings, NULL);
 

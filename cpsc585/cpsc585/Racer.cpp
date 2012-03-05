@@ -26,9 +26,14 @@ float Racer::frontExtents = config.frontExtents;
 float Racer::rearExtents = config.rearExtents;
 float Racer::springForceCap = config.springForceCap;
 
+hkpWorld* Racer::physicsWorld = NULL;
+Sound* Racer::sound = NULL;
 
-Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerType)
+
+Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerType racerType)
 {
+	sound = s;
+
 	laserDraw = new Drawable(LASERMODEL, "laser.dds", device);
 	r->addDrawable(laserDraw);
 
@@ -129,6 +134,10 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, RacerType racerT
 	
 	hkpConstraintStabilizationUtil::stabilizeRigidBodyInertia(body);
 
+	hkpPropertyValue val;
+	val.setPtr(NULL);
+	body->addProperty(0, val);
+
 	reset();
 }
 
@@ -160,8 +169,6 @@ void Racer::setPosAndRot(float posX, float posY, float posZ,
 	wheelFR->setPosAndRot(attachFR(0) + pos(0), attachFR(1) + pos(1), attachFR(2) + pos(2), rotX, rotY, rotZ);
 	wheelRL->setPosAndRot(attachRL(0) + pos(0), attachRL(1) + pos(1), attachRL(2) + pos(2), rotX, rotY, rotZ);
 	wheelRR->setPosAndRot(attachRR(0) + pos(0), attachRR(1) + pos(1), attachRR(2) + pos(2), rotX, rotY, rotZ);
-
-	update();
 }
 
 
@@ -792,6 +799,8 @@ void Racer::fireLaser()
 		laserReady = false;
 	}
 
+	sound->playLaser();
+
 	hkpWorldRayCastInput input;
 	hkpWorldRayCastOutput output;
 	hkVector4 from;
@@ -833,13 +842,12 @@ void Racer::respawn()
 
 	deathPos(1) += 5.0f;
 	body->setPositionAndRotation(deathPos, deathRot);
-
-	//update();
 }
 
 void Racer::giveDamage(Racer* attacker, int damage)
 {
 	health -= damage;
+	sound->playCrash();
 
 	if (health <= 0)
 	{
