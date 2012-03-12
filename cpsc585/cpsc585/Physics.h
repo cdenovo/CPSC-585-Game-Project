@@ -35,13 +35,8 @@
 #include <Physics/Collide/Shape/Compound/Tree/Mopp/hkpMoppBvTreeShape.h>
 #include <Physics/Collide/Shape/Compound/Collection/ExtendedMeshShape/hkpExtendedMeshShape.h>
 #include <Physics/Collide/Util/Welding/hkpMeshWeldingUtility.h>
-
 #include <Physics/Collide/Query/CastUtil/hkpWorldRayCastInput.h>
 #include <Physics/Collide/Query/CastUtil/hkpWorldRayCastOutput.h>
-#include <Physics/Collide/Query/CastUtil/hkpWorldRayCaster.h>
-#include <Physics/Collide/Query/Collector/RayCollector/hkpClosestRayHitCollector.h>
-
-#include <Common\Serialize\Util\hkSerializeUtil.h>
 
 
 static void HK_CALL errorReport(const char* msg, void* userContext);

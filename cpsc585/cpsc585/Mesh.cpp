@@ -14,7 +14,7 @@ void Mesh::loadMesh(std::string filename)
 {
 	// Set vertexCount and indexCount
 	std::ifstream filestream(filename, std::ifstream::binary);
-
+	
 	filestream.read((char*)&vertexCount, 4);
 	filestream.read((char*)&indexCount, 4);
 

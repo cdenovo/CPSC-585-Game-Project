@@ -11,11 +11,12 @@
 #include "FrontWheelMesh.h"
 #include "RearWheelMesh.h"
 #include "WaypointMesh.h"
+#include "LaserModel.h"
 
 #include <string>
 
 
-enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT };
+enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, LASERMODEL };
 
 class Drawable
 {
@@ -26,7 +27,6 @@ public:
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians
 	void setTransform(D3DXMATRIX* input);
-	void changeTexture(IDirect3DTexture9* newTexture);
 
 	D3DXVECTOR3 getXVector();
 	D3DXVECTOR3 getYVector();
@@ -36,7 +36,6 @@ public:
 	hkVector4 getXhkVector();
 	hkVector4 getYhkVector();
 	hkVector4 getZhkVector();
-	hkVector4 gethkPosition();
 
 private:
 	void initialize(MeshType type, std::string textureName, IDirect3DDevice9* device);

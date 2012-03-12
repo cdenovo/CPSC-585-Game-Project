@@ -3,7 +3,7 @@
 
 Camera::Camera(void)
 {
-	kValue = 30.0f;
+	kValue = 20.0f;
 
 	focusObject = NULL;
 }
@@ -28,10 +28,10 @@ void Camera::setFocus(Drawable* focus)
 	objPos = focusObject->getPosition();
 	zVec = focusObject->getZVector();
 
-	lookAt = (zVec * (30.0f)) + objPos;
+	lookAt = (zVec * (20.0f)) + objPos;
 
-	position = (zVec * (-12.0f)) + objPos;
-	position.y += 3.0f;
+	position = (zVec * (-9.0f)) + objPos;
+	position.y += 2.0f;
 
 	up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 }
@@ -43,10 +43,10 @@ void Camera::update()
 	objPos = focusObject->getPosition();
 	zVec = focusObject->getZVector();
 
-	lookAt += (((zVec * (30.0f)) + objPos) - lookAt) / kValue;
+	lookAt += (((zVec * (20.0f)) + objPos) - lookAt) / kValue;
 
-	desiredPos = (zVec * (-12.0f)) + objPos;
-	desiredPos.y += 3.0f;
+	desiredPos = (zVec * (-9.0f)) + objPos;
+	desiredPos.y += 2.0f;
 
 	position += (desiredPos - position) / kValue;
 
@@ -54,3 +54,4 @@ void Camera::update()
 
 	D3DXMatrixLookAtLH(&viewMatrix, &position, &lookAt, &up);
 }
+

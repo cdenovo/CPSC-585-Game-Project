@@ -78,9 +78,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Ability.cpp" />
     <ClCompile Include="AI.cpp" />
     <ClCompile Include="AIMind.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CheckpointTimer.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="ConfigReader.cpp" />
     <ClCompile Include="Drawable.cpp" />
@@ -89,6 +91,7 @@
     <ClCompile Include="HUD.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Intention.cpp" />
+    <ClCompile Include="LaserModel.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Physics.cpp" />
@@ -100,14 +103,17 @@
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="Waypoint.cpp" />
+    <ClCompile Include="WaypointEditor.cpp" />
     <ClCompile Include="WaypointMesh.cpp" />
     <ClCompile Include="World.cpp" />
     <ClCompile Include="WorldMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Ability.h" />
     <ClInclude Include="AI.h" />
     <ClInclude Include="AIMind.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CheckpointTimer.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="ConfigReader.h" />
     <ClInclude Include="Drawable.h" />
@@ -117,6 +123,7 @@
     <ClInclude Include="HUD.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Intention.h" />
+    <ClInclude Include="LaserModel.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="NetworkInfo.h" />
@@ -129,6 +136,7 @@
     <ClInclude Include="Server.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="Waypoint.h" />
+    <ClInclude Include="WaypointEditor.h" />
     <ClInclude Include="WaypointMesh.h" />
     <ClInclude Include="World.h" />
     <ClInclude Include="WorldMesh.h" />

@@ -19,6 +19,8 @@ public:
 	bool networking();
 	bool isServer();
 	bool isClient();
+	bool placingWaypoint();
+	void setPlaceWaypointFalse();
 
 private:
 	bool quit;
@@ -28,4 +30,5 @@ private:
 	bool debug;
 	Intention intention;
 	bool controllerAvailable;
+	bool placeWaypoint;
 };

@@ -5,6 +5,7 @@ Input::Input(void)
 {
 	quit = false;
 	debug = false;
+	placeWaypoint = false;
 	network = false;
 	client = false;
 	server = false;
@@ -49,44 +50,36 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 		client = true;
 	else if ((umessage == WM_KEYDOWN) && (wparam == 'V') && network && !client)
 		server = true;
+	else if ((umessage == WM_KEYUP) && (wparam == 'X'))
+		placeWaypoint = true;
 	else
 	{
+		// Process input
 		if (umessage == WM_KEYDOWN)
 		{
-			// Process input
-			if((wparam == 'A'))
+			switch (wparam)
 			{
-				intention.leftStick = -25000;
-			}
-			else if(wparam == 'D')
-			{
-				intention.leftStick = 25000;
-			}
-			else
-			{
-				switch (wparam)
+			case VK_UP:
 				{
-				case VK_UP:
-					{
-						intention.rightStickY = 25000;
-						break;
-					}
-				case VK_DOWN:
-					{
-						intention.rightStickY = -25000;
-						break;
-					}
-				case VK_LEFT:
-					{
-						intention.rightStickX = -25000;
-						break;
-					}
-				case VK_RIGHT:
-					{
-						intention.rightStickX = 25000;
-						break;
-					}
-				case VK_SPACE:
+					intention.rightStickY = 25000;
+					break;
+				}
+			case VK_DOWN:
+				{
+					intention.rightStickY = -25000;
+					break;
+				}
+			case VK_LEFT:
+				{
+					intention.rightStickX = -25000;
+					break;
+				}
+			case VK_RIGHT:
+				{
+					intention.rightStickX = 25000;
+					break;
+				}
+			case VK_SPACE:
 					{
 						intention.rightTrig = 255;
 						break;
@@ -111,69 +104,76 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 						intention.lbumpPressed = true;
 						break;
 					}
-				}
+				case 'A':
+					{
+						intention.leftStick = -25000;
+						break;
+					}
+				case 'D':
+					{
+						intention.leftStick = 25000;
+						break;
+					}
 			}
 		}
 		else if (umessage == WM_KEYUP)
 		{
-			// Process input
-			if((wparam == 'A'))
+			switch (wparam)
 			{
-				intention.leftStick = 0;
-			}
-			else if(wparam == 'D')
-			{
-				intention.leftStick = 0;
-			}
-			else
-			{
-				switch (wparam)
+			case VK_UP:
 				{
-				case VK_UP:
-					{
-						intention.rightStickY = 0;
-						break;
-					}
-				case VK_DOWN:
-					{
-						intention.rightStickY = 0;
-						break;
-					}
-				case VK_LEFT:
-					{
-						intention.rightStickX = 0;
-						break;
-					}
-				case VK_RIGHT:
-					{
-						intention.rightStickX = 0;
-						break;
-					}
-				case VK_SPACE:
-					{
-						intention.rightTrig = 0;
-						break;
-					}
-				case VK_SHIFT:
-					{
-						intention.leftTrig = 0;
-						break;
-					}
-				case 'Z':
-					{
-						intention.yPressed = false;
-						break;
-					}
-				case 'R':
-					{
-						intention.rbumpPressed = false;
-						break;
-					}
-				case 'E':
-					{
-						intention.lbumpPressed = false;
-						break;
-					}
+					intention.rightStickY = 0;
+					break;
+				}
+			case VK_DOWN:
+				{
+					intention.rightStickY = 0;
+					break;
+				}
+			case VK_LEFT:
+				{
+					intention.rightStickX = 0;
+					break;
+				}
+			case VK_RIGHT:
+				{
+					intention.rightStickX = 0;
+					break;
+				}
+			case VK_SPACE:
+				{
+					intention.rightTrig = 0;
+					break;
+				}
+			case VK_SHIFT:
+				{
+					intention.leftTrig = 0;
+					break;
+				}
+			case 'Z':
+				{
+					intention.yPressed = false;
+					break;
+				}
+			case 'R':
+				{
+					intention.rbumpPressed = false;
+					break;
+				}
+			case 'E':
+				{
+					intention.lbumpPressed = false;
+					break;
+				}
+			case 'A':
+				{
+					intention.leftStick = 0;
+					break;
+				}
+			case 'D':
+				{
+					intention.leftStick = 0;
+					break;
 				}
 			}
 		}
@@ -321,6 +321,16 @@ Intention Input::getIntention()
 bool Input::debugging()
 {
 	return debug;
+}
+
+bool Input::placingWaypoint()
+{
+	return placeWaypoint;
+}
+
+void Input::setPlaceWaypointFalse()
+{
+	placeWaypoint = false;
 }
 
 bool Input::networking()

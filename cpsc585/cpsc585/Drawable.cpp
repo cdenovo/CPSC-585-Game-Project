@@ -51,6 +51,11 @@ void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevic
 			mesh = WaypointMesh::getInstance(device);
 			break;
 		}
+	case LASERMODEL:
+		{
+			mesh = LaserModel::getInstance(device);
+			break;
+		}
 	default:
 		mesh = NULL;
 	}
@@ -84,11 +89,6 @@ void Drawable::render(IDirect3DDevice9* device)
 	device->SetTexture(0, texture);
 
 	mesh->render(device);
-}
-
-void Drawable::changeTexture(IDirect3DTexture9* newTexture)
-{
-	texture = newTexture;
 }
 
 void Drawable::setTransform(D3DXMATRIX* input)
@@ -131,9 +131,4 @@ hkVector4 Drawable::getYhkVector()
 hkVector4 Drawable::getZhkVector()
 {
 	return hkVector4(transform._31, transform._32, transform._33);
-}
-
-hkVector4 Drawable::gethkPosition()
-{
-	return hkVector4(transform._41, transform._42, transform._43);
 }

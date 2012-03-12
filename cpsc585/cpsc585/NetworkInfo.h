@@ -4,7 +4,8 @@
 #include <inaddr.h>
 //#include <WinSock2.h>
 
-#define MAXCLIENTS 5
+const int MAXCLIENTS = 5;
+const int NETWORK_PORT = 5869;
 
 //Client headers
 const char BUTTON = 'B';

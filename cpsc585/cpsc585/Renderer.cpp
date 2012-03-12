@@ -14,6 +14,7 @@ Renderer::Renderer()
 	numDrawables = 0;
 	drawables = NULL;
 	currentDrawable = 0;
+	hud = NULL;
 }
 
 
@@ -26,6 +27,8 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	numDrawables = numToDraw;
 
 	drawables = new Drawable*[numToDraw];
+	
+	hud = new HUD(width, height);
 
 	d3dObject = Direct3DCreate9(D3D_SDK_VERSION);
 	
@@ -163,6 +166,10 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTOP_SELECTARG1);
 	device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);	// Just to be safe (ignored)
 
+
+	// Set up HUD
+	hud->initialize(device);
+
 	return true;
 }
 
@@ -171,6 +178,13 @@ void Renderer::shutdown()
 	if (drawables)
 	{
 		// Clean up drawables
+	}
+
+	if (hud)
+	{
+		// Clean up HUD
+		hud->shutdown();
+		hud = NULL;
 	}
 
 	if (camera)
@@ -217,8 +231,6 @@ void Renderer::render()
 
 	device->BeginScene();
 
-	
-
 	for (int i = 0; i < currentDrawable; i++)
 	{
 		drawables[i]->render(device);
@@ -229,8 +241,14 @@ void Renderer::render()
 	{
 		writeText(sentences[i], i);
 	}
+	
 
 	device->EndScene();
+
+
+	// Now draw HUD
+	hud->render();
+
 
 	device->Present(NULL, NULL, NULL, NULL);
 
@@ -298,4 +316,9 @@ void Renderer::setFocus(int drawableIndex)
 IDirect3DDevice9* Renderer::getDevice()
 {
 	return device;
+}
+
+HUD* Renderer::getHUD()
+{
+	return hud;
 }

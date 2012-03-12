@@ -9,9 +9,10 @@ FrontWheel::FrontWheel(IDirect3DDevice9* device, int filter)
 
 	hkVector4 startAxis = hkVector4(-0.15f, 0, 0);
 	hkVector4 endAxis = hkVector4(0.15f, 0, 0);
-	hkReal radius = FRONTWHEELRAD;
+	hkReal radius = 0.35f;
 
 	hkpRigidBodyCinfo info;
+	info.m_gravityFactor = 0.0f;
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_MOVING;
 	info.m_collisionFilterInfo = hkpGroupFilter::calcFilterInfo(hkpGroupFilterSetup::LAYER_DYNAMIC, filter);

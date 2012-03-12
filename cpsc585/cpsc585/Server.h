@@ -7,8 +7,6 @@
 #include "NetworkInfo.h"
 #include "Racer.h"
 
-#define NETWORK_PORT 5869
-
 class Server
 {
 public:
