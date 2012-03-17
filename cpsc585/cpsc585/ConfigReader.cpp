@@ -77,5 +77,9 @@ void ConfigReader::parseLine(std::string line)
 		{
 			ss >> serverIP;
 		}
+		else if(key == "TOPSPEED")
+		{
+			ss >> topSpeed;
+		}
 	}
 }

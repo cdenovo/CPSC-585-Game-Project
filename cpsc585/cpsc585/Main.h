@@ -1,6 +1,6 @@
 #pragma once
-#include <Windows.h>
 #define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 
 // AI.h includes everything Main needs to know about
 #include "AI.h"
@@ -9,6 +9,7 @@ Renderer* renderer;
 AI* ai;
 Input* input;
 Sound* sound;
+TopMenu* menu;
 
 LPCSTR appName;
 HINSTANCE hInstance;

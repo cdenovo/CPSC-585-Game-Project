@@ -58,6 +58,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\DirectX;..\Havok\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -102,6 +103,7 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Sound.cpp" />
+    <ClCompile Include="TopMenu.cpp" />
     <ClCompile Include="Waypoint.cpp" />
     <ClCompile Include="WaypointEditor.cpp" />
     <ClCompile Include="WaypointMesh.cpp" />
@@ -135,6 +137,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="Sound.h" />
+    <ClInclude Include="TopMenu.h" />
     <ClInclude Include="Waypoint.h" />
     <ClInclude Include="WaypointEditor.h" />
     <ClInclude Include="WaypointMesh.h" />

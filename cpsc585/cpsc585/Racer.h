@@ -47,6 +47,7 @@ private:
 		hkVector4* xVector, hkVector4* zVector, float xFrictionForce, float zFrictionForce, float seconds);
 	void applyTireRaycast();
 	void applyCounterSpin(float seconds);
+	void applyDrag(float seconds);
 	void respawn();
 
 public:
@@ -97,6 +98,9 @@ private:
 	static float rearExtents;
 	static float frontExtents;
 	static float springForceCap;
+
+	static float dragCoeff;
+	static float topSpeed;
 	
 	static ConfigReader config;
 };

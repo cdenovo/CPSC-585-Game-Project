@@ -15,6 +15,7 @@ Renderer::Renderer()
 	drawables = NULL;
 	currentDrawable = 0;
 	hud = NULL;
+	menu = NULL;
 }
 
 
@@ -22,8 +23,10 @@ Renderer::~Renderer()
 {
 }
 
-bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float zFar, int numToDraw, char* msg)
+bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float zFar, int numToDraw, char* msg, TopMenu* m)
 {
+	menu = m;
+
 	numDrawables = numToDraw;
 
 	drawables = new Drawable*[numToDraw];

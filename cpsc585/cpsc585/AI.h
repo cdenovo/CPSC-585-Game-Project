@@ -19,6 +19,7 @@
 #include "CheckpointTimer.h"
 #include "Server.h"
 #include "Client.h"
+#include "TopMenu.h"
 
 #define NUMRACERS 5
 
@@ -28,8 +29,8 @@ public:
 	AI(void);
 	~AI(void);
 	void shutdown();
-	void initialize(Renderer* renderer, Input* input, Sound* sound);
-	void simulate(float milliseconds);
+	void initialize(Renderer* renderer, Input* input, Sound* sound, TopMenu* m);
+	bool simulate(float milliseconds);
 	void displayDebugInfo(Intention intention, float milliseconds);
 
 private:
@@ -45,6 +46,7 @@ private:
 	static unsigned __stdcall staticConnectToServer(void *pThis);
 	void connectToServer();
 	void runNetworking();
+	void runMenu();
 
 	Renderer* renderer;
 	Input* input;
@@ -188,4 +190,8 @@ private:
 	Intention racerIntents[NUMRACERS];
 	bool readyStatus[NUMRACERS];
 	Intention prevIntent;
+
+	//Menu
+	TopMenu *menu;
+	bool quit;
 };

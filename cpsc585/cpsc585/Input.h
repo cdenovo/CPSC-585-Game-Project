@@ -1,6 +1,7 @@
 #pragma once
 #pragma comment(lib, "XInput.lib")
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <XInput.h>
 #include "Intention.h"
@@ -19,6 +20,8 @@ public:
 	bool networking();
 	bool isServer();
 	bool isClient();
+	bool menuOn();
+	bool quitOn();
 	bool placingWaypoint();
 	void setPlaceWaypointFalse();
 
@@ -28,6 +31,7 @@ private:
 	bool client;
 	bool server;
 	bool debug;
+	bool menu;
 	Intention intention;
 	bool controllerAvailable;
 	bool placeWaypoint;

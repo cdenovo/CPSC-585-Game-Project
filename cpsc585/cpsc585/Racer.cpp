@@ -26,6 +26,9 @@ float Racer::frontExtents = config.frontExtents;
 float Racer::rearExtents = config.rearExtents;
 float Racer::springForceCap = config.springForceCap;
 
+float Racer::topSpeed = config.topSpeed;
+float Racer::dragCoeff = chassisMass*accelerationScale/(topSpeed*topSpeed);
+
 hkpWorld* Racer::physicsWorld = NULL;
 Sound* Racer::sound = NULL;
 
@@ -60,7 +63,6 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 	default:
 		drawable = new Drawable(RACER, "racer2.dds", device);
 	}
-
 
 	// Set up filter group (so the car doesn't collide with the wheels)
 	int collisionGroupFilter = p->getFilter();
@@ -335,6 +337,20 @@ void Racer::accelerate(float seconds, float value)
 	}
 }
 
+/**
+Vector dragForce = chassisRigidBody.GetLinearVelocity();
+float speed = dragForce.Normalize();
+dragForce.Scale(-dragCoeff * speed * speed);
+•To determine dragCoeff, set dragForce to accelForce, set speed == topSpeed, and solve
+*/
+void Racer::applyDrag(float seconds)
+{
+	hkVector4 dragForce = body->getLinearVelocity();
+	float test =dragCoeff;
+	float speed = dragForce.normalizeWithLength3();
+	dragForce.mul(-dragCoeff*speed*speed);
+	body->applyForce(seconds, dragForce);
+}
 
 // between -1.0 and 1.0 (left is negative)
 void Racer::steer(float seconds, float value)
@@ -361,21 +377,31 @@ void Racer::steer(float seconds, float value)
 		float centripScale = 0.0f;
 
 		// Now adjust forces (will need to tweak these values later)
-		if (dot < 15.0f)
+		if (dot < 10.0f)
+		{
+			torqueScale = 80.0f;
+			centripScale = 50.0f;
+		}
+		else if (dot < 15.0f)
 		{
 			//torqueScale = 40.0f;
-			torqueScale = 50.0f;
+			torqueScale = 58.0f;
 			centripScale = 50.0f;
 		}
 		else if (dot < 25.0f)
 		{
-			torqueScale = 50.0f;
-			centripScale = 70.0f;
+			torqueScale = 60.0f;
+			centripScale = 80.0f;
+		}
+		else if(dot < 45.0f)
+		{
+			torqueScale = 65.0f;
+			centripScale = 80.0f;
 		}
 		else
 		{
-			torqueScale = 70.0f;
-			centripScale = 80.0f;
+			torqueScale = 80.0f;
+			centripScale = 90.0f;
 		}
 
 		if (negative)
@@ -528,9 +554,10 @@ hkVector4 Racer::getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach,
 void Racer::applyForces(float seconds)
 {
 	applyFriction(seconds);
+	applyDrag(seconds);
 	applyTireRaycast();
 	applySprings(seconds);
-	applyCounterSpin(seconds);
+	//applyCounterSpin(seconds);
 
 	if (!laserReady)
 	{
@@ -718,7 +745,7 @@ void Racer::applyTireRaycast()
 
 void Racer::applyCounterSpin(float seconds)
 {
-	float airDamping = .99;
+	float airDamping = .9999;
 	if(!wheelFR->touchingGround && !wheelFL->touchingGround && !wheelRL->touchingGround && !wheelRR->touchingGround)
 	{
 		hkVector4 angularVel = body->getAngularVelocity();

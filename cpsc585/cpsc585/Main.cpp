@@ -8,6 +8,7 @@ bool initialize()
 	ai = new AI();
 	input = new Input();
 	sound = new Sound();
+	menu = new TopMenu(input);
 	
 	quit = false;
 
@@ -96,14 +97,14 @@ bool initialize()
 
 	// TO DO: Run the 'initialize' method for each component
 	char* errorMsg = new char[128];
-	if (!(renderer->initialize(resx, resy, hwnd, 1.0f, 1000.0f, 200, errorMsg)))
+	if (!(renderer->initialize(resx, resy, hwnd, 1.0f, 1000.0f, 200, errorMsg, menu)))
 	{
 		errorPopup(errorMsg);
 		errorPopup("Renderer initialization failed!");
 		return false;
 	}
 
-	ai->initialize(renderer, input, sound);
+	ai->initialize(renderer, input, sound, menu);
 	sound->initialize();
 
 	return true;
@@ -171,6 +172,11 @@ void shutdown()
 	{
 		renderer->shutdown();
 		renderer = NULL;
+	}
+
+	if(menu)
+	{
+		menu = NULL;
 	}
 
 	ClipCursor(NULL);
@@ -275,8 +281,8 @@ bool mainLoop()
 		return false;
 	}
 	
-	quit = input->update();
-	ai->simulate((currentTime - prevTime) / 1000.0f);
+	input->update();
+	quit = ai->simulate((currentTime - prevTime) / 1000.0f);
 	renderer->render();
 
 	prevTime = currentTime;

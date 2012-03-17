@@ -3,6 +3,7 @@
 
 AI::AI(void)
 {
+	menu = NULL;
 	renderer = NULL;
 	input = NULL;
 	physics = NULL;
@@ -57,6 +58,12 @@ void AI::shutdown()
 		physics = NULL;
 	}
 
+	if(menu)
+	{
+		delete menu;
+		menu = NULL;
+	}
+
 	if(checkPointTimer)
 	{
 		delete checkPointTimer;
@@ -71,11 +78,12 @@ void AI::shutdown()
 	}
 }
 
-void AI::initialize(Renderer* r, Input* i, Sound* s)
+void AI::initialize(Renderer* r, Input* i, Sound* s, TopMenu* m)
 {
 	renderer = r;
 	input = i;
 	sound = s;
+	menu = m;
 	count = 25;
 	fps = 0;
 	racerIndex = 0;
@@ -726,10 +734,34 @@ void AI::runNetworking()
 	}
 }
 
-void AI::simulate(float seconds)
+void AI::runMenu()
+{
+	menu->update(); //Update the menu
+
+	switch(menu->getState())
+	{
+	case STARTGAME:
+		{
+			//Code to start game goes here
+			break;
+		}
+	case QUIT:
+		{
+			quit = true;
+			break;
+		}
+	}
+
+	std::string stringArray[] = {menu->str()};
+	renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
+}
+
+bool AI::simulate(float seconds)
 {
 	_ASSERT(seconds > 0.0f);
 	Intention intention = input->getIntention();
+
+	quit = input->quitOn();
 
 	// Debugging Information ---------------------------------------
 	if(input->debugging()){
@@ -738,6 +770,10 @@ void AI::simulate(float seconds)
 	else if(input->networking())
 	{
 		runNetworking();
+	}
+	else if(input->menuOn())
+	{
+		runMenu();
 	}
 	else
 	{
@@ -756,12 +792,11 @@ void AI::simulate(float seconds)
 	
 	for(int i = 0; i < NUMRACERS; i++)
 	{
-		racerMinds[i]->update(hud, intention, seconds, waypoints, checkpoints); //Update each racermind
-
 		if(racerMinds[i]->getType() != COMPUTER && player != racers[i] && server.gameStarted) //If we are running as the server, update the racers based on networked button presses
 		{
-			racers[i]->steer(seconds, server.intents[i].steering);
-			racers[i]->accelerate(seconds, server.intents[i].acceleration);
+			//racers[i]->steer(seconds, server.intents[i].steering);
+			//racers[i]->accelerate(seconds, server.intents[i].acceleration);
+			racerMinds[i]->update(hud, server.intents[i], seconds, waypoints, checkpoints); //Update each racermind
 
 			// Reset the player (in case you fall over)
 			if (server.intents[i].yPressed)
@@ -770,12 +805,16 @@ void AI::simulate(float seconds)
 				racers[i]->reset(new hkVector4(cwPosition.x, cwPosition.y, cwPosition.z));
 			}
 
-			racers[i]->applyForces(seconds);
+			//racers[i]->applyForces(seconds);
 		}
 		else if(client.newWorldInfo) //If we are running as a client, update the world info if there is new info to be had
 		{
 			racers[i]->unserialize(client.world[i]);
 			racers[i]->applyForces(seconds);
+		}
+		else
+		{
+			racerMinds[i]->update(hud, intention, seconds, waypoints, checkpoints); //Update each racermind
 		}
 	}
 	client.newWorldInfo = false;
@@ -826,7 +865,7 @@ void AI::simulate(float seconds)
 		racers[i]->update();
 	}
 
-	return;
+	return quit;
 }
 
 

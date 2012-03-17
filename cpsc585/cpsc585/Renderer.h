@@ -2,6 +2,7 @@
 #pragma comment(lib, "d3dx9.lib")
 #pragma comment(lib, "DxErr.lib")
 
+#define WIN32_LEAN_AND_MEAN
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <DxErr.h>
@@ -11,14 +12,14 @@
 #include "Camera.h"
 #include "Drawable.h"
 #include "HUD.h"
-
+#include "TopMenu.h"
 
 class Renderer
 {
 public:
 	Renderer();
 	~Renderer();
-	bool initialize(int width, int height, HWND hwnd, float zNear, float zFar, int numDrawables, char* msg);
+	bool initialize(int width, int height, HWND hwnd, float zNear, float zFar, int numDrawables, char* msg, TopMenu *m);
 	void shutdown();
 	void render();
 	void setText(std::string* sentences, int count);
@@ -49,4 +50,6 @@ private:
 	Drawable** drawables;
 
 	HUD* hud;
+
+	TopMenu* menu;
 };

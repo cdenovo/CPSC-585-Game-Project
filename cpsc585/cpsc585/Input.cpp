@@ -9,6 +9,7 @@ Input::Input(void)
 	network = false;
 	client = false;
 	server = false;
+	menu = false;
 
 	XINPUT_CAPABILITIES cap;
 	
@@ -36,14 +37,22 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 {
 	if ((umessage == WM_KEYDOWN) && (wparam == 'Q'))
 		quit = true;
+	else if ((umessage == WM_KEYDOWN) && (wparam == 'M'))
+	{
+		menu = !menu;
+		network = false;
+		debug = false;
+	}
 	else if ((umessage == WM_KEYDOWN) && (wparam == 'B'))
 	{
 		debug = !debug;
 		network = false;
+		menu = false;
 	}
 	else if ((umessage == WM_KEYDOWN) && (wparam == 'N'))
 	{
 		debug = false;
+		menu = false;
 		network = !network;
 	}
 	else if ((umessage == WM_KEYDOWN) && (wparam == 'C') && network && !server)
@@ -346,4 +355,14 @@ bool Input::isClient()
 bool Input::isServer()
 {
 	return server;
+}
+
+bool Input::menuOn()
+{
+	return menu;
+}
+
+bool Input::quitOn()
+{
+	return quit;
 }

@@ -1,11 +1,12 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
 #include <iostream>
-#include <Windows.h>
 #include <sstream>
 #include "Intention.h"
 #include "NetworkInfo.h"
 #include "Racer.h"
+#include <Windows.h>
 
 class Server
 {
@@ -52,5 +53,6 @@ private:
 	bool tcp_ready;
 	bool udp_ready;
 	char in_buffer[100];
+	int seqNum;
 };
 

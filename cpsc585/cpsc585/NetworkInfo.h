@@ -1,8 +1,10 @@
 #pragma once
 
-#include <WinSock.h>
-#include <inaddr.h>
-//#include <WinSock2.h>
+//#include <WinSock.h>
+//#include <inaddr.h>
+#define WIN32_LEAN_AND_MEAN
+#include <WinSock2.h>
+#include <ws2tcpip.h>
 
 const int MAXCLIENTS = 5;
 const int NETWORK_PORT = 5869;
@@ -28,4 +30,5 @@ struct ClientInfo
 	SOCKET sock;
 	bool ready;
 	SOCKADDR_IN addr;
+	addrinfo * result;
 };

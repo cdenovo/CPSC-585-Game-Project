@@ -50,5 +50,6 @@ private:
 	bool udp_ready;
 	bool wsa_ready;
 	WSADATA w; //holds winsock info
+	int seqNum;
 };
 
