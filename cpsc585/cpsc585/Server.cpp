@@ -1,5 +1,7 @@
 #include "Server.h"
 
+#define CLIENT_TIMEOUT 1
+
 Server::Server()
 {
 	wsa_ready = false;
@@ -154,7 +156,7 @@ int Server::setupTCPSocket()
 	return 0;
 }
 
-int Server::lobbyListen()
+int Server::lobbyListen(float milliseconds)
 {
 	//tcp for joining clients and for lobby communications
 	if (!tcp_ready || !wsa_ready)
@@ -172,6 +174,9 @@ int Server::lobbyListen()
 		std::cout << "A client has joined the lobby!" << std::endl;
 		clients[numClients].id = numClients;
 		clients[numClients].ready = false;
+		//newly added (TAG1)
+		clients[numClients].connected = true;
+		clients[numClients].millisecond_lag = 0;
 		clients[numClients].color = numClients;
 		clients[numClients].addr.sin_family = AF_INET;
 		clients[numClients].addr.sin_port = htons(NETWORK_PORT);
@@ -180,12 +185,12 @@ int Server::lobbyListen()
 		sendLobbyInfo();
 	}
 
-	getTCPMessages();
+	getTCPMessages(milliseconds);
 
 	return 0;
 }
 
-int Server::raceListen()
+int Server::raceListen(float milliseconds)
 {
 	//udp for vehicle control and tcp for game control
 	if (!udp_ready || !tcp_ready || !wsa_ready)
@@ -193,7 +198,7 @@ int Server::raceListen()
 		std::cout << "Error: Trying to listen on TCP/UDP sockets when Winsock or sockets are not ready." << std::endl;
 		return 0;
 	}
-	getTCPMessages();
+	getTCPMessages(milliseconds);
 	getUDPMessages();
 
 	return 0;
@@ -405,7 +410,7 @@ int Server::sendID(int id)
 /**
  * Receives any TCP messages in the buffer
  */
-void Server::getTCPMessages()
+void Server::getTCPMessages(float milliseconds)
 {
 	char buff[1000];
 	bool changes = false;
@@ -413,6 +418,13 @@ void Server::getTCPMessages()
 	for(int i = 1; i < numClients; i++)
 	{
 		int err = 0;
+
+		//timeout feature (TAG1)
+		clients[i].millisecond_lag += milliseconds;
+
+		if (clients[i].millisecond_lag > CLIENT_TIMEOUT){
+			std::cout << "Client " << i << " has timed out" << std::endl;
+		}
 
 		while(err != WSAEWOULDBLOCK)
 		{
@@ -429,10 +441,23 @@ void Server::getTCPMessages()
 
 				//Get the message
 				err = recv(clients[i].sock, buff, size, 0);
-				if(err == -1)
+
+				if (err == 0)
+				{
+					//client has closed connection safely, need to make new server (TAG1)
+					std::cout << "Client " << i << " connection closed safely, need to swap to AI." << std::endl;
+					clients[i].connected = false;
+				}
+
+				else if(err == -1)
 				{
 					err = WSAGetLastError();
 				}
+
+				//assume client is connected since we received a message (TAG1)
+				//should we set changes to true????
+				clients[i].millisecond_lag = 0;
+				clients[i].connected = true;
 
 				//Call the correct function depending on the message
 				switch(buff[0])

@@ -14,6 +14,7 @@ const char BUTTON = 'B';
 const char READY = 'R';
 const char UNREADY = 'U';
 const char COLOR = 'C';
+const char ALIVE = 'A';
 
 //Server headers
 const char TRACK = 'T';
@@ -29,6 +30,7 @@ struct ClientInfo
 	int color;
 	SOCKET sock;
 	bool ready;
+	bool connected;
+	float millisecond_lag;
 	SOCKADDR_IN addr;
-	addrinfo * result;
 };

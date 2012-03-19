@@ -15,8 +15,8 @@ public:
 	~Client();
 
 	bool connectToServer(int port, std::string ipAddress);
-	void getTCPMessages();
-	void getUDPMessages();
+	void getTCPMessages(float milliseconds);
+	void getUDPMessages(float milliseconds);
 
 	int setupWSA();
 	int setupUDPSocket();
@@ -25,6 +25,7 @@ public:
 	int unready();
 	int setColor(int color);
 
+	int sendAliveMessage();
 	int sendButtonState(Intention intention);
 
 	std::string track;

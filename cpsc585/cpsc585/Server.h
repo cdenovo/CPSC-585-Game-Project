@@ -17,8 +17,8 @@ public:
 	bool gameStarted;
 	std::string track;
 
-	int lobbyListen();
-	int raceListen();
+	int lobbyListen(float milliseconds);
+	int raceListen(float milliseconds);
 	
 	int setupWSA();
 	int setupTCPSocket();
@@ -27,7 +27,7 @@ public:
 	int changeTrack(std::string track);
 	int startGame();
 	int endGame();
-	void getTCPMessages();
+	void getTCPMessages(float milliseconds);
 	void getUDPMessages();
 	int sendLobbyInfo();
 	int sendTCPMessage(const char* message, int length, int clientID);

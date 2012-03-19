@@ -19,6 +19,9 @@ AI::AI(void)
 	ai4 = NULL;
 	world = NULL;
 
+	isClient = false;
+	isServer = false;
+
 	//Networking
 	hostName = "";
 	clientConnected = false;
@@ -514,10 +517,10 @@ void AI::initializeCheckpoints()
 	checkpoints[6] = cp7;
 }
 
-unsigned __stdcall AI::staticGetIP(void * pThis)
+unsigned __stdcall AI::staticSetupServer(void * pThis)
 {
     AI * pthX = (AI*)pThis;   // the tricky cast
-    pthX->getIP();           // now call the true entry-point-function
+    pthX->setupServer();           // now call the true entry-point-function
 
     // A thread terminates automatically if it completes execution,
     // or it can terminate itself with a call to _endthread().
@@ -525,7 +528,7 @@ unsigned __stdcall AI::staticGetIP(void * pThis)
     return 1;          // the thread exit code
 }
 
-void AI::getIP()
+void AI::setupServer()
 {
     // This is the desired entry-point-function but to get
     // here we have to use a 2 step procedure involving
@@ -580,16 +583,23 @@ void AI::connectToServer()
 	client.setupUDPSocket();
 }
 
-void AI::runNetworking()
+void AI::runNetworking(float milliseconds)
 {
-	if(input->isServer())
+	//See if this game should be a client or a server
+	if(!isServer && !isClient)
+	{
+		isServer = input->isServer();
+		isClient = input->isClient();
+	}
+
+	if(isServer)
 	{
 		if(!serverStarted)
 		{
 			unsigned  uiThread1ID;
 			hth1 = (HANDLE)_beginthreadex( NULL,         // security
                                 0,            // stack size
-                                AI::staticGetIP,  // entry-point-function
+                                AI::staticSetupServer,  // entry-point-function
                                 this,           // arg list holding the "this" pointer
                                 0,  //Thread starts right away
                                 &uiThread1ID );
@@ -599,12 +609,14 @@ void AI::runNetworking()
 		}
 		else if(!server.gameStarted)
 		{
-			server.lobbyListen();
+			server.lobbyListen(milliseconds);
+			milliseconds = 0;
 		}
 		else
 		{
 			server.update(racers,NUMRACERS);
-			server.raceListen();
+			server.raceListen(milliseconds);
+			milliseconds = 0;
 		}
 		std::stringstream ss;
 		for(int i = 1; i < server.numClients; i++)
@@ -618,7 +630,7 @@ void AI::runNetworking()
 		std::string stringArray[] = {"You are a server.",hostName,ss.str()};
 		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
 	}
-	else if(input->isClient())
+	else if(isClient)
 	{
 		std::string msg1 = "";
 
@@ -643,6 +655,9 @@ void AI::runNetworking()
 		}
 		else if(clientConnected)
 		{
+			//boolean for determining whether to send an "alive" message (TAG1)
+			bool msg_sent = false;
+
 			Intention intent = input->getIntention();
 			if(!client.start)
 			{
@@ -653,7 +668,9 @@ void AI::runNetworking()
 					idFound = true;
 				}
 
-				client.getTCPMessages();
+				client.getTCPMessages(milliseconds);
+				//set milliseconds to 0 in case another get is called after this
+				milliseconds = 0;
 
 				//If the player has been assigned an ID, set them to that car
 				if(!idFound && client.id >= 0)
@@ -675,11 +692,17 @@ void AI::runNetworking()
 				{
 					client.ready();
 					readyPressed = true;
+
+					//a msg was sent
+					msg_sent = true;
 				}
 				else if(intent.lbumpPressed && readyPressed)
 				{
 					client.unready();
 					readyPressed = false;
+
+					//a msg was sent
+					msg_sent = true;
 				}
 				
 				if(!client.isReady)
@@ -713,15 +736,26 @@ void AI::runNetworking()
 			}
 			else
 			{
-				client.getUDPMessages();
+				client.getUDPMessages(milliseconds);
+				//set milliseconds to 0 in case another get function is called (TAG1)
+				milliseconds = 0;
 
 				if(!intent.equals(prevIntent))
 				{
 					client.sendButtonState(intent);
+
+					//a msg was sent
+					msg_sent = true;
 				}
 				msg1 = "Game started.";
 			}
 			prevIntent = intent;
+
+			//send an "alive" message if no messages were sent (TAG1)
+			if (!msg_sent)
+			{
+				client.sendAliveMessage();
+			}
 		}
 
 		std::string stringArray[] = {"You are a client.",msg1};
@@ -769,7 +803,7 @@ bool AI::simulate(float seconds)
 	}
 	else if(input->networking())
 	{
-		runNetworking();
+		runNetworking(seconds);
 	}
 	else if(input->menuOn())
 	{

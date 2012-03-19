@@ -41,11 +41,11 @@ private:
 	std::string boolToString(bool boolean);
 
 	//Networking functions
-	static unsigned __stdcall staticGetIP(void * pThis);
-	void getIP();
+	static unsigned __stdcall staticSetupServer(void * pThis);
+	void setupServer();
 	static unsigned __stdcall staticConnectToServer(void *pThis);
 	void connectToServer();
-	void runNetworking();
+	void runNetworking(float milliseconds);
 	void runMenu();
 
 	Renderer* renderer;
@@ -190,6 +190,8 @@ private:
 	Intention racerIntents[NUMRACERS];
 	bool readyStatus[NUMRACERS];
 	Intention prevIntent;
+	bool isClient;
+	bool isServer;
 
 	//Menu
 	TopMenu *menu;

@@ -1,5 +1,8 @@
 #include "Client.h"
 
+//new timeout feature (TAG1)
+#define SERVER_TIMEOUT 1000
+
 Client::Client()
 {
 	start = false;
@@ -143,6 +146,7 @@ bool Client::connectToServer(int port, std::string ipAddress)
 			{
 				int error = WSAGetLastError();
 				std::cout << "Fail!\n";
+				//what should we do here?
 			}
 
 			//Set to non-blocking
@@ -158,24 +162,44 @@ bool Client::connectToServer(int port, std::string ipAddress)
 /**
  * Receives any TCP messages in the buffer
  */
-void Client::getTCPMessages()
+void Client::getTCPMessages(float milliseconds)
 {
-	char buff1[1000];
 	char buff[1000];
 
 	int err = 0;
+
+	//add milliseconds passed to lag timer for server (TAG1)
+	clients[0].millisecond_lag += milliseconds;
+
+	//check for timeout (TAG1)
+	if (clients[0].millisecond_lag > SERVER_TIMEOUT)
+	{
+		clients[0].connected = false;
+		std::cout << "Server timeout in getTCP" << std::endl;
+	}
 
 	while(err != WSAEWOULDBLOCK)
 	{
 		//Find out the size of the message
 		err = recv(sTCP, buff, 5, MSG_PEEK);
-		if(err == -1)
+
+		if (err == 0)
+		{
+			//server has closed connection safely, need to make new server (TAG1)
+			std::cout << "Server connection closed safely, need to connect to new server." << std::endl;
+			clients[0].connected = false;
+		}
+
+		else if(err == -1)
 		{
 			err = WSAGetLastError();
 		}
 
 		if(err != WSAEWOULDBLOCK)
 		{
+			//assumes there was no error (TAG1)
+			clients[0].millisecond_lag = 0;
+
 			int size = *((int*)(buff+1)); //Get size
 
 			//Get the message
@@ -183,6 +207,8 @@ void Client::getTCPMessages()
 			if(err == -1)
 			{
 				err = WSAGetLastError();
+				//error while reading tcp message (TAG1)
+				std::cout << "Error receiving TCP from server." << std::endl;
 			}
 
 			//Call the correct function depending on the message
@@ -234,11 +260,21 @@ void Client::getTCPMessages()
 /**
  * Receives any UDP messages in the buffer
  */
-void Client::getUDPMessages()
+void Client::getUDPMessages(float milliseconds)
 {
 	char buff[1000];
 
 	int err = 0;
+
+	//add milliseconds passed to lag timer for server (TAG1)
+	clients[0].millisecond_lag += milliseconds;
+
+	//check for timeout (TAG1)
+	if (clients[0].millisecond_lag > SERVER_TIMEOUT)
+	{
+		clients[0].connected = false;
+		std::cout << "Server timeout in getUDP" << std::endl;
+	}
 
 	while(err != WSAEWOULDBLOCK)
 	{
@@ -258,7 +294,11 @@ void Client::getUDPMessages()
 			if(err == -1)
 			{
 				err = WSAGetLastError();
+				//we should handle this properly (TAG1)
 			}
+
+			//assumes there was no error (TAG1)
+			clients[0].millisecond_lag = 0;
 
 			//Call the correct function depending on the message
 			switch(buff[0])
@@ -350,6 +390,17 @@ int Client::setColor(int color)
 
 	delete[] buffer;
 
+	return err;
+}
+
+//notifies server that this client is alive (TAG1)
+int Client::sendAliveMessage()
+{
+	int size = 1;
+	char* buffer = new char[size];
+	buffer[0] = ALIVE;
+	int err = sendTCPMessage(buffer, size);
+	delete[] buffer;
 	return err;
 }
 

@@ -123,6 +123,12 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 						intention.leftStick = 25000;
 						break;
 					}
+				case VK_RETURN:
+					{
+						intention.aPressed = true;
+						break;
+					}
+
 			}
 		}
 		else if (umessage == WM_KEYUP)
@@ -184,6 +190,11 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 					intention.leftStick = 0;
 					break;
 				}
+			case VK_RETURN:
+					{
+						intention.aPressed = false;
+						break;
+					}
 			}
 		}
 		// Compute acceleration and steering (between -1.0 and 1.0)
