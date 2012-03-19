@@ -20,6 +20,7 @@ public:
 	float chassisMass;
 	float accelerationScale;
 	float springForceCap;
+	float grip;
 
 private:
 	std::ifstream file;

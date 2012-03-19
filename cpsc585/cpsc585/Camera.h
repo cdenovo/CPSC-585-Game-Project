@@ -16,10 +16,11 @@ public:
 
 	void render();
 	void getViewMatrix(D3DXMATRIX& matrix);
+	void setLookDir(float x, float y, float z);
 
 private:
 	D3DXMATRIX viewMatrix;
 	Drawable* focusObject;
-	D3DXVECTOR3 up, lookAt, position;
+	D3DXVECTOR3 up, lookAt, position, lookDir;
 	float kValue;
 };

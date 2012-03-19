@@ -73,5 +73,9 @@ void ConfigReader::parseLine(std::string line)
 		{
 			ss >> springForceCap; //Convert to float
 		}
+		else if(key == "GRIP")
+		{
+			ss >> grip; //Convert to float
+		}
 	}
 }

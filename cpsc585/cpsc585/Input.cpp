@@ -204,21 +204,35 @@ bool Input::update()
 
 		if (gamepad.sThumbLX > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
-			intention.leftStick = gamepad.sThumbLX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+			intention.leftStickX = gamepad.sThumbLX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 		}
 		else if (gamepad.sThumbLX < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
-			intention.leftStick = gamepad.sThumbLX + XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+			intention.leftStickX = gamepad.sThumbLX + XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 		}
 		else
 		{
-			intention.leftStick = 0;
+			intention.leftStickX = 0;
+		}
+
+		if (gamepad.sThumbLY > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+		{
+			intention.leftStickY = gamepad.sThumbLY - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+		}
+		else if (gamepad.sThumbLY < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+		{
+			intention.leftStickY = gamepad.sThumbLY + XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+		}
+		else
+		{
+			intention.leftStickY = 0;
 		}
 
 		
 		// Compute acceleration and steering (between -1.0 and 1.0)
-		intention.acceleration = (intention.rightTrig - intention.leftTrig) / (float) (255 - XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
-		intention.steering = intention.leftStick / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+		intention.acceleration = intention.leftStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+		intention.cameraX = intention.rightStickX / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
+		intention.cameraY = intention.rightStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
 		
 
 

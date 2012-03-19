@@ -83,7 +83,6 @@
     <ClCompile Include="AIMind.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CheckpointTimer.cpp" />
-    <ClCompile Include="Client.cpp" />
     <ClCompile Include="ConfigReader.cpp" />
     <ClCompile Include="Drawable.cpp" />
     <ClCompile Include="FrontWheel.cpp" />
@@ -100,7 +99,6 @@
     <ClCompile Include="RearWheel.cpp" />
     <ClCompile Include="RearWheelMesh.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Server.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="Waypoint.cpp" />
     <ClCompile Include="WaypointEditor.cpp" />
@@ -114,7 +112,6 @@
     <ClInclude Include="AIMind.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CheckpointTimer.h" />
-    <ClInclude Include="Client.h" />
     <ClInclude Include="ConfigReader.h" />
     <ClInclude Include="Drawable.h" />
     <ClInclude Include="FrontWheel.h" />
@@ -132,7 +129,6 @@
     <ClInclude Include="RearWheel.h" />
     <ClInclude Include="RearWheelMesh.h" />
     <ClInclude Include="Renderer.h" />
-    <ClInclude Include="Server.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="Waypoint.h" />
     <ClInclude Include="WaypointEditor.h" />

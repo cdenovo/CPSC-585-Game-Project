@@ -30,11 +30,13 @@ public:
 	// Analog State
 	int rightStickX;
 	int rightStickY;
-	int leftStick;
+	int leftStickX;
+	int leftStickY;
 	int rightTrig;
 	int leftTrig;
 
 
 	float acceleration; // between -1.0 and 1.0
-	float steering; // between -1.0 and 1.0
+	float cameraX; // between -1.0 and 1.0
+	float cameraY; // between -1.0 and 1.0
 };

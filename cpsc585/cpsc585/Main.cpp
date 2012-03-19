@@ -275,8 +275,14 @@ bool mainLoop()
 		return false;
 	}
 	
+	float deltaTime = (currentTime - prevTime) / 1000.0f;
+	
+	if (deltaTime > 0.5f)
+		deltaTime = 0.5f;
+
+
 	quit = input->update();
-	ai->simulate((currentTime - prevTime) / 1000.0f);
+	ai->simulate(deltaTime);
 	renderer->render();
 
 	prevTime = currentTime;

@@ -26,7 +26,9 @@ public:
 	void setFocus(int drawableIndex);
 	IDirect3DDevice9* getDevice();
 	HUD* getHUD();
+	Camera* getCamera();
 	
+
 private:
 	void writeText(std::string text, int line);
 
@@ -37,7 +39,7 @@ private:
 	D3DXMATRIX worldMatrix;
 	D3DXMATRIX orthoMatrix;
 
-	Camera* camera;
+	
 	
 	ID3DXFont* font;
 	
@@ -49,4 +51,5 @@ private:
 	Drawable** drawables;
 
 	HUD* hud;
+	Camera* camera;
 };

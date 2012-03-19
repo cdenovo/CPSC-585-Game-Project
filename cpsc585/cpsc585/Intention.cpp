@@ -13,12 +13,12 @@ Intention::Intention(void)
 	rbumpPressed = false;
 	rightStickX = 0;
 	rightStickY = 0;
-	leftStick = 0;
+	leftStickX = 0;
+	leftStickY = 0;
 	rightTrig = 0;
 	leftTrig = 0;
 
 	acceleration = 0;
-	steering = 0;
 }
 
 
@@ -38,12 +38,12 @@ void Intention::reset()
 	rbumpPressed = false;
 	rightStickX = 0;
 	rightStickY = 0;
-	leftStick = 0;
+	leftStickX = 0;
+	leftStickY = 0;
 	rightTrig = 0;
 	leftTrig = 0;
 
 	acceleration = 0;
-	steering = 0;
 }
 
 
@@ -76,8 +76,8 @@ std::string Intention::serialize()
 	bitstr[4] = rightStickY & 0x00FF;
 
 	//Store leftStick
-	bitstr[5] = (leftStick & 0xFF00) >> 8;
-	bitstr[6] = leftStick & 0x00FF;
+	bitstr[5] = (leftStickX & 0xFF00) >> 8;
+	bitstr[6] = leftStickX & 0x00FF;
 
 	//Store rightTrig
 	bitstr[7] = (rightTrig & 0xFF00) >> 8;
@@ -109,7 +109,7 @@ void Intention::unserialize(char bitstr[])
 
 	rightStickX = ((int)bitstr[1] << 8) | bitstr[2]; //Get rightStickX
 	rightStickY = ((int)bitstr[3] << 8) | bitstr[4]; //Get rightStickY
-	leftStick = ((int)bitstr[5] << 8) | bitstr[6]; //Get leftStick
+	leftStickX = ((int)bitstr[5] << 8) | bitstr[6]; //Get leftStickX
 	rightTrig = ((int)bitstr[7] << 8) | bitstr[8]; //Get rightTrig
 	leftTrig = ((int)bitstr[9] << 8) | bitstr[10]; //Get leftTrig
 }
@@ -128,7 +128,7 @@ std::string Intention::toStr()
 	ss << "lbumpPressed: " << lbumpPressed << "\nrbumpPressed: " << rbumpPressed << std::endl;
 
 	ss << "rightStickX: " << rightStickX << "\nrightStickY: " << rightStickY << std::endl;
-	ss << "leftStick: " << leftStick << std::endl;
+	ss << "leftStickX: " << leftStickX << std::endl;
 	ss << "rightTrig: " << rightTrig << "\nleftTrig: " << leftTrig << std::endl;
 
 	return ss.str();

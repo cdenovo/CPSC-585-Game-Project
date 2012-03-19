@@ -22,6 +22,7 @@ public:
 		float rotX, float rotY, float rotZ);	// In Radians
 	void update();
 
+	void brake(float seconds);
 	void accelerate(float seconds, float value);	// between -1.0 and 1.0 (backwards is negative)
 	void steer(float seconds, float value);			// between -1.0 and 1.0 (left is negative)
 
@@ -39,7 +40,7 @@ private:
 	void applySprings(float seconds);
 	void applyFriction(float seconds);
 	void applyFrictionToTire(hkVector4* attachPoint, hkpRigidBody* wheelBody,
-		hkVector4* xVector, hkVector4* zVector, float xFrictionForce, float zFrictionForce, float seconds);
+		float xFrictionForce, float zFrictionForce, float seconds, WheelType type);
 	void applyTireRaycast();
 	void respawn();
 
@@ -53,6 +54,11 @@ public:
 	int kills;
 	float laserTime;
 
+	hkVector4 lookDir;
+	float lookHeight;
+
+	float currentAcceleration;
+
 private:
 	Drawable* laserDraw;
 
@@ -64,6 +70,7 @@ private:
 	RearWheel* wheelRR;
 
 	float currentSteering;
+
 
 	static hkpWorld* physicsWorld;
 	static Sound* sound;
@@ -91,6 +98,7 @@ private:
 	static float rearExtents;
 	static float frontExtents;
 	static float springForceCap;
+	static float grip;
 	
 	static ConfigReader config;
 };
