@@ -28,7 +28,7 @@ public:
 	int startGame();
 	int endGame();
 	void getTCPMessages(float milliseconds);
-	void getUDPMessages();
+	void getUDPMessages(float seconds);
 	int sendLobbyInfo();
 	int sendTCPMessage(const char* message, int length, int clientID);
 	int sendUDPMessage(const char* message, int length, int clientID);
@@ -40,6 +40,7 @@ public:
 	Intention intents[MAXCLIENTS];
 	int numClients;
 	ClientInfo clients[MAXCLIENTS];
+	int id;
 
 private:
 

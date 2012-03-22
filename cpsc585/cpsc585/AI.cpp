@@ -583,6 +583,17 @@ void AI::connectToServer()
 	client.setupUDPSocket();
 }
 
+void AI::switchToServer()
+{
+	for(int i = 0; i < server.numClients; i++)
+	{
+		if(server.clients[i].connected && racerMinds[i]->getType() == COMPUTER)
+		{
+			racerMinds[i]->togglePlayerComputerAI();
+		}
+	}
+}
+
 void AI::runNetworking(float milliseconds)
 {
 	//See if this game should be a client or a server
@@ -614,16 +625,24 @@ void AI::runNetworking(float milliseconds)
 		}
 		else
 		{
+			//Check if any racers have disconnected and if they have, switch them to AI
+			for(int i = 0; i < NUMRACERS; i++)
+			{
+				if(racerMinds[i]->getType() == PLAYER && !server.clients[i].connected)
+				{
+					racerMinds[i]->togglePlayerComputerAI();
+				}
+			}
 			server.update(racers,NUMRACERS);
 			server.raceListen(milliseconds);
 			milliseconds = 0;
 		}
 		std::stringstream ss;
-		for(int i = 1; i < server.numClients; i++)
+		for(int i = 1; i < MAXCLIENTS; i++)
 		{
-			ss << "Player " << i << " has joined.\n";
-			if(racerMinds[i]->getType() == COMPUTER)
+			if(racerMinds[i]->getType() == COMPUTER && server.clients[i].connected)
 			{
+				ss << "Player " << i << " has joined.\n";
 				racerMinds[i]->togglePlayerComputerAI();
 			}
 		}
@@ -704,6 +723,10 @@ void AI::runNetworking(float milliseconds)
 					//a msg was sent
 					msg_sent = true;
 				}
+				else
+				{
+					client.sendAliveMessage();
+				}
 				
 				if(!client.isReady)
 				{
@@ -723,7 +746,7 @@ void AI::runNetworking(float milliseconds)
 
 				for(int i = 0; i < client.numClients; i++)
 				{
-					if(client.clients[i].ready)
+					if(client.clients[i].connected && client.clients[i].ready)
 					{
 						ss << "Player " << client.clients[i].id << " is ready.\n";
 					}
@@ -736,17 +759,19 @@ void AI::runNetworking(float milliseconds)
 			}
 			else
 			{
+				client.getTCPMessages(milliseconds);
 				client.getUDPMessages(milliseconds);
 				//set milliseconds to 0 in case another get function is called (TAG1)
 				milliseconds = 0;
 
-				if(!intent.equals(prevIntent))
+				//if(!intent.equals(prevIntent))
 				{
 					client.sendButtonState(intent);
 
 					//a msg was sent
 					msg_sent = true;
 				}
+
 				msg1 = "Game started.";
 			}
 			prevIntent = intent;
@@ -754,7 +779,7 @@ void AI::runNetworking(float milliseconds)
 			//send an "alive" message if no messages were sent (TAG1)
 			if (!msg_sent)
 			{
-				client.sendAliveMessage();
+				//client.sendAliveMessage();
 			}
 		}
 

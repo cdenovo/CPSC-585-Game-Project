@@ -1,7 +1,7 @@
 #include "Client.h"
 
 //new timeout feature (TAG1)
-#define SERVER_TIMEOUT 1000
+const int SERVER_TIMEOUT = 5;
 
 Client::Client()
 {
@@ -13,6 +13,10 @@ Client::Client()
 	newWorldInfo = false;
 	udp_ready = false;
 	wsa_ready = false;
+	for(int i = 0; i < MAXCLIENTS; i++)
+	{
+		clients[i].millisecond_lag = 0;
+	}
 }
 
 Client::~Client()
@@ -119,6 +123,9 @@ bool Client::connectToServer(int port, std::string ipAddress)
 		target.sin_addr.s_addr = inet_addr(ipAddress.c_str());
 
 		sTCP = socket(AF_INET, SOCK_STREAM, 0); //Create TCP socket
+
+		int nSocketBuffer = 131072; // 128k
+		setsockopt(sTCP,SOL_SOCKET,SO_SNDBUF,(LPCSTR)&nSocketBuffer,sizeof(int));
 		//setupUDPSocket();
 		//sUDP = socket(AF_INET, SOCK_DGRAM, 0); // Create UDP socket
 
@@ -167,6 +174,7 @@ void Client::getTCPMessages(float milliseconds)
 	char buff[1000];
 
 	int err = 0;
+	bool hasError = false;
 
 	//add milliseconds passed to lag timer for server (TAG1)
 	clients[0].millisecond_lag += milliseconds;
@@ -178,24 +186,24 @@ void Client::getTCPMessages(float milliseconds)
 		std::cout << "Server timeout in getTCP" << std::endl;
 	}
 
-	while(err != WSAEWOULDBLOCK)
+	while(!hasError)
 	{
 		//Find out the size of the message
 		err = recv(sTCP, buff, 5, MSG_PEEK);
 
-		if (err == 0)
-		{
-			//server has closed connection safely, need to make new server (TAG1)
-			std::cout << "Server connection closed safely, need to connect to new server." << std::endl;
-			clients[0].connected = false;
-		}
 
-		else if(err == -1)
+
+		if(err == -1)
 		{
 			err = WSAGetLastError();
+			hasError = true;
+			if(err != WSAEWOULDBLOCK)
+			{
+				clients[0].connected = false;
+			}
 		}
 
-		if(err != WSAEWOULDBLOCK)
+		if(!hasError)
 		{
 			//assumes there was no error (TAG1)
 			clients[0].millisecond_lag = 0;
@@ -209,49 +217,56 @@ void Client::getTCPMessages(float milliseconds)
 				err = WSAGetLastError();
 				//error while reading tcp message (TAG1)
 				std::cout << "Error receiving TCP from server." << std::endl;
+				hasError = true;
+				if(err != WSAEWOULDBLOCK)
+				{
+					clients[0].connected = false;
+				}
 			}
-
-			//Call the correct function depending on the message
-			switch(buff[0])
+			else
 			{
-			case TRACK: //Update track
-				track = "";
-
-				for(int i = 5; i < size; i++)
+				//Call the correct function depending on the message
+				switch(buff[0])
 				{
-					track.append(1, buff[i]);
+				case TRACK: //Update track
+					track = "";
+
+					for(int i = 5; i < size; i++)
+					{
+						track.append(1, buff[i]);
+					}
+					break;
+
+				case START: //Start game
+					start = true;
+					std::cout << "Starting Game!\n";
+					break;
+
+				case CLIENTINFO: //Get updated client info
+					{
+					memcpy(reinterpret_cast<char *>(&numClients),buff+5,sizeof(int)); //Get number of clients
+
+					//numClients = 2; //Trying to debug memory error, this shouldn't actually be here
+
+					//Get clients
+					for(int i = 0; i < numClients; i++)
+					{
+						memcpy(reinterpret_cast<char *>(&clients[i]),buff+9+i*sizeof(ClientInfo),sizeof(ClientInfo));
+					}
+					break;
+					}
+
+				case ID:
+					{
+					memcpy(reinterpret_cast<char *>(&id),buff+5,sizeof(int)); //Get client's ID
+					std::cout << "Your ID is " << id << "\n";
+					break;
+					}
+
+				case END:
+					end = true;
+					break;
 				}
-				break;
-
-			case START: //Start game
-				start = true;
-				std::cout << "Starting Game!\n";
-				break;
-
-			case CLIENTINFO: //Get updated client info
-				{
-				memcpy(reinterpret_cast<char *>(&numClients),buff+5,sizeof(int)); //Get number of clients
-
-				//numClients = 2; //Trying to debug memory error, this shouldn't actually be here
-
-				//Get clients
-				for(int i = 0; i < numClients; i++)
-				{
-					memcpy(reinterpret_cast<char *>(&clients[i]),buff+9+i*sizeof(ClientInfo),sizeof(ClientInfo));
-				}
-				break;
-				}
-
-			case ID:
-				{
-				memcpy(reinterpret_cast<char *>(&id),buff+5,sizeof(int)); //Get client's ID
-				std::cout << "Your ID is " << id << "\n";
-				break;
-				}
-
-			case END:
-				end = true;
-				break;
 			}
 		}
 	}
@@ -276,16 +291,23 @@ void Client::getUDPMessages(float milliseconds)
 		std::cout << "Server timeout in getUDP" << std::endl;
 	}
 
-	while(err != WSAEWOULDBLOCK)
+	bool hasError = false;
+
+	while(!hasError || err == 10040)
 	{
 		//Find out the size of the message
 		err = recv(sUDP, buff, 5, MSG_PEEK);
 		if(err == -1)
 		{
 			err = WSAGetLastError();
+			hasError = true;
+			if(err != WSAEWOULDBLOCK)
+			{
+				clients[0].connected = false;
+			}
 		}
 
-		if(err != WSAEWOULDBLOCK)
+		if(!hasError || err == 10040)
 		{
 			int size = *((int*)(buff+1)); //Get size
 
@@ -294,26 +316,32 @@ void Client::getUDPMessages(float milliseconds)
 			if(err == -1)
 			{
 				err = WSAGetLastError();
+				hasError = true;
 				//we should handle this properly (TAG1)
-			}
-
-			//assumes there was no error (TAG1)
-			clients[0].millisecond_lag = 0;
-
-			//Call the correct function depending on the message
-			switch(buff[0])
-			{
-			case WORLDSTATE: //Get updated world state
+				if(err != WSAEWOULDBLOCK)
 				{
-					int numRacers;
-					memcpy(&numRacers,buff+5,sizeof(int)); //Get player's ID
-					for(int i = 0; i < numRacers; i++)
-					{
-						memcpy(world[i],buff+9+i*RACERSIZE,RACERSIZE); //Get the button presses
-					}
+					clients[0].connected = false;
+				}
+			}
+			else
+			{
+				clients[0].millisecond_lag = 0;
 
-					newWorldInfo = true;
-					break;
+				//Call the correct function depending on the message
+				switch(buff[0])
+				{
+				case WORLDSTATE: //Get updated world state
+					{
+						int numRacers;
+						memcpy(&numRacers,buff+5,sizeof(int)); //Get player's ID
+						for(int i = 0; i < numRacers; i++)
+						{
+							memcpy(world[i],buff+9+i*RACERSIZE,RACERSIZE); //Get the button presses
+						}
+
+						newWorldInfo = true;
+						break;
+					}
 				}
 			}
 		}
@@ -396,9 +424,10 @@ int Client::setColor(int color)
 //notifies server that this client is alive (TAG1)
 int Client::sendAliveMessage()
 {
-	int size = 1;
+	int size = 5;
 	char* buffer = new char[size];
 	buffer[0] = ALIVE;
+	memcpy(buffer+1,&size,sizeof(int));
 	int err = sendTCPMessage(buffer, size);
 	delete[] buffer;
 	return err;

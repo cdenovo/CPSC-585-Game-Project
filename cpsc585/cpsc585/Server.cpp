@@ -1,6 +1,6 @@
 #include "Server.h"
 
-#define CLIENT_TIMEOUT 1
+const int CLIENT_TIMEOUT = 5;
 
 Server::Server()
 {
@@ -12,7 +12,13 @@ Server::Server()
 	track = "Track1";
 
 	clients[0].id = 0;
+	clients[0].connected = true;
+	for(int i = 1; i < MAXCLIENTS; i++)
+	{
+		clients[i].connected = false;
+	}
 	numClients = 1;
+	id = 0;
 }
 
 Server::~Server()
@@ -199,7 +205,7 @@ int Server::raceListen(float milliseconds)
 		return 0;
 	}
 	getTCPMessages(milliseconds);
-	getUDPMessages();
+	getUDPMessages(milliseconds);
 
 	return 0;
 }
@@ -214,9 +220,9 @@ void Server::closeConnection()
 	if(tcp_ready)
 	{
 		closesocket(sTCP);
-		for(int i = 0; i < numClients; i++)
+		for(int i = 0; i < MAXCLIENTS; i++)
 		{
-			if(clients[i].sock)
+			if(clients[i].connected && clients[i].sock)
 			{
 				closesocket(clients[i].sock);
 			}
@@ -257,9 +263,12 @@ int Server::sendUDPMessage(const char* message, int length, int clientID)
 
 int Server::sendUDPMessage(const char* message, int length)
 {
-	for(int i = 1; i < numClients; i++)
+	for(int i = 0; i < MAXCLIENTS; i++)
 	{
-		sendUDPMessage(message, length, i);
+		if(id != i && clients[i].connected) //Don't send to self
+		{
+			sendUDPMessage(message, length, i);
+		}
 	}
 	return true;
 }
@@ -279,12 +288,15 @@ int Server::changeTrack(std::string track)
 	memcpy(buffer+5,track.c_str(),track.length());
 
 	//Send each client a message
-	for(int i = 0; i < numClients; i++)
+	for(int i = 0; i < MAXCLIENTS; i++)
 	{
-		int result = sendTCPMessage(buffer,size,i); //Send the message
-		if(result == -1)
-			result = WSAGetLastError();
-		std::cout << "Returned " << result << "\n";
+		if(clients[i].connected)
+		{
+			int result = sendTCPMessage(buffer,size,i); //Send the message
+			if(result == -1)
+				result = WSAGetLastError();
+			std::cout << "Returned " << result << "\n";
+		}
 	}
 
 	delete[] buffer;
@@ -306,9 +318,12 @@ int Server::startGame()
 	memcpy(buffer+1,&size,sizeof(int));
 	
 	//Send each client a message
-	for(int i = 0; i < numClients; i++)
+	for(int i = 0; i < MAXCLIENTS; i++)
 	{
-		sendTCPMessage(buffer, size, i); //Send the message
+		if(clients[i].connected)
+		{
+			sendTCPMessage(buffer, size, i); //Send the message
+		}
 	}
 
 	std::cout << "Successfully sent Start Game message to clients." << std::endl;
@@ -328,9 +343,12 @@ int Server::endGame()
 	memcpy(buffer+1,&size,sizeof(int));
 
 	//Send each client a message
-	for(int i = 0; i < numClients; i++)
+	for(int i = 0; i < MAXCLIENTS; i++)
 	{
-		sendTCPMessage(buffer,size,i); //Send the message
+		if(clients[i].connected)
+		{
+			sendTCPMessage(buffer,size,i); //Send the message
+		}
 	}
 
 	std::cout << "Successfully sent End Game message to clients." << std::endl;
@@ -344,20 +362,23 @@ int Server::endGame()
 int Server::sendLobbyInfo()
 {
 	//Set up buffer to send
-	int size = sizeof(ClientInfo)*numClients + 5 + sizeof(int);
+	int size = sizeof(ClientInfo)*MAXCLIENTS + 5 + sizeof(int);
 	char* buffer = new char[size];
 	buffer[0] = 'L';
 	memcpy(buffer+1,&size,sizeof(int));
-	memcpy(buffer+5,&numClients,sizeof(int));
+	memcpy(buffer+5,&MAXCLIENTS,sizeof(int));
 
-	for(int i = 0; i < numClients; i++)
+	for(int i = 0; i < MAXCLIENTS; i++)
 	{
 		memcpy(buffer+9+i*sizeof(ClientInfo),&clients[i],sizeof(ClientInfo)); //Put clientinfo into buffer
 	}
 
-	for(int i = 0; i < numClients; i++)
+	for(int i = 0; i < MAXCLIENTS; i++)
 	{
-		sendTCPMessage(buffer,size,i);
+		if(i != id && clients[i].connected)
+		{
+			sendTCPMessage(buffer,size,i);
+		}
 	}
 
 	delete[] buffer;
@@ -415,86 +436,107 @@ void Server::getTCPMessages(float milliseconds)
 	char buff[1000];
 	bool changes = false;
 
-	for(int i = 1; i < numClients; i++)
+	for(int i = 0; i < MAXCLIENTS; i++)
 	{
-		int err = 0;
-
-		//timeout feature (TAG1)
-		clients[i].millisecond_lag += milliseconds;
-
-		if (clients[i].millisecond_lag > CLIENT_TIMEOUT){
-			std::cout << "Client " << i << " has timed out" << std::endl;
-		}
-
-		while(err != WSAEWOULDBLOCK)
+		if(i != id && clients[i].connected)
 		{
-			//Find out the size of the message
-			err = recv(clients[i].sock, buff, 5, MSG_PEEK);
-			if(err == -1)
-			{
-				err = WSAGetLastError();
+			int err = 0;
+			bool hasError = false;
+
+			//timeout feature (TAG1)
+			clients[i].millisecond_lag += milliseconds;
+
+			if (clients[i].millisecond_lag > CLIENT_TIMEOUT){
+				std::cout << "Client " << i << " has timed out" << std::endl;
+				clients[i].connected = false;
+				closesocket(clients[i].sock);
+				sendLobbyInfo();
 			}
-
-			if(err != WSAEWOULDBLOCK)
+			else
 			{
-				int size = *((int*)(buff+1)); //Get size
-
-				//Get the message
-				err = recv(clients[i].sock, buff, size, 0);
-
-				if (err == 0)
+				while(!hasError)
 				{
-					//client has closed connection safely, need to make new server (TAG1)
-					std::cout << "Client " << i << " connection closed safely, need to swap to AI." << std::endl;
-					clients[i].connected = false;
-				}
-
-				else if(err == -1)
-				{
-					err = WSAGetLastError();
-				}
-
-				//assume client is connected since we received a message (TAG1)
-				//should we set changes to true????
-				clients[i].millisecond_lag = 0;
-				clients[i].connected = true;
-
-				//Call the correct function depending on the message
-				switch(buff[0])
-				{
-				case READY: //The client is ready
-					std::cout << "Player " << i << " is ready!\n";
-					clients[i].ready = true;
-					changes = true;
-					break;
-
-				case UNREADY: //The client is no longer ready
-					clients[i].ready = false;
-					changes = true;
-					break;
-
-				case COLOR: //The message is the client changing their colour
-					int color;
-					memcpy(&color,buff+5,sizeof(int)); //Get colour
-
-					//Make sure colour is not in use
-					bool used = false;
-					for(int j = 0; j < numClients; i++)
+					//Find out the size of the message
+					err = recv(clients[i].sock, buff, 5, MSG_PEEK);
+					if(err == -1)
 					{
-						if(clients[j].color == color)
+						err = WSAGetLastError();
+						hasError = true;
+						if(err != WSAEWOULDBLOCK)
 						{
-							used = true;
-							j = numClients;
+							clients[i].connected = false;
 						}
 					}
 
-					//If the color is not in use, set the player's color to it
-					if(!used)
+					if(!hasError)
 					{
-						clients[i].color = color;
-						changes = true;
+						int size = *((int*)(buff+1)); //Get size
+
+						//Get the message
+						err = recv(clients[i].sock, buff, size, 0);
+
+						/*if (err == 0)
+						{
+							//client has closed connection safely, need to make new server (TAG1)
+							std::cout << "Client " << i << " connection closed safely, need to swap to AI." << std::endl;
+							clients[i].connected = false;
+						}
+						else */
+						if(err == -1)
+						{
+							err = WSAGetLastError();
+							hasError = true;
+							if(err != WSAEWOULDBLOCK)
+							{
+								clients[i].connected = false;
+							}
+						}
+						else
+						{
+							//assume client is connected since we received a message (TAG1)
+							//should we set changes to true????
+							clients[i].millisecond_lag = 0;
+							clients[i].connected = true;
+
+							//Call the correct function depending on the message
+							switch(buff[0])
+							{
+							case READY: //The client is ready
+								std::cout << "Player " << i << " is ready!\n";
+								clients[i].ready = true;
+								changes = true;
+								break;
+
+							case UNREADY: //The client is no longer ready
+								clients[i].ready = false;
+								changes = true;
+								break;
+
+							case COLOR: //The message is the client changing their colour
+								int color;
+								memcpy(&color,buff+5,sizeof(int)); //Get colour
+
+								//Make sure colour is not in use
+								bool used = false;
+								for(int j = 0; j < MAXCLIENTS; i++)
+								{
+									if(clients[j].connected && clients[j].color == color)
+									{
+										used = true;
+										j = MAXCLIENTS;
+									}
+								}
+
+								//If the color is not in use, set the player's color to it
+								if(!used)
+								{
+									clients[i].color = color;
+									changes = true;
+								}
+								break;
+							}
+						}
 					}
-					break;
 				}
 			}
 		}
@@ -509,13 +551,12 @@ void Server::getTCPMessages(float milliseconds)
 		bool allReady = true;
 		if(!gameStarted)
 		{
-			for(int i = 0; i < numClients; i++)
+			for(int i = 0; i < MAXCLIENTS; i++)
 			{
-				if(!clients[i].ready)
+				if(clients[i].connected && !clients[i].ready)
 				{
-					std::cout << "All players are ready. Starting game.\n";
 					allReady = false;
-					i = numClients;
+					i = MAXCLIENTS;
 				}
 			}
 		}
@@ -524,9 +565,12 @@ void Server::getTCPMessages(float milliseconds)
 		if(allReady)
 		{
 			int pos[MAXCLIENTS];
-			for(int i = 0; i < numClients; i++)
+			for(int i = 0; i < MAXCLIENTS; i++)
 			{
-				pos[clients[i].id] = i+1;
+				if(clients[i].connected)
+				{
+					pos[clients[i].id] = i+1;
+				}
 			}
 			startGame();
 		}
@@ -536,23 +580,34 @@ void Server::getTCPMessages(float milliseconds)
 /**
  * Receives any UDP messages in the buffer
  */
-void Server::getUDPMessages()
+void Server::getUDPMessages(float seconds)
 {
 	char buff[1000];
 	bool changes = false;
 
 	int err = 0;
+	bool hasError = false;
 
-	while(err != WSAEWOULDBLOCK)
+	//Add lag time to each connected client
+	for(int i = 0; i < MAXCLIENTS; i++)
+	{
+		if(clients[i].connected)
+		{
+			clients[i].millisecond_lag += seconds;
+		}
+	}
+
+	while(!hasError || err == 10040)
 	{
 		//Find out the size of the message
 		err = recv(sUDP, buff, 5, MSG_PEEK);
 		if(err == -1)
 		{
 			err = WSAGetLastError();
+			hasError = true;
 		}
 
-		if(err != WSAEWOULDBLOCK)
+		if(!hasError || err == 10040)
 		{
 			int size = *((int*)(buff+1)); //Get size
 
@@ -561,26 +616,45 @@ void Server::getUDPMessages()
 			if(err == -1)
 			{
 				err = WSAGetLastError();
+				hasError = true;
 			}
-
-			//Call the correct function depending on the message
-			switch(buff[0])
+			else
 			{
-			case BUTTON: //Message is button press
-				int id;
-				memcpy(&id,buff+5,sizeof(int)); //Get player's ID
-				memcpy(&intents[id],buff+9,sizeof(Intention)); //Get the button presses
-				std::cout << "Player " << id << " has the following button state:\n" << intents[id].toStr() << std::endl;
-				break;
+				switch(buff[0])
+				{
+				case BUTTON: //Message is button press
+					int id;
+				
+					memcpy(&id,buff+5,sizeof(int)); //Get player's ID
+					//Call the correct function depending on the message
+					if(clients[id].connected)
+					{
+						clients[id].millisecond_lag = 0;
+						memcpy(&intents[id],buff+9,sizeof(Intention)); //Get the button presses
+						std::cout << "Player " << id << " has the following button state:\n" << intents[id].toStr() << std::endl;
+					}
+					break;
 
-			default:
-				std::cout << "Not button.\n";
-				break;
+				default:
+					std::cout << "Not button.\n";
+					break;
+				}
 			}
 		}
 		else
 		{
 			//std::cout << "Buffer empty.\n";
+		}
+	}
+
+	//See if any clients have timed out
+	for(int i = 0; i < MAXCLIENTS; i++)
+	{
+		if (clients[i].connected && clients[i].millisecond_lag > CLIENT_TIMEOUT){
+			std::cout << "Client " << i << " has timed out" << std::endl;
+			clients[i].connected = false;
+			closesocket(clients[i].sock);
+			sendLobbyInfo();
 		}
 	}
 }

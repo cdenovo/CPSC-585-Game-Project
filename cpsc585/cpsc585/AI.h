@@ -46,6 +46,8 @@ private:
 	static unsigned __stdcall staticConnectToServer(void *pThis);
 	void connectToServer();
 	void runNetworking(float milliseconds);
+	void switchToServer();
+
 	void runMenu();
 
 	Renderer* renderer;
