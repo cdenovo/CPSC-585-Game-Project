@@ -1,9 +1,23 @@
 #include "ConfigReader.h"
 
-#define BUFFERSIZE 500
+#define BUFFERSIZE 32
 
 ConfigReader::ConfigReader()
 {
+	//Initialize values
+	kFront = 50000;
+	kRear = 50000;
+	frontExtents = 0.25;
+	rearExtents = 0.25;
+	frontDamping = 5000;
+	rearDamping = 5000;
+	chassisMass = 800;
+	accelerationScale = 15;
+	springForceCap = 80000;
+	serverIP = "";
+	topSpeed = 100;
+	grip = 2.0;
+
 	file.open("config.txt");
 
 	if(file.is_open())
@@ -17,6 +31,28 @@ ConfigReader::ConfigReader()
 		}
 
 		file.close();
+	}
+	else
+	{
+		std::ofstream outFile;
+		outFile.open("config.txt");
+		if(file.is_open())
+		{
+			outFile << "KFRONT " << kFront << "\n"
+				<< "KREAR " << kRear << "\n"
+				<< "FRONTEXTENTS " << frontExtents << "\n"
+				<< "REAREXTENTS " << rearExtents << "\n"
+				<< "FRONTDAMPING " << frontDamping << "\n"
+				<< "REARDAMPING " << rearDamping << "\n"
+				<< "CHASISMASS " << chassisMass << "\n"
+				<< "ACCELERATIONSCALE " << accelerationScale << "\n"
+				<< "SPRINGFORCECAP " << springForceCap << "\n"
+				<< "SERVERIP " << serverIP << "\n"
+				<< "TOPSPEED " << topSpeed << "\n"
+				<< "GRIP " << grip;
+
+			outFile.close();
+		}
 	}
 }
 
@@ -73,13 +109,18 @@ void ConfigReader::parseLine(std::string line)
 		{
 			ss >> springForceCap; //Convert to float
 		}
+		else if(key == "GRIP")
+		{
+			ss >> grip; //Convert to float
+		}
 		else if(key == "SERVERIP")
 		{
 			ss >> serverIP;
 		}
-		else if(key == "TOPSPEED")
+		else if(key == "TOPSPEED") 
 		{
-			ss >> topSpeed;
+			ss >> topSpeed; //Convert to float 
 		}
+
 	}
 }

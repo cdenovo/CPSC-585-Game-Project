@@ -1,6 +1,5 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
 #include <iostream>
 #include <sstream>
 
@@ -18,8 +17,6 @@ public:
 
 	std::string toStr();
 
-	bool equals(Intention intent);
-
 	// Buttons Pressed State
 	bool xPressed;
 	bool yPressed;
@@ -33,11 +30,13 @@ public:
 	// Analog State
 	int rightStickX;
 	int rightStickY;
-	int leftStick;
+	int leftStickX;
+	int leftStickY;
 	int rightTrig;
 	int leftTrig;
 
 
 	float acceleration; // between -1.0 and 1.0
-	float steering; // between -1.0 and 1.0
+	float cameraX; // between -1.0 and 1.0
+	float cameraY; // between -1.0 and 1.0
 };

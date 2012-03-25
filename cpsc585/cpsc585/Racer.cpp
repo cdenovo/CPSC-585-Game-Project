@@ -9,13 +9,14 @@ ConfigReader Racer::config = ConfigReader();
 hkVector4 Racer::xAxis = hkVector4(1.0f, 0.0f, 0.0f);
 hkVector4 Racer::yAxis = hkVector4(0.0f, 1.0f, 0.0f);
 hkVector4 Racer::zAxis = hkVector4(0.0f, 0.0f, 1.0f);
-hkVector4 Racer::attachFL = hkVector4(-0.8f, -0.7f, 1.5f);
-hkVector4 Racer::attachFR = hkVector4(0.8f, -0.7f, 1.5f);
-hkVector4 Racer::attachRL = hkVector4(-0.8f, -0.67f, -1.2f);
-hkVector4 Racer::attachRR = hkVector4(0.8f, -0.67f, -1.2f);
+hkVector4 Racer::attachFL = hkVector4(-0.8f, -0.72f, 1.5f);
+hkVector4 Racer::attachFR = hkVector4(0.8f, -0.72f, 1.5f);
+hkVector4 Racer::attachRL = hkVector4(-0.8f, -0.65f, -1.2f);
+hkVector4 Racer::attachRR = hkVector4(0.8f, -0.65f, -1.2f);
 hkVector4 Racer::attachLaser = hkVector4(0.0f, 0.1f, 1.8f);
 
 hkReal Racer::chassisMass = config.chassisMass;
+float Racer::grip = config.grip;
 float Racer::accelerationScale = config.accelerationScale;
 float Racer::frontSpringK = config.kFront;
 float Racer::rearSpringK = config.kRear;
@@ -48,7 +49,11 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 	index = -1;
 
 	currentSteering = 0.0f;
+	currentAcceleration = 0.0f;
 
+	lookDir = hkVector4(0, 0, 1);
+	lookHeight = 0;
+	
 	physicsWorld = p->world;
 
 
@@ -64,15 +69,18 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 		drawable = new Drawable(RACER, "racer2.dds", device);
 	}
 
+
 	// Set up filter group (so the car doesn't collide with the wheels)
 	int collisionGroupFilter = p->getFilter();
 	
 	hkpRigidBodyCinfo info;
-	hkVector4 halfExtent(0.9f, 0.7f, 2.3f);		//Half extent for racer rigid body box
+	hkVector4 halfExtent(0.9f, 0.65f, 2.1f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL;
-	info.m_centerOfMass = hkVector4(0.0f, -0.7f, 0.0f);	// lower CM a bit
-	info.m_restitution = 0.1f;
+	info.m_centerOfMass = hkVector4(0.0f, -0.4f, 0.0f);	// lower CM a bit
+	info.m_restitution = 0.0f;
+	info.m_maxAngularVelocity = 180.0f;
+	info.m_maxLinearVelocity = 170.0f;
 	hkpMassProperties massProperties;
 	hkpInertiaTensorComputer::computeBoxVolumeMassProperties(halfExtent, chassisMass, massProperties);
 	info.setMassProperties(massProperties);
@@ -201,18 +209,27 @@ void Racer::update()
 		(body->getTransform()).get4x4ColumnMajor(transMat);
 		drawable->setTransform(&transMat);
 		laserDraw->setTransform(&transMat);
-		
+
 		
 		// Now update wheels
-		(wheelRL->body->getTransform()).get4x4ColumnMajor(transMat);
+		hkRotation carRot = body->getTransform().getRotation();
+		hkTransform wheelTransform = wheelRL->body->getTransform();
+		wheelTransform.setRotation(carRot);
+		wheelTransform.get4x4ColumnMajor(transMat);
 		wheelRL->drawable->setTransform(&transMat);
-		
-		(wheelRR->body->getTransform()).get4x4ColumnMajor(transMat);
+
+		wheelTransform = wheelRR->body->getTransform();
+		wheelTransform.setRotation(carRot);
+		wheelTransform.get4x4ColumnMajor(transMat);
 		wheelRR->drawable->setTransform(&transMat);
 
 
 
 		(wheelFL->body->getTransform()).get4x4ColumnMajor(transMat);
+		wheelTransform = wheelFL->body->getTransform();
+		wheelTransform.setRotation(carRot);
+		wheelTransform.get4x4ColumnMajor(transMat);
+
 
 		D3DXMATRIX rot1, rot2, trans1;
 		D3DXVECTOR3 scale, trans;
@@ -229,12 +246,17 @@ void Racer::update()
 		wheelFL->drawable->setTransform(&transMat);
 
 		(wheelFR->body->getTransform()).get4x4ColumnMajor(transMat);
+		wheelTransform = wheelFR->body->getTransform();
+		wheelTransform.setRotation(carRot);
+		wheelTransform.get4x4ColumnMajor(transMat);
 
 		D3DXMatrixTranslation(&trans1, transMat._41, transMat._42, transMat._43);
 
 		D3DXMatrixMultiply(&transMat, &rot1, &rot2);
 		D3DXMatrixMultiply(&transMat, &transMat, &trans1);
 		wheelFR->drawable->setTransform(&transMat);
+
+		currentAcceleration = 0.0f;
 	}
 }
 
@@ -254,8 +276,10 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 	kit->setLinearDofB(yAxis, yID);
 	kit->setLinearDofA(zAxis, zID);
 	kit->setLinearDofB(zAxis, zID);
+	
+	hkVector4 wheelAttach = hkVector4(0,0,0);
 
-	kit->setPivotA(hkVector4(0,0,0));
+	kit->setPivotA(wheelAttach);
 	kit->setPivotB(*attachmentPt);
 	kit->setAngularBasisABodyFrame();
 	kit->setAngularBasisBBodyFrame();
@@ -267,158 +291,325 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 
 	if (type == FRONT)
 	{
-		kit->setLinearLimit(yID, -frontExtents, frontExtents);
+		kit->setLinearLimit(yID, -frontExtents, frontExtents / 2.0f);
 	}
 	else
 	{
-		kit->setLinearLimit(yID, -rearExtents, rearExtents);
+		kit->setLinearLimit(yID, -rearExtents, rearExtents / 2.0f);
 	}
-
+	
 	kit->end();
 
 	constraint->setSolvingMethod(hkpConstraintAtom::METHOD_STABILIZED);
 }
 
+
+
+void Racer::brake(float seconds)
+{
+	// Braking. Apply force to all wheels
+	hkVector4 point, forward;
+	hkTransform trans = body->getTransform();
+
+	float accelForce = chassisMass * -accelerationScale;
+
+	accelForce /= 4.0f;
+
+	if (wheelFL->touchingGround)
+	{
+		forward = wheelFL->body->getLinearVelocity();
+		forward.normalize3IfNotZero();
+		forward.mul(accelForce);
+		point.setTransformedPos(trans, attachFL);
+		body->applyForce(seconds, forward, point);
+	}
+
+	if (wheelFR->touchingGround)
+	{
+		forward = wheelFR->body->getLinearVelocity();
+		forward.normalize3IfNotZero();
+		forward.mul(accelForce);
+		point.setTransformedPos(trans, attachFR);
+		body->applyForce(seconds, forward, point);
+	}
+
+	if (wheelRL->touchingGround)
+	{
+		forward = wheelRL->body->getLinearVelocity();
+		forward.normalize3IfNotZero();
+		forward.mul(accelForce);
+		point.setTransformedPos(trans, attachRL);
+		body->applyForce(seconds, forward, point);
+	}
+
+	if (wheelRR->touchingGround)
+	{
+		forward = wheelRR->body->getLinearVelocity();
+		forward.normalize3IfNotZero();
+		forward.mul(accelForce);
+		point.setTransformedPos(trans, attachRR);
+		body->applyForce(seconds, forward, point);
+	}
+}
+
+
 // between -1.0 and 1.0 (backwards is negative)
 void Racer::accelerate(float seconds, float value)
 {
 	if ((value == 0.0f) || ( !(wheelRL->touchingGround) && !(wheelRR->touchingGround)))
+	{
+		currentAcceleration = 0.0f;
 		return;
+	}
+
+	hkVector4 point;
+	hkTransform trans = body->getTransform();
+
+	float accelForce = value * chassisMass * accelerationScale;
+
+	// Cap force, due to grip constraints
+	float maxGrip = chassisMass * 20.0f * grip * (drawable->getYVector()).y;
+
+	if (accelForce >= maxGrip)
+	{
+		accelForce = maxGrip;
+	}
+
+	currentAcceleration = value;
 
 	hkVector4 forward = drawable->getZhkVector();
-	hkVector4 vel = body->getMotion()->getLinearVelocity();
-	float dot = vel.dot3(drawable->getZhkVector());
+	hkVector4 vel = body->getLinearVelocity();
+	float dot = vel.dot3(forward);
 
-	if ((dot > 0.0f) && (value < 0.0f))
+	if ((dot > 0.1f) && (value < 0.0f))
 	{
-		// Braking. Apply force to all wheels, opposite linear velocity
+		// Braking. Apply force to all wheels
+		accelForce /= 4.0f;
+
 		if (wheelFL->touchingGround)
 		{
 			forward = wheelFL->body->getLinearVelocity();
 			forward.normalize3IfNotZero();
-			forward.mul(value * chassisMass * accelerationScale);
-			body->applyForce(seconds, forward, wheelFL->body->getPosition());
+			forward.mul(accelForce);
+			point.setTransformedPos(trans, attachFL);
+			body->applyForce(seconds, forward, point);
 		}
 
 		if (wheelFR->touchingGround)
 		{
 			forward = wheelFR->body->getLinearVelocity();
 			forward.normalize3IfNotZero();
-			forward.mul(value * chassisMass * accelerationScale);
-			body->applyForce(seconds, forward, wheelFR->body->getPosition());
+			forward.mul(accelForce);
+			point.setTransformedPos(trans, attachFR);
+			body->applyForce(seconds, forward, point);
 		}
 
 		if (wheelRL->touchingGround)
 		{
 			forward = wheelRL->body->getLinearVelocity();
 			forward.normalize3IfNotZero();
-			forward.mul(value * chassisMass * accelerationScale);
-			body->applyForce(seconds, forward, wheelRL->body->getPosition());
+			forward.mul(accelForce);
+			point.setTransformedPos(trans, attachRL);
+			body->applyForce(seconds, forward, point);
 		}
 
 		if (wheelRR->touchingGround)
 		{
 			forward = wheelRR->body->getLinearVelocity();
 			forward.normalize3IfNotZero();
-			forward.mul(value * chassisMass * accelerationScale);
-			body->applyForce(seconds, forward, wheelRR->body->getPosition());
+			forward.mul(accelForce);
+			point.setTransformedPos(trans, attachRR);
+			body->applyForce(seconds, forward, point);
 		}
 
 	}
 	else
 	{
-		forward.mul(value * chassisMass * accelerationScale);
+		forward.mul(accelForce / 2.0f);
 
 		if (wheelRL->touchingGround)
-			body->applyForce(seconds, forward,  wheelRL->body->getPosition());
+		{
+			point.setTransformedPos(trans, attachRL);
+			body->applyForce(seconds, forward, point);
+		}
 
 		if (wheelRR->touchingGround)
-			body->applyForce(seconds, forward, wheelRR->body->getPosition());
+		{
+			point.setTransformedPos(trans, attachRR);
+			body->applyForce(seconds, forward, point);
+		}
 	}
+
+	computeRPM();
 }
 
-/**
-Vector dragForce = chassisRigidBody.GetLinearVelocity();
-float speed = dragForce.Normalize();
-dragForce.Scale(-dragCoeff * speed * speed);
-•To determine dragCoeff, set dragForce to accelForce, set speed == topSpeed, and solve
-*/
-void Racer::applyDrag(float seconds)
-{
-	hkVector4 dragForce = body->getLinearVelocity();
-	float test =dragCoeff;
-	float speed = dragForce.normalizeWithLength3();
-	dragForce.mul(-dragCoeff*speed*speed);
-	body->applyForce(seconds, dragForce);
-}
 
 // between -1.0 and 1.0 (left is negative)
+// Make sure this is called once every frame, even if value = 0
 void Racer::steer(float seconds, float value)
 {
-	hkVector4 vel = body->getMotion()->getLinearVelocity();
+	currentSteering = value;
+
+	if (!(wheelFL->touchingGround) && !(wheelFR->touchingGround))
+		return;
+	
+	float torqueScale = 0.0f;
+	float centripScale = 0.0f;
+
+	hkVector4 vel = body->getLinearVelocity();
+	hkVector4 yVec = drawable->getYhkVector();
+	hkVector4 currentAngularVelocity = body->getAngularVelocity();
+
+
+	float dot = vel.dot3(vel);
+
+	bool negative = false;
+
+	if (dot < 0.0f)
+	{
+		negative = true;
+		dot *= -1;
+	}
+
+
+
+	float currentAngularSpeed = currentAngularVelocity.dot3(yVec);
+	float maxAngularSpeed = 5.0f;
+
+
+	if (dot == 0.0f)
+	{
+		maxAngularSpeed = 0.0f;
+	}
+	else if (dot < 8.0f)
+	{
+		//maxAngularSpeed = 0.4f * dot;
+	}
+
+	float desiredAngularSpeed = value * maxAngularSpeed;
+	float deltaAngularSpeed = desiredAngularSpeed - currentAngularSpeed;
+
+
+
+	
+	
+	
+	// Now adjust forces (will need to tweak these values later)
+	if (dot < 2.0f)
+	{
+		torqueScale = 0.4f;
+	}
+	else if (dot < 11.0f)	// < ~40km/h. Low speed, no slip
+	{
+		torqueScale = 1.0f;
+		centripScale = 2.0f;
+	}
+	else if (dot < 15.0f)
+	{
+
+		torqueScale = 5.0f;
+		centripScale = 5.0f;
+	}
+	else if (dot < 25.0f)
+	{
+		torqueScale = 5.0f;
+		centripScale = 7.0f;
+	}
+	else if (dot < 45.0f)
+	{
+		torqueScale = 7.0f;
+		centripScale = 10.0f;
+	}
+	else
+	{
+		torqueScale = 7.0f;
+		centripScale = 12.0f;
+	}
+	
+	if (negative)
+	{
+		torqueScale *= -1;
+		centripScale *= -1;
+	}
+
+
+	hkVector4 force = hkVector4(drawable->getXhkVector());
+	
+	if (force.dot3(vel) < 0.0f)
+	{
+		force.mul(deltaAngularSpeed * chassisMass * centripScale);
+		body->applyForce(seconds, force, body->getPosition());
+	}
+
+	force = hkVector4(yVec);
+	force.mul(deltaAngularSpeed * chassisMass * torqueScale);
+	body->applyTorque(seconds, force);
+
+
+	/*currentSteering = value;
+
+	if ((!(wheelFL->touchingGround) && !(wheelFR->touchingGround)) || (value == 0.0f))
+		return;
+	
+	hkVector4 vel = body->getLinearVelocity();
 	float dot = vel.dot3(drawable->getZhkVector());
 
-	if(dot > 1.0f || dot < -1.0f)
+	bool negative = false;
+
+	if (dot < 0.0f)
 	{
-		currentSteering = value;
-	
-		if (!(wheelFL->touchingGround) && !(wheelFR->touchingGround))
-			return;
-
-		bool negative = false;
-
-		if (dot < 0.0f)
-		{
-			negative = true;
-			dot *= -1;
-		}
-	
-		float torqueScale = 0.0f;
-		float centripScale = 0.0f;
-
-		// Now adjust forces (will need to tweak these values later)
-		if (dot < 10.0f)
-		{
-			torqueScale = 80.0f;
-			centripScale = 50.0f;
-		}
-		else if (dot < 15.0f)
-		{
-			//torqueScale = 40.0f;
-			torqueScale = 58.0f;
-			centripScale = 50.0f;
-		}
-		else if (dot < 25.0f)
-		{
-			torqueScale = 60.0f;
-			centripScale = 80.0f;
-		}
-		else if(dot < 45.0f)
-		{
-			torqueScale = 65.0f;
-			centripScale = 80.0f;
-		}
-		else
-		{
-			torqueScale = 80.0f;
-			centripScale = 90.0f;
-		}
-
-		if (negative)
-		{
-			torqueScale *= -1;
-			centripScale *= -1;
-		}
-
-
-		hkVector4 force = drawable->getXhkVector();
-		force.mul(value * chassisMass * centripScale);
-		body->applyForce(seconds, force, body->getPosition());
-
-		force = drawable->getYhkVector();
-		force.mul(value * chassisMass * torqueScale);
-		body->applyTorque(seconds, force);
+		negative = true;
+		dot *= -1;
 	}
+	
+	
+	// Now adjust forces (will need to tweak these values later)
+
+	float torqueScale = 0.0f;
+	float centripScale = 0.0f;
+
+	
+	if (dot < 11.0f)	// < ~40km/h. Low speed, no slip
+	{
+		torqueScale = 1.0f;
+		centripScale = 2.0f;
+	}
+	else if (dot < 15.0f)
+	{
+
+		torqueScale = 1.0f;
+		centripScale = 5.0f;
+	}
+	else if (dot < 25.0f)
+	{
+		torqueScale = 1.0f;
+		centripScale = 20.0f;
+	}
+	else if (dot < 45.0f)
+	{
+		torqueScale = 1.0f;
+		centripScale = 20.0f;
+	}
+	else
+	{
+		torqueScale = 1.0f;
+		centripScale = 20.0f;
+	}
+	
+	if (negative)
+	{
+		torqueScale *= -1;
+		centripScale *= -1;
+	}
+	
+
+	hkVector4 force = hkVector4(drawable->getXhkVector());
+	force.mul(value * chassisMass * centripScale);
+	body->applyForce(seconds, force, body->getPosition());
+
+	force = hkVector4(drawable->getYhkVector());
+	force.mul(value * chassisMass * torqueScale);
+	body->applyTorque(seconds, force);*/
 }
 
 
@@ -439,40 +630,53 @@ void Racer::reset(hkVector4* resetPos)
 	wheelRR->body->setAngularVelocity(reset);
 }
 
+/**
+Vector dragForce = chassisRigidBody.GetLinearVelocity();
+float speed = dragForce.Normalize();
+dragForce.Scale(-dragCoeff * speed * speed);
+•To determine dragCoeff, set dragForce to accelForce, set speed == topSpeed, and solve
+*/
+void Racer::applyDrag(float seconds)
+{
+	hkVector4 dragForce = body->getLinearVelocity();
+	float test = dragCoeff;
+	float speed = dragForce.normalizeWithLength3();
+	dragForce.mul(-dragCoeff*speed*speed);
+	body->applyForce(seconds, dragForce);
+}
 
 void Racer::applySprings(float seconds)
 {
 	// Applies springs and dampers using the helper function getForce()
 	hkVector4 force, point;
-	D3DXMATRIX transMat;
-	(body->getTransform()).get4x4ColumnMajor(transMat);
-	hkVector4 upVector = hkVector4(transMat._21, transMat._22, transMat._23);
+	hkVector4 upVector = drawable->getYhkVector();
+	hkTransform transform = body->getTransform();
 
 	if (wheelFL->touchingGround)
 	{
 		force = getForce(&upVector,  wheelFL->body, &attachFL, FRONT);
-		point.setTransformedPos(body->getTransform(), attachFL);
+		point.setTransformedPos(transform, attachFL);
 		body->applyForce(seconds, force, point);
 	}
 
 	if (wheelFR->touchingGround)
 	{
 		force = getForce(&upVector,  wheelFR->body, &attachFR, FRONT);
-		point.setTransformedPos(body->getTransform(), attachFR);
+		point.setTransformedPos(transform, attachFR);
 		body->applyForce(seconds, force, point);
 	}
 
 	if (wheelRL->touchingGround)
 	{
 		force = getForce(&upVector,  wheelRL->body, &attachRL, REAR);
-		point.setTransformedPos(body->getTransform(), attachRL);
+		point.setTransformedPos(transform, attachRL);
 		body->applyForce(seconds, force, point);
 	}
 
 	if (wheelRR->touchingGround)
 	{
 		force = getForce(&upVector,  wheelRR->body, &attachRR, REAR);
-		point.setTransformedPos(body->getTransform(), attachRR);
+		point.setTransformedPos(transform, attachRR);
 		body->applyForce(seconds, force, point);
 	}
 }
@@ -499,10 +703,9 @@ hkVector4 Racer::getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach,
 
 	actualPos = wheel->getPosition();
 	restPos.setTransformedPos(body->getTransform(), *attach);
-	actualPos.sub3clobberW(restPos);
+	actualPos.sub(restPos);
 
 	displacement = actualPos.dot3(*up);
-	
 
 	if (type == FRONT)
 	{
@@ -537,7 +740,7 @@ hkVector4 Racer::getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach,
 	damperForce = hkVector4(*up);
 	damperForce.mul(c * -speedOfDisplacement);
 
-	force.add3clobberW(damperForce);
+	force.add(damperForce);
 
 	if (force.dot3(force) > springForceCap*springForceCap)
 	{
@@ -550,14 +753,29 @@ hkVector4 Racer::getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach,
 }
 
 
-
 void Racer::applyForces(float seconds)
 {
-	applyFriction(seconds);
+	hkVector4 aVel, vel = body->getLinearVelocity();
+	float dot = vel.dot3(vel);
+	aVel = body->getAngularVelocity();
+	float aDot = aVel.dot3(aVel);
+
+	// Only want to be automatically braking if the player
+	// isn't trying to move or already moving
+	if ((dot > 0.0f) && (dot < 6.0f) && (aDot != 0.0f) &&
+		(currentAcceleration == 0.0f))
+	{
+		brake(seconds);
+	}
+	else
+	{
+		applyFriction(seconds);
+	}
+
 	applyDrag(seconds);
 	applyTireRaycast();
 	applySprings(seconds);
-	//applyCounterSpin(seconds);
+	
 
 	if (!laserReady)
 	{
@@ -583,7 +801,6 @@ void Racer::applyTireRaycast()
 	raycastDir.mul(-1);
 	hkTransform transform = body->getTransform();
 
-
 	// Raycast and reposition each tire
 	input = hkpWorldRayCastInput();
 	output = hkpWorldRayCastOutput();
@@ -592,33 +809,33 @@ void Racer::applyTireRaycast()
 	from.setTransformedPos(transform, attachFL);
 	to = hkVector4(raycastDir);
 	to.mul(frontExtents + 0.35f);
-	to.add3clobberW(from);
-
+	to.add(from);
+	
 	input.m_from = hkVector4(from);
 	input.m_to = hkVector4(to);
 
 	physicsWorld->castRay(input, output);
-
+	
 	if (output.hasHit())
 	{
 		wheelFL->touchingGround = true;
-		to.sub3clobberW(from);
+		to.sub(from);
 		to.mul(output.m_hitFraction);
 		raycastDir.mul(-0.35f);
 
-		to.add3clobberW(from);
-		to.add3clobberW(raycastDir);
+		to.add(from);
+		to.add(raycastDir);
 
 		wheelFL->body->setPosition(to);
 	}
 	else
 	{
 		wheelFL->touchingGround = false;
-		to.sub3clobberW(from);
+		to.sub(from);
 		raycastDir.mul(-0.35f);
 
-		to.add3clobberW(from);
-		to.add3clobberW(raycastDir);
+		to.add(from);
+		to.add(raycastDir);
 
 		wheelFL->body->setPosition(to);
 	}
@@ -633,7 +850,7 @@ void Racer::applyTireRaycast()
 	from.setTransformedPos(transform, attachFR);
 	to = hkVector4(raycastDir);
 	to.mul(frontExtents + 0.35f);
-	to.add3clobberW(from);
+	to.add(from);
 
 	input.m_from = hkVector4(from);
 	input.m_to = hkVector4(to);
@@ -643,23 +860,23 @@ void Racer::applyTireRaycast()
 	if (output.hasHit())
 	{
 		wheelFR->touchingGround = true;
-		to.sub3clobberW(from);
+		to.sub(from);
 		to.mul(output.m_hitFraction);
 		raycastDir.mul(-0.35f);
 
-		to.add3clobberW(from);
-		to.add3clobberW(raycastDir);
+		to.add(from);
+		to.add(raycastDir);
 
 		wheelFR->body->setPosition(to);
 	}
 	else
 	{
 		wheelFR->touchingGround = false;
-		to.sub3clobberW(from);
+		to.sub(from);
 		raycastDir.mul(-0.35f);
 
-		to.add3clobberW(from);
-		to.add3clobberW(raycastDir);
+		to.add(from);
+		to.add(raycastDir);
 
 		wheelFR->body->setPosition(to);
 	}
@@ -674,7 +891,7 @@ void Racer::applyTireRaycast()
 	from.setTransformedPos(transform, attachRL);
 	to = hkVector4(raycastDir);
 	to.mul(rearExtents + 0.42f);
-	to.add3clobberW(from);
+	to.add(from);
 
 	input.m_from = hkVector4(from);
 	input.m_to = hkVector4(to);
@@ -684,21 +901,23 @@ void Racer::applyTireRaycast()
 	if (output.hasHit())
 	{
 		wheelRL->touchingGround = true;
-		to.sub3clobberW(from);
+		to.sub(from);
 		to.mul(output.m_hitFraction);
 		raycastDir.mul(-0.42f);
 
-		to.add3clobberW(from);
-		to.add3clobberW(raycastDir);
+		to.add(from);
+		to.add(raycastDir);
 
 		wheelRL->body->setPosition(to);
 	}
 	else
 	{
 		wheelRL->touchingGround = false;
+		to.sub(from);
 		raycastDir.mul(-0.42f);
-		
-		to.add3clobberW(raycastDir);
+
+		to.add(from);
+		to.add(raycastDir);
 
 		wheelRL->body->setPosition(to);
 	}
@@ -713,7 +932,7 @@ void Racer::applyTireRaycast()
 	from.setTransformedPos(transform, attachRR);
 	to = hkVector4(raycastDir);
 	to.mul(rearExtents + 0.42f);
-	to.add3clobberW(from);
+	to.add(from);
 
 	input.m_from = hkVector4(from);
 	input.m_to = hkVector4(to);
@@ -723,132 +942,113 @@ void Racer::applyTireRaycast()
 	if (output.hasHit())
 	{
 		wheelRR->touchingGround = true;
-		to.sub3clobberW(from);
+		to.sub(from);
 		to.mul(output.m_hitFraction);
 		raycastDir.mul(-0.42f);
 
-		to.add3clobberW(from);
-		to.add3clobberW(raycastDir);
+		to.add(from);
+		to.add(raycastDir);
 
 		wheelRR->body->setPosition(to);
 	}
 	else
 	{
 		wheelRR->touchingGround = false;
+		to.sub(from);
 		raycastDir.mul(-0.42f);
-		
-		to.add3clobberW(raycastDir);
+
+		to.add(from);
+		to.add(raycastDir);
 
 		wheelRR->body->setPosition(to);
-	}
-}
-
-void Racer::applyCounterSpin(float seconds)
-{
-	float airDamping = .9999;
-	if(!wheelFR->touchingGround && !wheelFL->touchingGround && !wheelRL->touchingGround && !wheelRR->touchingGround)
-	{
-		hkVector4 angularVel = body->getAngularVelocity();
-		hkVector4 force = angularVel;
-		force.mul(-airDamping*body->getMass());
-
-		body->applyForce(seconds, force);
-	}
-	else
-	{
-		/*hkVector4 angularVel = body->getAngularVelocity();
-		hkVector4 force = angularVel;
-
-		force.mul(-airDamping*body->getMass());
-		hkVector4 yComp = hkVector4(0,force.getComponent(1),0);
-		force.sub(yComp);
-
-		body->applyForce(seconds, force);*/
 	}
 }
 
 
 void Racer::applyFriction(float seconds)
 {
-	float xFrictionForce = 3.5f * 20 * -chassisMass / 4.0f;
-	float zFrictionForce = 1.5f * 20 * -chassisMass / 4.0f;
+	float yComponent = drawable->getYVector().y;
 
-	hkVector4 point;
-	D3DXMATRIX transMat;
-	(body->getTransform()).get4x4ColumnMajor(transMat);
+	if (yComponent < 0.01f)
+		return;
 	
-	hkVector4 xVector = hkVector4(transMat._11, transMat._12, transMat._13);
-	hkVector4 zVector = hkVector4(transMat._31, transMat._32, transMat._33);
 
+	float xFrictionForce = yComponent * yComponent * grip * 20 * -chassisMass;	// / 4.0f
+	float zFrictionForce = yComponent * yComponent * (grip * 0.02f) * 20 * -chassisMass;  // / 4.0f
+
+	hkVector4 xForce, zForce, velocity = body->getLinearVelocity();
+	velocity.normalize3IfNotZero();
+
+	xForce = drawable->getXhkVector();
+
+	float dot = velocity.dot3(xForce);
+	
+
+	xForce.mul(xFrictionForce * dot);
+	body->applyForce(seconds, xForce);
+
+	zForce = drawable->getZhkVector();
+		
+	dot = velocity.dot3(zForce);
+
+	zForce.mul(zFrictionForce * dot);
+	body->applyForce(seconds, zForce);
+
+
+	/*
 	if (wheelFL->touchingGround)
 	{
-		applyFrictionToTire(&attachFL, wheelFL->body, &xVector, &zVector, xFrictionForce, zFrictionForce, seconds);
+		applyFrictionToTire(&attachFL, wheelFL->body, xFrictionForce, zFrictionForce, seconds, FRONT);
 	}
 
 	if (wheelFR->touchingGround)
 	{
-		applyFrictionToTire(&attachFR, wheelFR->body, &xVector, &zVector, xFrictionForce, zFrictionForce, seconds);
+		applyFrictionToTire(&attachFR, wheelFR->body, xFrictionForce, zFrictionForce, seconds, FRONT);
 	}
 
 	if (wheelRL->touchingGround)
 	{
-		applyFrictionToTire(&attachRL, wheelRL->body, &xVector, &zVector, xFrictionForce, zFrictionForce, seconds);
+		applyFrictionToTire(&attachRL, wheelRL->body, xFrictionForce, zFrictionForce, seconds, REAR);
 	}
 
 	if (wheelRR->touchingGround)
 	{
-		applyFrictionToTire(&attachRR, wheelRR->body, &xVector, &zVector, xFrictionForce, zFrictionForce, seconds);
+		applyFrictionToTire(&attachRR, wheelRR->body, xFrictionForce, zFrictionForce, seconds, REAR);
 	}
+	*/
 }
 
 
 void Racer::applyFrictionToTire(hkVector4* attachPoint, hkpRigidBody* wheelBody,
-	hkVector4* xVector, hkVector4* zVector, float xFrictionForce, float zFrictionForce, float seconds)
+	float xFrictionForce, float zFrictionForce, float seconds, WheelType type)
 {
+	if (type == REAR)
+	{
+		xFrictionForce *= 1.2f;
+	}
+
 	hkVector4 point, velocity, xForce, zForce;
 	point.setTransformedPos(body->getTransform(), *attachPoint);
-	velocity = wheelBody->getLinearVelocity();
+	body->getPointVelocity(point, velocity);
+	
 
-	xForce = hkVector4(*xVector);
+	velocity.normalize3IfNotZero();
+
+	xForce = drawable->getXhkVector();
+
 
 	float dot = velocity.dot3(xForce);
-
-	if (dot > 0.25f)
-	{
-		xForce.mul(xFrictionForce);
-		body->applyForce(seconds, xForce, point);
-	}
-	else if (dot < -0.25f)
-	{
-		xForce.mul(-xFrictionForce);
-		body->applyForce(seconds, xForce, point);
-	}
-	else
-	{
-		xForce.mul(xFrictionForce * dot);
-		body->applyForce(seconds, xForce, point);
-	}
+	
+	xForce.mul(xFrictionForce * dot);
+	body->applyForce(seconds, xForce, point);
 
 
-	zForce = hkVector4(*zVector);
+	zForce = drawable->getZhkVector();
 		
 	dot = velocity.dot3(zForce);
 
-	if (dot > 0.25f)
-	{
-		zForce.mul(zFrictionForce);
-		body->applyForce(seconds, zForce, point);
-	}
-	else if (dot < -0.25f)
-	{
-		zForce.mul(-zFrictionForce);
-		body->applyForce(seconds, zForce, point);
-	}
-	else
-	{
-		zForce.mul(zFrictionForce * dot);
-		body->applyForce(seconds, zForce, point);
-	}
+	zForce.mul(zFrictionForce * dot);
+	body->applyForce(seconds, zForce, point);
 }
 
 void Racer::fireLaser()
@@ -877,7 +1077,7 @@ void Racer::fireLaser()
 	from.setTransformedPos(transform, attachLaser);
 	to = hkVector4(raycastDir);
 	to.mul(30.0f);	// Laser length
-	to.add3clobberW(from);
+	to.add(from);
 
 	input.m_from = hkVector4(from);
 	input.m_to = hkVector4(to);
@@ -916,6 +1116,30 @@ void Racer::giveDamage(Racer* attacker, int damage)
 		respawn();
 		attacker->kills += 1;
 	}
+}
+
+void Racer::computeRPM()
+{
+	int gear;
+	float rpm;
+
+	float gearRatios[6] = {2.97f, 2.97f, 1.8, 1.43, 1.0, .84};
+
+	hkVector4 forward = drawable->getZhkVector();
+	hkVector4 vel = body->getLinearVelocity();
+	float forwardSpeed = vel.dot3(forward);
+
+	float angularVel = forwardSpeed/0.42;
+	float wheelRPM = angularVel*30/3.14159;
+
+	gear = forwardSpeed/15+1;
+	if(gear < 0)
+		gear = 0;
+	else if (gear > 5)
+		gear = 5;
+
+	rpm = gearRatios[gear]*3.14*wheelRPM;
+	rpm = rpm;
 }
 
 /**

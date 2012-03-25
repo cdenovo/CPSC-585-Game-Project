@@ -6,6 +6,9 @@
 #include "CheckpointTimer.h"
 #include <time.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 enum TypeOfRacer { PLAYER, COMPUTER };
 
 class AIMind

@@ -89,46 +89,55 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 					break;
 				}
 			case VK_SPACE:
-					{
-						intention.rightTrig = 255;
-						break;
-					}
-				case VK_SHIFT:
-					{
-						intention.leftTrig = 255;
-						break;
-					}
-				case 'Z':
-					{
-						intention.yPressed = true;
-						break;
-					}
-				case 'R':
-					{
-						intention.rbumpPressed = true;
-						break;
-					}
-				case 'E':
-					{
-						intention.lbumpPressed = true;
-						break;
-					}
-				case 'A':
-					{
-						intention.leftStick = -25000;
-						break;
-					}
-				case 'D':
-					{
-						intention.leftStick = 25000;
-						break;
-					}
-				case VK_RETURN:
-					{
-						intention.aPressed = true;
-						break;
-					}
-
+				{
+					intention.rightTrig = 255;
+					break;
+				}
+			case VK_SHIFT:
+				{
+					intention.leftTrig = 255;
+					break;
+				}
+			case 'Z':
+				{
+					intention.yPressed = true;
+					break;
+				}
+			case 'R':
+				{
+					intention.rbumpPressed = true;
+					break;
+				}
+			case 'E':
+				{
+					intention.lbumpPressed = true;
+					break;
+				}
+			case 'A':
+				{
+					intention.leftStickX = -25000;
+					break;
+				}
+			case 'D':
+				{
+					intention.leftStickX = 25000;
+					break;
+				}
+			case 'S':
+				{
+					intention.leftStickY = -25000;
+					break;
+				}
+			case 'W':
+				{
+					intention.leftStickY = 25000;
+					break;
+				}
+			case VK_RETURN:
+				{
+					intention.aPressed = true;
+					break;
+				}
 			}
 		}
 		else if (umessage == WM_KEYUP)
@@ -182,24 +191,35 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 				}
 			case 'A':
 				{
-					intention.leftStick = 0;
+					intention.leftStickX = 0;
 					break;
 				}
 			case 'D':
 				{
-					intention.leftStick = 0;
+					intention.leftStickX = 0;
+					break;
+				}
+			case 'S':
+				{
+					intention.leftStickY = 0;
+					break;
+				}
+			case 'W':
+				{
+					intention.leftStickY = 0;
 					break;
 				}
 			case VK_RETURN:
-					{
-						intention.aPressed = false;
-						break;
-					}
+				{
+					intention.aPressed = false;
+					break;
+				}
 			}
 		}
 		// Compute acceleration and steering (between -1.0 and 1.0)
-		intention.acceleration = (intention.rightTrig - intention.leftTrig) / (float) (255 - XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
-		intention.steering = intention.leftStick / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+		intention.acceleration = intention.leftStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+		intention.cameraX = intention.rightStickX / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
+		intention.cameraY = intention.rightStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
 	}
 	return;
 }
@@ -302,21 +322,35 @@ bool Input::update()
 
 		if (gamepad.sThumbLX > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
-			intention.leftStick = gamepad.sThumbLX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+			intention.leftStickX = gamepad.sThumbLX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 		}
 		else if (gamepad.sThumbLX < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
-			intention.leftStick = gamepad.sThumbLX + XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+			intention.leftStickX = gamepad.sThumbLX + XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 		}
 		else
 		{
-			intention.leftStick = 0;
+			intention.leftStickX = 0;
+		}
+
+		if (gamepad.sThumbLY > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+		{
+			intention.leftStickY = gamepad.sThumbLY - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+		}
+		else if (gamepad.sThumbLY < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+		{
+			intention.leftStickY = gamepad.sThumbLY + XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+		}
+		else
+		{
+			intention.leftStickY = 0;
 		}
 
 		
 		// Compute acceleration and steering (between -1.0 and 1.0)
-		intention.acceleration = (intention.rightTrig - intention.leftTrig) / (float) (255 - XINPUT_GAMEPAD_TRIGGER_THRESHOLD);
-		intention.steering = intention.leftStick / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+		intention.acceleration = intention.leftStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+		intention.cameraX = intention.rightStickX / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
+		intention.cameraY = intention.rightStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
 		
 
 

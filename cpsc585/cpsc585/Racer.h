@@ -24,6 +24,7 @@ public:
 		float rotX, float rotY, float rotZ);	// In Radians
 	void update();
 
+	void brake(float seconds);
 	void accelerate(float seconds, float value);	// between -1.0 and 1.0 (backwards is negative)
 	void steer(float seconds, float value);			// between -1.0 and 1.0 (left is negative)
 
@@ -38,15 +39,16 @@ public:
 	void serialize(char buff[]);
 	void unserialize(char buff[]);
 
+	void computeRPM();
+
 private:
 	void buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* constraint, WheelType type);
 	hkVector4 getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach, WheelType type);
 	void applySprings(float seconds);
 	void applyFriction(float seconds);
 	void applyFrictionToTire(hkVector4* attachPoint, hkpRigidBody* wheelBody,
-		hkVector4* xVector, hkVector4* zVector, float xFrictionForce, float zFrictionForce, float seconds);
+		float xFrictionForce, float zFrictionForce, float seconds, WheelType type);
 	void applyTireRaycast();
-	void applyCounterSpin(float seconds);
 	void applyDrag(float seconds);
 	void respawn();
 
@@ -60,6 +62,11 @@ public:
 	int kills;
 	float laserTime;
 
+	hkVector4 lookDir;
+	float lookHeight;
+
+	float currentAcceleration;
+
 private:
 	Drawable* laserDraw;
 
@@ -71,6 +78,7 @@ private:
 	RearWheel* wheelRR;
 
 	float currentSteering;
+
 
 	static hkpWorld* physicsWorld;
 	static Sound* sound;
@@ -91,6 +99,9 @@ private:
 
 	static hkReal chassisMass;
 
+	static float dragCoeff;
+	static float topSpeed;
+
 	static float rearSpringK;
 	static float frontSpringK;
 	static float rearDamperC;
@@ -98,9 +109,7 @@ private:
 	static float rearExtents;
 	static float frontExtents;
 	static float springForceCap;
-
-	static float dragCoeff;
-	static float topSpeed;
+	static float grip;
 	
 	static ConfigReader config;
 };

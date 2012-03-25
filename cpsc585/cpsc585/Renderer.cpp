@@ -15,7 +15,6 @@ Renderer::Renderer()
 	drawables = NULL;
 	currentDrawable = 0;
 	hud = NULL;
-	menu = NULL;
 }
 
 
@@ -112,7 +111,6 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 
 	device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 	device->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESS);
-	
 
 	D3DVIEWPORT9 viewport;
 	viewport.Width = width;
@@ -324,4 +322,9 @@ IDirect3DDevice9* Renderer::getDevice()
 HUD* Renderer::getHUD()
 {
 	return hud;
+}
+
+Camera* Renderer::getCamera()
+{
+	return camera;
 }

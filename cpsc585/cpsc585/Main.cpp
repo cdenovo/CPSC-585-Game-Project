@@ -8,7 +8,7 @@ bool initialize()
 	ai = new AI();
 	input = new Input();
 	sound = new Sound();
-	menu = new TopMenu(input);
+
 	
 	quit = false;
 
@@ -281,6 +281,12 @@ bool mainLoop()
 		return false;
 	}
 	
+	float deltaTime = (currentTime - prevTime) / 1000.0f;
+	
+	if (deltaTime > 0.5f)
+		deltaTime = 0.5f;
+
+
 	input->update();
 	quit = ai->simulate((currentTime - prevTime) / 1000.0f);
 	renderer->render();

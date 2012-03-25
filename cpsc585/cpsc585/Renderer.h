@@ -2,7 +2,6 @@
 #pragma comment(lib, "d3dx9.lib")
 #pragma comment(lib, "DxErr.lib")
 
-#define WIN32_LEAN_AND_MEAN
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <DxErr.h>
@@ -13,6 +12,7 @@
 #include "Drawable.h"
 #include "HUD.h"
 #include "TopMenu.h"
+
 
 class Renderer
 {
@@ -27,7 +27,9 @@ public:
 	void setFocus(int drawableIndex);
 	IDirect3DDevice9* getDevice();
 	HUD* getHUD();
+	Camera* getCamera();
 	
+
 private:
 	void writeText(std::string text, int line);
 
@@ -38,7 +40,7 @@ private:
 	D3DXMATRIX worldMatrix;
 	D3DXMATRIX orthoMatrix;
 
-	Camera* camera;
+	
 	
 	ID3DXFont* font;
 	
@@ -50,6 +52,6 @@ private:
 	Drawable** drawables;
 
 	HUD* hud;
-
 	TopMenu* menu;
+	Camera* camera;
 };

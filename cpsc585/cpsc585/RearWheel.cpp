@@ -7,14 +7,15 @@ RearWheel::RearWheel(IDirect3DDevice9* device, int filter)
 
 	drawable = new Drawable(REARWHEEL, "tire.dds", device);
 
-	hkVector4 startAxis = hkVector4(-0.2f, 0, 0);
-	hkVector4 endAxis = hkVector4(0.2f, 0, 0);
+	hkVector4 startAxis = hkVector4(-0.1f, 0, 0);
+	hkVector4 endAxis = hkVector4(0.1f, 0, 0);
 	hkReal radius = 0.42f;
 
 	hkpRigidBodyCinfo info;
 	info.m_gravityFactor = 0.0f;
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_MOVING;
+	info.m_restitution = 0.0f;
 	info.m_collisionFilterInfo = hkpGroupFilter::calcFilterInfo(hkpGroupFilterSetup::LAYER_DYNAMIC, filter);
 	body = new hkpRigidBody(info);		//Create rigid body
 	body->setLinearVelocity(hkVector4(0, 0, 0));

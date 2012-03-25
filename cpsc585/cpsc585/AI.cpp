@@ -19,10 +19,9 @@ AI::AI(void)
 	ai4 = NULL;
 	world = NULL;
 
+	//Networking
 	isClient = false;
 	isServer = false;
-
-	//Networking
 	hostName = "";
 	clientConnected = false;
 	serverStarted = false;
@@ -815,6 +814,7 @@ void AI::runMenu()
 	renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
 }
 
+
 bool AI::simulate(float seconds)
 {
 	_ASSERT(seconds > 0.0f);
@@ -834,8 +834,7 @@ bool AI::simulate(float seconds)
 	{
 		runMenu();
 	}
-	else
-	{
+	else{
 		std::string stringArray[] = {""};
 		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
 	}
@@ -849,6 +848,7 @@ bool AI::simulate(float seconds)
 	// Update Checkpoint Timer
 	//checkPointTimer->update(checkpoints);
 	
+
 	for(int i = 0; i < NUMRACERS; i++)
 	{
 		if(racerMinds[i]->getType() != COMPUTER && player != racers[i] && server.gameStarted) //If we are running as the server, update the racers based on networked button presses
@@ -870,6 +870,7 @@ bool AI::simulate(float seconds)
 		{
 			racers[i]->unserialize(client.world[i]);
 			racers[i]->applyForces(seconds);
+			racerMinds[i]->update(hud, intention, seconds, waypoints, checkpoints); //Update each racermind
 		}
 		else
 		{
@@ -877,7 +878,10 @@ bool AI::simulate(float seconds)
 		}
 	}
 	client.newWorldInfo = false;
-	
+
+	hkVector4 look = player->lookDir;
+	(renderer->getCamera())->setLookDir(look(0), look(1), look(2));
+
 	if(input->placingWaypoint()){
 		wpEditor->update(racers[racerIndex]);
 		input->setPlaceWaypointFalse();
@@ -966,11 +970,11 @@ void AI::displayDebugInfo(Intention intention, float seconds)
 		char buf4[33];
 		_itoa_s(intention.rightStickY, buf4, 10);
 		char buf5[33];
-		_itoa_s(intention.leftStick, buf5, 10);
+		_itoa_s(intention.leftStickX, buf5, 10);
 		char buf6[33];
 		_itoa_s((int) (intention.acceleration * 100.0f), buf6, 10);
 		char buf7[33];
-		_itoa_s((int) (intention.steering * 100.0f), buf7, 10);
+		_itoa_s((int) (intention.leftStickY), buf7, 10);
 
 		char buf8[33];
 		hkVector4 vel = racers[racerIndex]->body->getLinearVelocity();
@@ -1006,9 +1010,9 @@ void AI::displayDebugInfo(Intention intention, float seconds)
 			std::string("Left Trigger: ").append(buf2),
 			std::string("RStick X: ").append(buf3),
 			std::string("RStick Y: ").append(buf4),
-			std::string("LStick: ").append(buf5),
+			std::string("LStickX: ").append(buf5),
+			std::string("LStickY: ").append(buf7),
 			std::string("Acceleration: ").append(buf6),
-			std::string("Steering: ").append(buf7),
 			" ",
 			"Player Information:",
 			std::string("Currently Looking at Player #").append(buf14),

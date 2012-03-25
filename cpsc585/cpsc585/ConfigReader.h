@@ -23,6 +23,7 @@ public:
 	float springForceCap;
 	std::string serverIP;
 	float topSpeed;
+	float grip;
 
 private:
 	std::ifstream file;

@@ -2,7 +2,6 @@
 
 
 // Put Havok includes here (Havok.h is included in the .cpp file to prevent redef's)
-#define WIN32_LEAN_AND_MEAN
 #include <stdio.h>
 #include <Common/Base/hkBase.h>
 #include <Common/Base/System/hkBaseSystem.h>

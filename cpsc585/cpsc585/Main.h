@@ -1,6 +1,6 @@
 #pragma once
-#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#define WIN32_LEAN_AND_MEAN
 
 // AI.h includes everything Main needs to know about
 #include "AI.h"
