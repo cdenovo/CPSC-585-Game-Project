@@ -13,6 +13,7 @@ Ability::Ability(AbilityType _abilityType)
 		boostDuration = 3; // Time in seconds that the boost last
 		break;
 	case LASER:
+		lengthOfCooldown = 3; // Time until boost can be used again
 		break;
 	case LEFT:
 		break;

@@ -7,6 +7,9 @@ HUD::~HUD(void)
 
 HUD::HUD(int width, int height)
 {
+	screenWidth = width;
+	screenHeight = height;
+
 	radialEnabled = false;
 	selectedAbility = LASER;
 	sprite = NULL;
@@ -50,12 +53,28 @@ HUD::HUD(int width, int height)
 	centre->x = width / 2.0f;
 	centre->y = height / 2.0f;
 	centre->z = 0.0f;
+
+
+	speedoPos = new D3DXVECTOR3();
+	speedoPos->x = width - 150.0f;
+	speedoPos->y = height - 150.0f;
+	speedoPos->z = 0.0f;
+
+	D3DXMatrixIdentity(&needleTrans);
+
+	currentSpeed = 0;
+	currentHealth = 100;
+	currentCheckpointTime = 0;
+	currentLap = 0;
 }
 
 void HUD::initialize(IDirect3DDevice9* device)
 {
 	D3DXCreateTextureFromFile(device, "radialMenu.dds", &radialMenuTexture);
 	D3DXCreateTextureFromFile(device, "reticule.dds", &reticuleTexture);
+	D3DXCreateTextureFromFile(device, "speedometer.dds", &speedoTexture);
+	D3DXCreateTextureFromFile(device, "needle.dds", &needleTexture);
+	D3DXCreateTextureFromFile(device, "LCD.dds", &numbersTexture);
 	D3DXCreateSprite(device, &sprite);
 }
 
@@ -67,6 +86,12 @@ void HUD::shutdown()
 	{
 		delete radialPos;
 		radialPos = NULL;
+	}
+
+	if (speedoPos)
+	{
+		delete speedoPos;
+		speedoPos = NULL;
 	}
 
 	if (centre)
@@ -111,6 +136,24 @@ void HUD::shutdown()
 		reticuleTexture = NULL;
 	}
 
+	if (speedoTexture)
+	{
+		speedoTexture->Release();
+		speedoTexture = NULL;
+	}
+
+	if (needleTexture)
+	{
+		needleTexture->Release();
+		needleTexture = NULL;
+	}
+
+	if (numbersTexture)
+	{
+		numbersTexture->Release();
+		numbersTexture = NULL;
+	}
+
 	if (sprite)
 	{
 		sprite->Release();
@@ -147,10 +190,8 @@ void HUD::setSelectedAbility(AbilityType ability)
 	}
 }
 
-void HUD::update(Intention intention)//, D3DXVECTOR3 cameraPosition)
+void HUD::update(Intention intention)
 {
-	// Code for updating the speedometer
-
 	// Code for updating the Radial menu
 	if (intention.lbumpPressed)
 	{
@@ -183,12 +224,21 @@ void HUD::update(Intention intention)//, D3DXVECTOR3 cameraPosition)
 
 void HUD::render()
 {
+	D3DXMATRIX origTrans;
+	sprite->GetTransform(&origTrans);
+
 	sprite->Begin(D3DXSPRITE_ALPHABLEND);
 
 	// Draw reticule
 	sprite->Draw(reticuleTexture, NULL, &(D3DXVECTOR3(16,16,0)), centre, D3DXCOLOR(1.0f, 0.0f, 0.0f, 0.4f));
 
 	// Draw speedometer
+	
+	sprite->SetTransform(&needleTrans);
+	sprite->Draw(needleTexture, NULL, &(D3DXVECTOR3(120,8,0)), speedoPos,  0xFFFFFFFF);
+	sprite->SetTransform(&origTrans);
+
+	sprite->Draw(speedoTexture, NULL, &(D3DXVECTOR3(128,124,0)), speedoPos,  0xFFFFFFFF);
 	
 
 	// Draw radial menu
@@ -199,6 +249,14 @@ void HUD::render()
 
 
 	// Draw checkpoint timer
+	drawCheckpointTime();
+
+	// Draw health
+	drawHealth();
+
+	// Draw lap
+	drawLap();
+
 
 	sprite->End();
 }
@@ -207,4 +265,220 @@ void HUD::render()
 AbilityType HUD::getSelectedAbility()
 {
 	return selectedAbility;
+}
+
+void HUD::setSpeed(float speed)
+{
+	if (speed < 0.0f)
+		speed *= -1;
+
+	currentSpeed = speed;
+
+	float angle = speed * 0.038f - 0.78f;
+
+	// Code for updating the speedometer
+	D3DXMATRIX transToCentre, transToPos, rotate;
+
+	D3DXMatrixTranslation(&transToCentre, -speedoPos->x, -speedoPos->y, 0.0f);
+	D3DXMatrixRotationZ(&rotate, angle);
+	D3DXMatrixTranslation(&transToPos, speedoPos->x, speedoPos->y, 0.0f);
+
+	D3DXMatrixMultiply(&needleTrans, &transToCentre, &rotate);
+	D3DXMatrixMultiply(&needleTrans, &needleTrans, &transToPos);
+}
+
+void HUD::setHealth(int health)
+{
+	currentHealth = health;
+}
+
+void HUD::drawHealth()
+{
+	char healthString[4];
+	_itoa_s(currentHealth, healthString, 4, 10);
+
+	D3DXVECTOR3 drawPos;
+	drawPos.x = 96.0f;
+	drawPos.y = screenHeight - 64.0f;
+	drawPos.z = 0.0f;
+
+	D3DXVECTOR3 currCenter;
+	currCenter.x = 8.0f;
+	currCenter.y = 14.0f;
+	currCenter.z = 0.0f;
+
+	RECT current;
+
+	current.top = 0;
+	current.bottom = 28;
+	current.left = 0;
+	current.right = 16;
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (healthString[i] == '0')
+		{
+			current.left = 16 * 9;
+			current.right = 16 * 10;
+
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+
+			drawPos.x += 16.0f;
+		}
+		else if (healthString[i] == ':')
+		{
+			current.left = 16 * 10;
+			current.right = 16 * 11;
+
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+
+			drawPos.x += 16.0f;
+		}
+		else if ((healthString[i] > '0') && (healthString[i] <= '9'))
+		{
+			int num = (int) healthString[i] - '0';
+
+			current.left = 16 * (num - 1);
+			current.right = 16 * num;
+
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+
+			drawPos.x += 16.0f;
+		}
+	}
+	
+}
+
+void HUD::drawCheckpointTime()
+{
+	char timeString[6];
+	_itoa_s(currentCheckpointTime, timeString, 6, 10);
+
+	D3DXVECTOR3 drawPos;
+	drawPos.x = screenWidth / 2.0f - 32.0f;
+	drawPos.y = 64.0f;
+	drawPos.z = 0.0f;
+
+	D3DXVECTOR3 currCenter;
+	currCenter.x = 8.0f;
+	currCenter.y = 14.0f;
+	currCenter.z = 0.0f;
+
+	RECT current;
+
+	current.top = 0;
+	current.bottom = 28;
+	current.left = 0;
+	current.right = 16;
+
+	for (int i = 0; i < 5; i++)
+	{
+		if (timeString[i] == '0')
+		{
+			current.left = 16 * 9;
+			current.right = 16 * 10;
+
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+
+			drawPos.x += 16.0f;
+		}
+		else if (timeString[i] == ':')
+		{
+			current.left = 16 * 10;
+			current.right = 16 * 11;
+
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+
+			drawPos.x += 16.0f;
+		}
+		else if ((timeString[i] > '0') && (timeString[i] <= '9'))
+		{
+			int num = (int) timeString[i] - '0';
+
+			current.left = 16 * (num - 1);
+			current.right = 16 * num;
+
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+
+			drawPos.x += 16.0f;
+		}
+		else
+		{
+			break;
+		}
+	}
+	
+}
+
+
+void HUD::setCheckpointTime(int time)
+{
+	currentCheckpointTime = time;
+}
+
+void HUD::setLap(int lap)
+{
+	currentLap = lap;
+}
+
+
+void HUD::drawLap()
+{
+	char lapString[6];
+	_itoa_s(currentLap, lapString, 6, 10);
+
+	D3DXVECTOR3 drawPos;
+	drawPos.x = screenWidth - 64.0f;
+	drawPos.y = 64.0f;
+	drawPos.z = 0.0f;
+
+	D3DXVECTOR3 currCenter;
+	currCenter.x = 8.0f;
+	currCenter.y = 14.0f;
+	currCenter.z = 0.0f;
+
+	RECT current;
+
+	current.top = 0;
+	current.bottom = 28;
+	current.left = 0;
+	current.right = 16;
+
+	for (int i = 0; i < 5; i++)
+	{
+		if (lapString[i] == '0')
+		{
+			current.left = 16 * 9;
+			current.right = 16 * 10;
+
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+
+			drawPos.x += 16.0f;
+		}
+		else if (lapString[i] == ':')
+		{
+			current.left = 16 * 10;
+			current.right = 16 * 11;
+
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+
+			drawPos.x += 16.0f;
+		}
+		else if ((lapString[i] > '0') && (lapString[i] <= '9'))
+		{
+			int num = (int) lapString[i] - '0';
+
+			current.left = 16 * (num - 1);
+			current.right = 16 * num;
+
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+
+			drawPos.x += 16.0f;
+		}
+		else
+		{
+			break;
+		}
+	}
+	
 }

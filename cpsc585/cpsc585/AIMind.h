@@ -29,6 +29,7 @@ private:
 	Racer* racer;
 
 	Ability* speedBoost;
+	Ability* laser;
 
 	CheckpointTimer* checkPointTimer;
 

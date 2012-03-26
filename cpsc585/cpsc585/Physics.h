@@ -37,6 +37,7 @@
 #include <Physics/Collide/Util/Welding/hkpMeshWeldingUtility.h>
 #include <Physics/Collide/Query/CastUtil/hkpWorldRayCastInput.h>
 #include <Physics/Collide/Query/CastUtil/hkpWorldRayCastOutput.h>
+#include <Physics/Dynamics/Phantom/hkpAabbPhantom.h>
 
 
 static void HK_CALL errorReport(const char* msg, void* userContext);

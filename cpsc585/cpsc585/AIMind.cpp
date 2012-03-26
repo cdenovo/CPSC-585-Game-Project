@@ -12,10 +12,28 @@ AIMind::AIMind(Racer* _racer, TypeOfRacer _racerType)
 	currentLap = 1;
 	checkPointTimer = new CheckpointTimer(racer);
 	speedBoost = new Ability(SPEED);
+	laser = new Ability(LASER);
 }
 
 AIMind::~AIMind(void)
 {
+	if (checkPointTimer)
+	{
+		delete checkPointTimer;
+		checkPointTimer = NULL;
+	}
+
+	if (speedBoost)
+	{
+		delete speedBoost;
+		speedBoost = NULL;
+	}
+
+	if (laser)
+	{
+		delete laser;
+		laser = NULL;
+	}
 }
 
 void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* waypoints[], Waypoint* checkpoints[]){
@@ -36,7 +54,11 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 						float height;
 
 						angle = intention.cameraX * 0.05f;
-						height = intention.cameraY * 0.05f + racer->lookHeight;
+
+						if (racer->config.inverse)
+							height = intention.cameraY * -0.02f + racer->lookHeight;
+						else
+							height = intention.cameraY * 0.02f + racer->lookHeight;
 
 						if (height > 0.5f)
 							height = 0.5f;
@@ -78,13 +100,25 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 
 				// Update Heads Up Display
 				hud->update(intention);
-	
+
+				hkVector4 vel = racer->body->getLinearVelocity();
+				float velocity = vel.dot3(racer->drawable->getZhkVector());
+
+				hud->setSpeed(velocity);
+				hud->setHealth(racer->health);
+				hud->setCheckpointTime(checkPointTime);
+				hud->setLap(currentLap);
+
+				racer->computeRPM();
+
 
 				if(hud->getSelectedAbility() == SPEED && intention.rightTrig && !speedBoost->onCooldown()){
 					speedBoost->startCooldownTimer();
+					racer->sound->playBoost();
 				}
 
-				if(hud->getSelectedAbility() == LASER && intention.rightTrig){
+				if(hud->getSelectedAbility() == LASER && intention.rightTrig && !laser->onCooldown()){
+					laser->startCooldownTimer();
 					racer->fireLaser();
 				}
 
@@ -93,6 +127,10 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 					speedBoost->updateCooldown();
 					std::string stringArray[] = { buf1 };//, buf2, buf3, buf4 };
 					//renderer->setText(stringArray, 1);
+				}
+
+				if(laser->onCooldown()){
+					laser->updateCooldown();
 				}
 
 				/************* STEERING CALCULATIONS *************/
@@ -198,39 +236,7 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 				}
 				
 
-
-
-
-
-				
-				/* *********OLD CALCULATIONS ***********
-				hkVector4 A = racer->drawable->getZhkVector();
-				hkVector4 C = racer->body->getPosition();
-				hkVector4 B = hkVector4(waypoints[currentWaypoint]->wpPosition);
-				B.sub4(C);
-				float Ax = A.getComponent(0); float Ay = A.getComponent(1); float Az = A.getComponent(2);
-				float Bx = B.getComponent(0); float By = B.getComponent(1); float Bz = B.getComponent(2);
-				float AB = Ax*Bx+Ay*By+Az*Bz;
-				float Ad = sqrt(Ax*Ax + Ay*Ay + Az*Az);
-				float Bd = sqrt(Bx*Bx + By*By + Bz*Bz);
-				float angle = acos(AB/(Ad*Bd));
-
-				// Sign determines if it is pointing to the right or the left of the current waypoint
-				float sign = B.dot3(racer->drawable->getXhkVector());
-
-				// The computer only turns if it is pointing away from the current waypoint by more than 20
-				// degrees in either direction.
-				if(angle > 0.34906 && sign > 0){
-					racer->steer(seconds, 1.0f);
-				}
-				else if(angle > 0.34906 && sign < 0){
-					racer->steer(seconds, -1.0f);
-				}
-				else
-				{
-					racer->steer(seconds, 0.0f);
-				}
-				**********************************/
+				racer->lookDir(1) = 0.0f;
 
 				/****************************************************/
 

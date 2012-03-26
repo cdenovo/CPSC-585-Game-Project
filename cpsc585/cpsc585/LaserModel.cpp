@@ -33,9 +33,9 @@ void LaserModel::render(IDirect3DDevice9* device)
 void LaserModel::initialize(IDirect3DDevice9* device)
 {
 	D3DXVECTOR3 startPoint = D3DXVECTOR3(0.0f, 0.6f, 1.8f);
-	D3DXVECTOR3 endPoint = D3DXVECTOR3(0.0f, 0.1f, 31.8f);
+	D3DXVECTOR3 endPoint = D3DXVECTOR3(0.0f, 0.0f, 81.8f);
 	D3DXVECTOR3 normal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-	float thickness = 0.15f; // half thickness, actually
+	float thickness = 0.2f; // half thickness, actually
 	
 	vertexCount = 6;
 	vertices = new Vertex[6];

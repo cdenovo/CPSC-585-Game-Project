@@ -21,6 +21,9 @@ public:
 	float accelerationScale;
 	float springForceCap;
 	float grip;
+	float topSpeed;
+	std::string serverIP;
+	bool inverse;
 
 private:
 	std::ifstream file;

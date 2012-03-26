@@ -546,7 +546,7 @@ void AI::simulate(float seconds)
 		racerMinds[i]->update(hud, intention, seconds, waypoints, checkpoints);
 	}
 	
-	hkVector4 look = racers[0]->lookDir;
+	hkVector4 look = racers[racerIndex]->lookDir;
 	(renderer->getCamera())->setLookDir(look(0), look(1), look(2));
 
 	if(input->placingWaypoint()){
