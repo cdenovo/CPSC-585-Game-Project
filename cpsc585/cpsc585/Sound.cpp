@@ -81,7 +81,7 @@ void Sound::initialize(int numRacers)
 	musicSendList.pSends = &musicSend;
 
 	// Set music volume HERE
-	smMusic->SetVolume(0.1f);
+	smMusic->SetVolume(0.2f);
 
 	// Set sound effect volume HERE
 	smSFX->SetVolume(2.0f);
@@ -100,13 +100,13 @@ void Sound::initialize(int numRacers)
 
 
 
-	float* matrix = new float[2 *  details.OutputFormat.Format.nChannels];
-	for (int i = 0; i < 2 *  details.OutputFormat.Format.nChannels; i++)
+	float* matrix = new float[details.OutputFormat.Format.nChannels];
+	for (int i = 0; i < details.OutputFormat.Format.nChannels; i++)
 	{
 		matrix[i] = 1.0f;
 	}
 
-	music->SetOutputMatrix(smMusic, 2,  details.OutputFormat.Format.nChannels, matrix);
+	music->SetOutputMatrix(smMusic, 1,  details.OutputFormat.Format.nChannels, matrix);
 	
 
 	delete [] matrix;
@@ -374,8 +374,8 @@ void Sound::loadMusic(IXAudio2SourceVoice* &voice, std::string filename, char* &
 	ZeroMemory(&wfm, sizeof(WAVEFORMATEX));
 
 	wfm.wFormatTag = WAVE_FORMAT_PCM;
-	wfm.nChannels = 2;
-	wfm.nSamplesPerSec = 44100;
+	wfm.nChannels = 1;
+	wfm.nSamplesPerSec = 22050;
 	wfm.wBitsPerSample = 16;
 	wfm.nBlockAlign = wfm.nChannels * wfm.wBitsPerSample / 8;
 	wfm.nAvgBytesPerSec = wfm.nSamplesPerSec * wfm.nBlockAlign;
