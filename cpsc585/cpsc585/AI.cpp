@@ -99,6 +99,9 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 	physics = new Physics();
 	physics->initialize(5);
 	
+	// Initialize sound
+	s->initialize(NUMRACERS);
+
 	//Initialize Abilities
 	speedBoost = new Ability(SPEED); // Speed boost with cooldown of 15 seconds and aditional speed of 1
 	
@@ -118,7 +121,7 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 	initializeAIRacers();
 
 	//Initialize Racer Placement
-	for(int i = 0; i < 5; i++){
+	for(int i = 0; i < NUMRACERS; i++){
 		racerPlacement[i] = racerMinds[i];
 	}
 
@@ -134,6 +137,7 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 
 	// This is how you set an object for the camera to focus on!
 	renderer->setFocus(racers[racerIndex]->getIndex());
+
 }
 
 void AI::initializeAIRacers()
@@ -535,6 +539,38 @@ void AI::simulate(float seconds)
 	}
 	// ---------------------------------------------------------------
 	
+
+
+
+
+
+	// ---------- UPDATE SOUND WITH CURRENT CAMERA POSITION/ORIENTATION --------------- //
+
+	X3DAUDIO_LISTENER* listener = &(sound->listener);
+	hkVector4 vec = hkVector4(racers[racerIndex]->lookDir);
+	vec(1) = 0.0f;
+	vec.normalize3();
+	listener->OrientFront.x = vec(0);
+	listener->OrientFront.y = vec(1);
+	listener->OrientFront.z = vec(2);
+	
+	vec = hkVector4(racers[racerIndex]->body->getPosition());
+
+	listener->Position.x = vec(0);
+	listener->Position.y = vec(1);
+	listener->Position.z = vec(2);
+
+	vec = hkVector4(racers[racerIndex]->body->getLinearVelocity());
+
+	listener->Velocity.x = vec(0);
+	listener->Velocity.y = vec(1);
+	listener->Velocity.z = vec(2);
+
+
+	// -------------------------------------------------------------------------------- //
+
+
+
 
 
 	// To manipulate a Racer, you should use the methods Racer::accelerate(float) and Racer::steer(float)

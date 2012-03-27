@@ -135,7 +135,7 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 
 				if(hud->getSelectedAbility() == SPEED && intention.rightTrig && !speedBoost->onCooldown()){
 					speedBoost->startCooldownTimer();
-					racer->sound->playBoost();
+					racer->sound->playBoost(racer->emitter);
 				}
 
 				if(hud->getSelectedAbility() == LASER && intention.rightTrig && !laser->onCooldown()){

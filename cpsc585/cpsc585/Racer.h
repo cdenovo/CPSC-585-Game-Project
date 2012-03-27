@@ -65,6 +65,9 @@ public:
 	static ConfigReader config;
 	static Sound* sound;
 
+	
+	X3DAUDIO_EMITTER* emitter;
+
 private:
 	Drawable* laserDraw;
 

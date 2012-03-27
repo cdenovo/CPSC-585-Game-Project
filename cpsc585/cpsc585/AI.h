@@ -17,6 +17,8 @@
 #include "Ability.h"
 #include "CheckpointTimer.h"
 
+#define NUMRACERS 5
+
 class AI
 {
 public:
@@ -53,7 +55,7 @@ private:
 	Ability* speedBoost;
 
 	// Racers
-	Racer* racers[5];
+	Racer* racers[NUMRACERS];
 	Racer* player;
 	Racer* ai1;
 	Racer* ai2;
@@ -61,14 +63,14 @@ private:
 	Racer* ai4;
 
 	// Racer Minds
-	AIMind* racerMinds[5];
+	AIMind* racerMinds[NUMRACERS];
 	AIMind* playerMind;
 	AIMind* aiMind1;
 	AIMind* aiMind2;
 	AIMind* aiMind3;
 	AIMind* aiMind4;
 
-	AIMind* racerPlacement[5];
+	AIMind* racerPlacement[NUMRACERS];
 
 	// World
 	World* world;
