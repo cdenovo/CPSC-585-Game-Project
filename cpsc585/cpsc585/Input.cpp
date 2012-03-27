@@ -33,7 +33,7 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 {
 	if ((umessage == WM_KEYDOWN) && (wparam == 'Q'))
 		quit = true;
-	else if ((umessage == WM_KEYDOWN) && (wparam == 'D'))
+	else if ((umessage == WM_KEYDOWN) && (wparam == 'B'))
 		debug = !debug;
 	else if ((umessage == WM_KEYUP) && (wparam == 'X'))
 		placeWaypoint = true;
@@ -69,6 +69,51 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 					intention.rightTrig = 255;
 					break;
 				}
+			case VK_SHIFT:
+				{
+					intention.leftTrig = 255;
+					break;
+				}
+			case 'Z':
+				{
+					intention.yPressed = true;
+					break;
+				}
+			case 'R':
+				{
+					intention.rbumpPressed = true;
+					break;
+				}
+			case 'E':
+				{
+					intention.lbumpPressed = true;
+					break;
+				}
+			case 'A':
+				{
+					intention.leftStickX = -25000;
+					break;
+				}
+			case 'D':
+				{
+					intention.leftStickX = 25000;
+					break;
+				}
+			case 'S':
+				{
+					intention.leftStickY = -25000;
+					break;
+				}
+			case 'W':
+				{
+					intention.leftStickY = 25000;
+					break;
+				}
+			case VK_RETURN:
+				{
+					intention.aPressed = true;
+					break;
+				}
 			}
 		}
 		else if (umessage == WM_KEYUP)
@@ -100,9 +145,60 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
 					intention.rightTrig = 0;
 					break;
 				}
+			case VK_SHIFT:
+				{
+					intention.leftTrig = 0;
+					break;
+				}
+			case 'Z':
+				{
+					intention.yPressed = false;
+					break;
+				}
+			case 'R':
+				{
+					intention.rbumpPressed = false;
+					break;
+				}
+			case 'E':
+				{
+					intention.lbumpPressed = false;
+					break;
+				}
+			case 'A':
+				{
+					intention.leftStickX = 0;
+					break;
+				}
+			case 'D':
+				{
+					intention.leftStickX = 0;
+					break;
+				}
+			case 'S':
+				{
+					intention.leftStickY = 0;
+					break;
+				}
+			case 'W':
+				{
+					intention.leftStickY = 0;
+					break;
+				}
+			case VK_RETURN:
+				{
+					intention.aPressed = false;
+					break;
+				}
 			}
 		}
+
+		// Compute acceleration and steering (between -1.0 and 1.0)
+		intention.acceleration = intention.leftStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+		intention.cameraX = intention.rightStickX / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
+		intention.cameraY = intention.rightStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
 	}
+
 	return;
 }
 

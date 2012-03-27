@@ -34,7 +34,7 @@ void Sound::initialize()
 
 	mVoice->SetVolume(1.0f);
 
-	loadSound(music, "music.wav", musicBuffer);
+	loadMusic(music, "music.wav", musicBuffer);
 	loadSound(laser, "laser.wav", laserBuffer);
 	loadSound(crash, "crash.wav", crashBuffer);
 	loadSound(engine, "engine.wav", engineBuffer);

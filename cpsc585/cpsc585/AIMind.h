@@ -16,15 +16,27 @@ class AIMind
 public:
 	AIMind(Racer* racer, TypeOfRacer _racerType);
 	~AIMind(void);
-	void update(HUD* hud, Intention intention, float seconds, Waypoint* waypoints[], Waypoint* checkpoints[]);
+	void update(HUD* hud, Intention intention, float seconds, Waypoint* waypoints[], Waypoint* checkpoints[], Waypoint* prevCheckpoints[], Racer* racers[]);
 	void togglePlayerComputerAI();
+	void setPlacement(int place);
+	int getPlacement();
 	int getCheckpointTime();
 	int getCurrentLap();
 	int getCurrentWaypoint();
 	int getSpeedCooldown();
+	int getLaserLevel();
+	int getSpeedLevel();
+	int getLaserDamage();
+	int getOverallPosition();
+	int getCurrentCheckpoint();
+	float getRotationAngle();
+	hkVector4 getRacerPosition();
 
 private:
 	void updateWaypointsAndLap(float seconds, Waypoint* waypoints[]);
+	void upgrade();
+	void downgrade();
+	float calculateAngleToPosition(hkVector4* position);
 
 	Racer* racer;
 
@@ -42,6 +54,12 @@ private:
 
 	int currentWaypoint;
 	int checkPointTime;
+	int overallPosition;
 	int currentLap;
+	int placement;
+	int knownNumberOfKills;
+	int numberOfLapsToWin;
+
+	float rotationAngle;
 };
 

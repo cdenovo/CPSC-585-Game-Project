@@ -98,9 +98,6 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 	//Initialize physics
 	physics = new Physics();
 	physics->initialize(5);
-
-	
-	hud = renderer->getHUD();
 	
 	//Initialize Abilities
 	speedBoost = new Ability(SPEED); // Speed boost with cooldown of 15 seconds and aditional speed of 1
@@ -119,6 +116,11 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 
 	//Initialize AI-Racers
 	initializeAIRacers();
+
+	//Initialize Racer Placement
+	for(int i = 0; i < 5; i++){
+		racerPlacement[i] = racerMinds[i];
+	}
 
 	//Initialize Waypoints
 	initializeWaypoints();
@@ -165,244 +167,244 @@ void AI::initializeAIRacers()
 void AI::initializeWaypoints()
 {
 	wp1 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp1->drawable);
+	//renderer->addDrawable(wp1->drawable);
 	wp1->setPosAndRot(-4.0f, -14.0f, -157.0f, 0.0f, 0.0f, 0.0f);
 	wp2 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp2->drawable);
+	//renderer->addDrawable(wp2->drawable);
 	wp2->setPosAndRot(8.0f, -14.0f, -127.0f, 0.0f, 0.0f, 0.0f);
 	wp3 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp3->drawable);
+	//renderer->addDrawable(wp3->drawable);
 	wp3->setPosAndRot(38.0f, -14.0f, -77.0f, 0.0f, 0.0f, 0.0f);
 	wp4 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp4->drawable);
+	//renderer->addDrawable(wp4->drawable);
 	wp4->setPosAndRot(67.0f, -14.0f, -18.0f, 0.0f, 0.0f, 0.0f);
 	wp5 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp5->drawable);
+	//renderer->addDrawable(wp5->drawable);
 	wp5->setPosAndRot(70.0f, -14.0f, 31.0f, 0.0f, 0.0f, 0.0f);
 	wp6 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp6->drawable);
+	//renderer->addDrawable(wp6->drawable);
 	wp6->setPosAndRot(39.0f, -14.0f, 68.0f, 0.0f, 0.0f, 0.0f);
 	wp7 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp7->drawable);
+	//renderer->addDrawable(wp7->drawable);
 	wp7->setPosAndRot(-13.0f, -14.0f, 110.0f, 0.0f, 0.0f, 0.0f);
 	wp8 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp8->drawable);
+	//renderer->addDrawable(wp8->drawable);
 	wp8->setPosAndRot(-79.0f, -14.0f, 165.0f, 0.0f, 0.0f, 0.0f);
 	wp9 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp9->drawable);
+	//renderer->addDrawable(wp9->drawable);
 	wp9->setPosAndRot(-114.0f, -14.0f, 224.0f, 0.0f, 0.0f, 0.0f);
 	wp10 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp10->drawable);
+	//renderer->addDrawable(wp10->drawable);
 	wp10->setPosAndRot(-150.0f, -14.0f, 285.0f, 0.0f, 0.0f, 0.0f);
 	wp11 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp11->drawable);
+	//renderer->addDrawable(wp11->drawable);
 	wp11->setPosAndRot(-193.0f, -14.0f, 326.0f, 0.0f, 0.0f, 0.0f);
 	wp12 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp12->drawable);
+	//renderer->addDrawable(wp12->drawable);
 	wp12->setPosAndRot(-248.0f, -14.0f, 349.0f, 0.0f, 0.0f, 0.0f);
 	wp13 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp13->drawable);
+	//renderer->addDrawable(wp13->drawable);
 	wp13->setPosAndRot(-284.0f, -14.0f, 349.0f, 0.0f, 0.0f, 0.0f);
 	wp14 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp14->drawable);
+	//renderer->addDrawable(wp14->drawable);
 	wp14->setPosAndRot(-309.0f, -14.0f, 327.0f, 0.0f, 0.0f, 0.0f);
 	wp15 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp15->drawable);
+	//renderer->addDrawable(wp15->drawable);
 	wp15->setPosAndRot(-314.0f, -14.0f, 302.0f, 0.0f, 0.0f, 0.0f);
 	wp16 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp16->drawable);
+	//renderer->addDrawable(wp16->drawable);
 	wp16->setPosAndRot(-315.0f, -14.0f, 259.0f, 0.0f, 0.0f, 0.0f);
 	wp17 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp17->drawable);
+	//renderer->addDrawable(wp17->drawable);
 	wp17->setPosAndRot(-308.0f, -14.0f, 196.0f, 0.0f, 0.0f, 0.0f);
 	wp18 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp18->drawable);
+	//renderer->addDrawable(wp18->drawable);
 	wp18->setPosAndRot(-288.0f, -14.0f, 142.0f, 0.0f, 0.0f, 0.0f);
 	wp19 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp19->drawable);
+	//renderer->addDrawable(wp19->drawable);
 	wp19->setPosAndRot(-264.0f, -14.0f, 90.0f, 0.0f, 0.0f, 0.0f);
 	wp20 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp20->drawable);
+	//renderer->addDrawable(wp20->drawable);
 	wp20->setPosAndRot(-252.0f, -14.0f, 36.0f, 0.0f, 0.0f, 0.0f);
 	wp21 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp21->drawable);
+	//renderer->addDrawable(wp21->drawable);
 	wp21->setPosAndRot(-263.0f, -14.0f, -13.0f, 0.0f, 0.0f, 0.0f);
 	wp22 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp22->drawable);
+	//renderer->addDrawable(wp22->drawable);
 	wp22->setPosAndRot(-282.0f, -14.0f, -69.0f, 0.0f, 0.0f, 0.0f);
 	wp23 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp23->drawable);
+	//renderer->addDrawable(wp23->drawable);
 	wp23->setPosAndRot(-305.0f, -14.0f, -137.0f, 0.0f, 0.0f, 0.0f);
 	wp24 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp24->drawable);
+	//renderer->addDrawable(wp24->drawable);
 	wp24->setPosAndRot(-325.0f, -14.0f, -215.0f, 0.0f, 0.0f, 0.0f);
 	wp25 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp25->drawable);
+	//renderer->addDrawable(wp25->drawable);
 	wp25->setPosAndRot(-324.0f, -14.0f, -300.0f, 0.0f, 0.0f, 0.0f);
 	wp26 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp26->drawable);
+	//renderer->addDrawable(wp26->drawable);
 	wp26->setPosAndRot(-307.0f, -14.0f, -334.0f, 0.0f, 0.0f, 0.0f);
 	wp27 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp27->drawable);
+	//renderer->addDrawable(wp27->drawable);
 	wp27->setPosAndRot(-283.0f, -14.0f, -343.0f, 0.0f, 0.0f, 0.0f);
 	wp28 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp28->drawable);
+	//renderer->addDrawable(wp28->drawable);
 	wp28->setPosAndRot(-241.0f, -14.0f, -349.0f, 0.0f, 0.0f, 0.0f);
 	wp29 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp29->drawable);
+	//renderer->addDrawable(wp29->drawable);
 	wp29->setPosAndRot(-199.0f, -14.0f, -328.0f, 0.0f, 0.0f, 0.0f);
 	wp30 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp30->drawable);
+	//renderer->addDrawable(wp30->drawable);
 	wp30->setPosAndRot(-188.0f, -14.0f, -276.0f, 0.0f, 0.0f, 0.0f);
 	wp31 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp31->drawable);
+	//renderer->addDrawable(wp31->drawable);
 	wp31->setPosAndRot(-182.0f, -14.0f, -218.0f, 0.0f, 0.0f, 0.0f);
 	wp32 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp32->drawable);
+	//renderer->addDrawable(wp32->drawable);
 	wp32->setPosAndRot(-160.0f, -14.0f, -153.0f, 0.0f, 0.0f, 0.0f);
 	wp33 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp33->drawable);
+	//renderer->addDrawable(wp33->drawable);
 	wp33->setPosAndRot(-135.0f, -12.0f, -108.0f, 0.0f, 0.0f, 0.0f);
 	wp34 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp34->drawable);
+	//renderer->addDrawable(wp34->drawable);
 	wp34->setPosAndRot(-114.0f, -7.0f, -77.0f, 0.0f, 0.0f, 0.0f);
 	wp35 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp35->drawable);
+	//renderer->addDrawable(wp35->drawable);
 	wp35->setPosAndRot(-83.0f, -2.0f, -31.0f, 0.0f, 0.0f, 0.0f);
 	wp36 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp36->drawable);
+	//renderer->addDrawable(wp36->drawable);
 	wp36->setPosAndRot(-61.0f, 2.0f, 1.0f, 0.0f, 0.0f, 0.0f);
 	wp37 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp37->drawable);
+	//renderer->addDrawable(wp37->drawable);
 	wp37->setPosAndRot(-30.0f, 7.0f, 49.0f, 0.0f, 0.0f, 0.0f);
 	wp38 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp38->drawable);
+	//renderer->addDrawable(wp38->drawable);
 	wp38->setPosAndRot(-5.0f, 10.0f, 85.0f, 0.0f, 0.0f, 0.0f);
 	wp39 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp39->drawable);
+	//renderer->addDrawable(wp39->drawable);
 	wp39->setPosAndRot(64.0f, -5.0f, 176.0f, 0.0f, 0.0f, 0.0f);
 	wp40 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp40->drawable);
+	//renderer->addDrawable(wp40->drawable);
 	wp40->setPosAndRot(94.0f, -6.0f, 213.0f, 0.0f, 0.0f, 0.0f);
 	wp41 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp41->drawable);
+	//renderer->addDrawable(wp41->drawable);
 	wp41->setPosAndRot(136.0f, -8.0f, 260.0f, 0.0f, 0.0f, 0.0f);
 	wp42 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp42->drawable);
+	//renderer->addDrawable(wp42->drawable);
 	wp42->setPosAndRot(194.0f, -14.0f, 312.0f, 0.0f, 0.0f, 0.0f);
 	wp43 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp43->drawable);
+	//renderer->addDrawable(wp43->drawable);
 	wp43->setPosAndRot(240.0f, -14.0f, 319.0f, 0.0f, 0.0f, 0.0f);
 	wp44 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp44->drawable);
+	//renderer->addDrawable(wp44->drawable);
 	wp44->setPosAndRot(278.0f, -14.0f, 312.0f, 0.0f, 0.0f, 0.0f);
 	wp45 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp45->drawable);
+	//renderer->addDrawable(wp45->drawable);
 	wp45->setPosAndRot(316.0f, -14.0f, 284.0f, 0.0f, 0.0f, 0.0f);
 	wp46 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp46->drawable);
+	//renderer->addDrawable(wp46->drawable);
 	wp46->setPosAndRot(327.0f, -14.0f, 232.0f, 0.0f, 0.0f, 0.0f);
 	wp47 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp47->drawable);
+	//renderer->addDrawable(wp47->drawable);
 	wp47->setPosAndRot(303.0f, -14.0f, 177.0f, 0.0f, 0.0f, 0.0f);
 	wp48 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp48->drawable);
+	//renderer->addDrawable(wp48->drawable);
 	wp48->setPosAndRot(270.0f, -14.0f, 144.0f, 0.0f, 0.0f, 0.0f);
 	wp49 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp49->drawable);
+	//renderer->addDrawable(wp49->drawable);
 	wp49->setPosAndRot(227.0f, -14.0f, 98.0f, 0.0f, 0.0f, 0.0f);
 	wp50 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp50->drawable);
+	//renderer->addDrawable(wp50->drawable);
 	wp50->setPosAndRot(202.0f, -14.0f, 50.0f, 0.0f, 0.0f, 0.0f);
 	wp51 = new Waypoint(renderer->getDevice(), SHARP_POINT);
-	renderer->addDrawable(wp51->drawable);
+	//renderer->addDrawable(wp51->drawable);
 	wp51->setPosAndRot(204.0f, -14.0f, 7.0f, 0.0f, 0.0f, 0.0f);
 	wp52 = new Waypoint(renderer->getDevice(), SHARP_POINT);
-	renderer->addDrawable(wp52->drawable);
+	//renderer->addDrawable(wp52->drawable);
 	wp52->setPosAndRot(223.0f, -14.0f, -21.0f, 0.0f, 0.0f, 0.0f);
 	wp53 = new Waypoint(renderer->getDevice(), SHARP_POINT);
-	renderer->addDrawable(wp53->drawable);
+	//renderer->addDrawable(wp53->drawable);
 	wp53->setPosAndRot(258.0f, -14.0f, -50.0f, 0.0f, 0.0f, 0.0f);
 	wp54 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp54->drawable);
+	//renderer->addDrawable(wp54->drawable);
 	wp54->setPosAndRot(302.0f, -14.0f, -86.0f, 0.0f, 0.0f, 0.0f);
 	wp55 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp55->drawable);
+	//renderer->addDrawable(wp55->drawable);
 	wp55->setPosAndRot(315.0f, -14.0f, -135.0f, 0.0f, 0.0f, 0.0f);
 	wp56 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp56->drawable);
+	//renderer->addDrawable(wp56->drawable);
 	wp56->setPosAndRot(293.0f, -14.0f, -165.0f, 0.0f, 0.0f, 0.0f);
 	wp57 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp57->drawable);
+	//renderer->addDrawable(wp57->drawable);
 	wp57->setPosAndRot(239.0f, -14.0f, -178.0f, 0.0f, 0.0f, 0.0f);
 	wp58 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp58->drawable);
+	//renderer->addDrawable(wp58->drawable);
 	wp58->setPosAndRot(190.0f, -14.0f, -181.0f, 0.0f, 0.0f, 0.0f);
 	wp59 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp59->drawable);
+	//renderer->addDrawable(wp59->drawable);
 	wp59->setPosAndRot(140.0f, -14.0f, -189.0f, 0.0f, 0.0f, 0.0f);
 	wp60 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp60->drawable);
+	//renderer->addDrawable(wp60->drawable);
 	wp60->setPosAndRot(91.0f, -14.0f, -206.0f, 0.0f, 0.0f, 0.0f);
 	wp61 = new Waypoint(renderer->getDevice(), SHARP_POINT);
-	renderer->addDrawable(wp61->drawable);
+	//renderer->addDrawable(wp61->drawable);
 	wp61->setPosAndRot(80.0f, -14.0f, -227.0f, 0.0f, 0.0f, 0.0f);
 	wp62 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp62->drawable);
+	//renderer->addDrawable(wp62->drawable);
 	wp62->setPosAndRot(96.0f, -14.0f, -248.0f, 0.0f, 0.0f, 0.0f);
 	wp63 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp63->drawable);
+	//renderer->addDrawable(wp63->drawable);
 	wp63->setPosAndRot(124.0f, -14.0f, -260.0f, 0.0f, 0.0f, 0.0f);
 	wp64 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp64->drawable);
+	//renderer->addDrawable(wp64->drawable);
 	wp64->setPosAndRot(167.0f, -14.0f, -269.0f, 0.0f, 0.0f, 0.0f);
 	wp65 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp65->drawable);
+	//renderer->addDrawable(wp65->drawable);
 	wp65->setPosAndRot(231.0f, -14.0f, -276.0f, 0.0f, 0.0f, 0.0f);
 	wp66 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp66->drawable);
+	//renderer->addDrawable(wp66->drawable);
 	wp66->setPosAndRot(283.0f, -14.0f, -282.0f, 0.0f, 0.0f, 0.0f);
 	wp67 = new Waypoint(renderer->getDevice(), SHARP_POINT);
-	renderer->addDrawable(wp67->drawable);
+	//renderer->addDrawable(wp67->drawable);
 	wp67->setPosAndRot(311.0f, -14.0f, -295.0f, 0.0f, 0.0f, 0.0f);
 	wp68 = new Waypoint(renderer->getDevice(), SHARP_POINT);
-	renderer->addDrawable(wp68->drawable);
+	//renderer->addDrawable(wp68->drawable);
 	wp68->setPosAndRot(323.0f, -14.0f, -314.0f, 0.0f, 0.0f, 0.0f);
 	wp69 = new Waypoint(renderer->getDevice(), SHARP_POINT);
-	renderer->addDrawable(wp69->drawable);
+	//renderer->addDrawable(wp69->drawable);
 	wp69->setPosAndRot(316.0f, -14.0f, -343.0f, 0.0f, 0.0f, 0.0f);
 	wp70 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp70->drawable);
+	//renderer->addDrawable(wp70->drawable);
 	wp70->setPosAndRot(294.0f, -14.0f, -357.0f, 0.0f, 0.0f, 0.0f);
 	wp71 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp71->drawable);
+	//renderer->addDrawable(wp71->drawable);
 	wp71->setPosAndRot(254.0f, -14.0f, -363.0f, 0.0f, 0.0f, 0.0f);
 	wp72 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp72->drawable);
+	//renderer->addDrawable(wp72->drawable);
 	wp72->setPosAndRot(206.0f, -14.0f, -360.0f, 0.0f, 0.0f, 0.0f);
 	wp73 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp73->drawable);
+	//renderer->addDrawable(wp73->drawable);
 	wp73->setPosAndRot(153.0f, -14.0f, -355.0f, 0.0f, 0.0f, 0.0f);
 	wp74 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp74->drawable);
+	//renderer->addDrawable(wp74->drawable);
 	wp74->setPosAndRot(91.0f, -14.0f, -349.0f, 0.0f, 0.0f, 0.0f);
 	wp75 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp75->drawable);
+	//renderer->addDrawable(wp75->drawable);
 	wp75->setPosAndRot(42.0f, -14.0f, -340.0f, 0.0f, 0.0f, 0.0f);
 	wp76 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp76->drawable);
+	//renderer->addDrawable(wp76->drawable);
 	wp76->setPosAndRot(7.0f, -14.0f, -326.0f, 0.0f, 0.0f, 0.0f);
 	wp77 = new Waypoint(renderer->getDevice(), TURN_POINT);
-	renderer->addDrawable(wp77->drawable);
+	//renderer->addDrawable(wp77->drawable);
 	wp77->setPosAndRot(-17.0f, -14.0f, -290.0f, 0.0f, 0.0f, 0.0f);
 	wp78 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp78->drawable);
+	//renderer->addDrawable(wp78->drawable);
 	wp78->setPosAndRot(-18.0f, -14.0f, -254.0f, 0.0f, 0.0f, 0.0f);
 	wp79 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	renderer->addDrawable(wp79->drawable);
+	//renderer->addDrawable(wp79->drawable);
 	wp79->setPosAndRot(-14.0f, -14.0f, -212.0f, 0.0f, 0.0f, 0.0f);
 	wp80 = new Waypoint(renderer->getDevice(), LAP_POINT);
-	renderer->addDrawable(wp80->drawable);
+	//renderer->addDrawable(wp80->drawable);
 	wp80->setPosAndRot(2.0f, -14.0f, -141.0f, 0.0f, 0.0f, 0.0f);
 	waypoints[0] = wp1;
 	waypoints[1] = wp2;
@@ -488,34 +490,34 @@ void AI::initializeWaypoints()
 
 void AI::initializeCheckpoints()
 {
-	cp1 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	cp1->setPosAndRot(-83.0f, 5.0f, -49.0f, 0.0f, 0.0f, 0.0f);
-	
-	cp2 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	cp2->setPosAndRot(-189.0f, 5.0f, 87.0f, 0.0f, 0.0f, 0.0f);
+	prevCheckpoints[0] = new Waypoint(renderer->getDevice(), TURN_POINT);
+	prevCheckpoints[0]->setPosAndRot(-264.0f, -14.0f, 90.0f, 0.0f, 0.0f, 0.0f);
 
-	cp3 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	cp3->setPosAndRot(-160.0f, 5.0f, 189.0f, 0.0f, 0.0f, 0.0f);
+	checkpoints[0] = new Waypoint(renderer->getDevice(), TURN_POINT);
+	checkpoints[0]->setPosAndRot(-252.0f, -14.0f, 36.0f, 0.0f, 0.0f, 0.0f);
 
-	cp4 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	cp4->setPosAndRot(-11.0f, 5.0f, 197.0f, 0.0f, 0.0f, 0.0f);
+	prevCheckpoints[1] = new Waypoint(renderer->getDevice(), CHECK_POINT);
+	prevCheckpoints[1]->setPosAndRot(-30.0f, 7.0f, 49.0f, 0.0f, 0.0f, 0.0f);
 
-	cp5 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	cp5->setPosAndRot(74.0f, 5.0f, 92.0f, 0.0f, 0.0f, 0.0f);
+	checkpoints[1] = new Waypoint(renderer->getDevice(), CHECK_POINT);
+	checkpoints[1]->setPosAndRot(-5.0f, 10.0f, 85.0f, 0.0f, 0.0f, 0.0f);
 
-	cp6 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	cp6->setPosAndRot(148.0f, 5.0f, -33.0f, 0.0f, 0.0f, 0.0f);
+	prevCheckpoints[2] = new Waypoint(renderer->getDevice(), CHECK_POINT);
+	prevCheckpoints[2]->setPosAndRot(239.0f, -14.0f, -178.0f, 0.0f, 0.0f, 0.0f);
 
-	cp7 = new Waypoint(renderer->getDevice(), CHECK_POINT);
-	cp7->setPosAndRot(91.0f, 5.0f, -173.0f, 0.0f, 0.0f, 0.0f);
+	checkpoints[2] = new Waypoint(renderer->getDevice(), CHECK_POINT);
+	checkpoints[2]->setPosAndRot(190.0f, -14.0f, -181.0f, 0.0f, 0.0f, 0.0f);
 
-	checkpoints[0] = cp1;
-	checkpoints[1] = cp2;
-	checkpoints[2] = cp3;
-	checkpoints[3] = cp4;
-	checkpoints[4] = cp5;
-	checkpoints[5] = cp6;
-	checkpoints[6] = cp7;
+	prevCheckpoints[3] = new Waypoint(renderer->getDevice(), CHECK_POINT);
+	prevCheckpoints[3]->setPosAndRot(-14.0f, -14.0f, -212.0f, 0.0f, 0.0f, 0.0f);
+
+	checkpoints[3] = new Waypoint(renderer->getDevice(), LAP_POINT);
+	checkpoints[3]->setPosAndRot(2.0f, -14.0f, -141.0f, 0.0f, 0.0f, 0.0f);
+
+	renderer->addDrawable(checkpoints[0]->drawable);
+	renderer->addDrawable(checkpoints[1]->drawable);
+	renderer->addDrawable(checkpoints[2]->drawable);
+	renderer->addDrawable(checkpoints[3]->drawable);
 }
 
 void AI::simulate(float seconds)
@@ -543,11 +545,14 @@ void AI::simulate(float seconds)
 	
 
 	for(int i = 0; i < 5; i++){
-		racerMinds[i]->update(hud, intention, seconds, waypoints, checkpoints);
+		racerMinds[i]->update(hud, intention, seconds, waypoints, checkpoints, prevCheckpoints, racers);
 	}
 	
-	hkVector4 look = racers[racerIndex]->lookDir;
-	(renderer->getCamera())->setLookDir(look(0), look(1), look(2));
+	updateRacerPlacement(0, 4);
+
+	for(int i = 0; i < 5; i++){
+		racerPlacement[i]->setPlacement(5-i);
+	}
 
 	if(input->placingWaypoint()){
 		wpEditor->update(racers[racerIndex]);
@@ -582,11 +587,15 @@ void AI::simulate(float seconds)
 		renderer->setFocus(racers[racerIndex]->getIndex());
 	}
 
+	hkVector4 look = racers[racerIndex]->lookDir;
+	(renderer->getCamera())->setLookDir(look(0), look(1), look(2));
+
 	// Reset the player (in case you fall over)
 	if (intention.yPressed)
 	{
 		D3DXVECTOR3 cwPosition = waypoints[racerMinds[racerIndex]->getCurrentWaypoint()]->drawable->getPosition();
-		racers[racerIndex]->reset(new hkVector4(cwPosition.x, cwPosition.y, cwPosition.z));
+		float rotation = 0;
+		racers[racerIndex]->reset(new hkVector4(cwPosition.x, cwPosition.y, cwPosition.z), rotation);
 	}
 
 	physics->step(seconds);
@@ -596,6 +605,66 @@ void AI::simulate(float seconds)
 	}
 
 	return;
+}
+
+/*
+	Runs a quicksort algorithm O(nlogn) to determine the position of a racer
+	in the race based on numbers calculated from the most recent waypoint a
+	racer has reached and what lap they are on. "OverallPosition = #waypoints x #laps"
+	Source: http://www.algolist.net/Algorithms/Sorting/Quicksort
+ */
+void AI::updateRacerPlacement(int left, int right)
+{
+	int i = left, j = right;
+    AIMind* tmp;
+
+	int pivot = racerPlacement[(left + right) / 2]->getOverallPosition();
+
+ 
+
+      /* partition */
+
+      while (i <= j) {
+
+		  while (racerPlacement[i]->getOverallPosition() < pivot)
+                  i++;
+		  while (racerPlacement[j]->getOverallPosition() > pivot)
+                  j--;
+
+            if (i <= j) {
+				if(racerPlacement[i]->getCurrentWaypoint() == racerPlacement[j]->getCurrentWaypoint()){
+					
+					hkSimdReal distanceOfI = waypoints[racerPlacement[i]->getCurrentWaypoint()]->wpPosition.distanceTo(racerPlacement[i]->getRacerPosition());
+					hkSimdReal distanceOfJ = waypoints[racerPlacement[j]->getCurrentWaypoint()]->wpPosition.distanceTo(racerPlacement[j]->getRacerPosition());
+
+					if(distanceOfI < distanceOfJ){
+						tmp = racerPlacement[i];
+					    racerPlacement[i] = racerPlacement[j];
+					    racerPlacement[j] = tmp;
+					}
+				}
+				else{
+					tmp = racerPlacement[i];
+					    racerPlacement[i] = racerPlacement[j];
+					    racerPlacement[j] = tmp;
+				}
+                  
+                  i++;
+                  j--;
+            }
+
+      }
+
+ 
+
+      /* recursion */
+
+      if (left < j)
+            updateRacerPlacement(left, j);
+
+      if (i < right)
+            updateRacerPlacement(i, right);
+
 }
 
 
@@ -665,6 +734,20 @@ void AI::displayDebugInfo(Intention intention, float seconds)
 		_itoa_s(racerMinds[racerIndex]->getCurrentLap(), buf15, 10);
 		char buf16[33];
 		_itoa_s(racers[racerIndex]->health, buf16, 10);
+		char buf17[33];
+		_itoa_s(racerMinds[racerIndex]->getLaserLevel(), buf17, 10);
+		char buf18[33];
+		_itoa_s(racerMinds[racerIndex]->getLaserDamage(), buf18, 10);
+		char buf19[33];
+		_itoa_s(racerMinds[racerIndex]->getPlacement(), buf19, 10);
+		char buf20[33];
+		_itoa_s(racerMinds[racerIndex]->getOverallPosition(), buf20, 10);
+		char buf21[33];
+		_itoa_s(racerMinds[racerIndex]->getSpeedLevel(), buf21, 10);
+		char buf22[33];
+		_itoa_s(racerMinds[racerIndex]->getCurrentCheckpoint(), buf22, 10);
+		char buf23[33];
+		_itoa_s((int)(racerMinds[racerIndex]->getRotationAngle()*1000.0f), buf23, 10);
 		
 		std::string stringArray[] = { getFPSString(seconds * 1000.0f), 
 			"X: " + boolToString(intention.xPressed),
@@ -688,9 +771,16 @@ void AI::displayDebugInfo(Intention intention, float seconds)
 			std::string("Current Lap: ").append(buf15),
 			std::string("Kills: ").append(buf10),
 			std::string("Current Waypoint: ").append(buf11),
+			std::string("Current Checkpoint: ").append(buf22),
 			std::string("Checkpoint Time: ").append(buf12),
+			std::string("Speed level: ").append(buf21),
 			std::string("Speed Boost Cooldown: ").append(buf13),
-			std::string("Health: ").append(buf16)};
+			std::string("Health: ").append(buf16),
+			std::string("Laser Level: ").append(buf17),
+			std::string("Laser Damage: ").append(buf18),
+			std::string("Placement: ").append(buf19),
+			std::string("Overall position value: ").append(buf20),
+			std::string("Rotation Angle: ").append(buf23)};
 	
 		renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
 }

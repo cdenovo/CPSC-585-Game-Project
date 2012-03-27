@@ -7,20 +7,20 @@ Waypoint::Waypoint(IDirect3DDevice9* device, WPType _wpType)
 	{
 	case WAY_POINT:
 		radius = 20;
-		checkPointTime = 0;
+		checkPointTime = 20;
 		break;
 	case CHECK_POINT:
 		radius = 20;
-		checkPointTime = 3;
+		checkPointTime = 20;
 	case LAP_POINT:
 		radius = 20;
-		checkPointTime = 3;
+		checkPointTime = 20;
 	case TURN_POINT:
 		radius = 20;
-		checkPointTime = 3;
+		checkPointTime = 20;
 	case SHARP_POINT:
 		radius = 20;
-		checkPointTime = 3;
+		checkPointTime = 20;
 	}
 
 	drawable = new Drawable(WAYPOINT, "checker.dds", device);
@@ -71,12 +71,20 @@ void Waypoint::setCheckPointTime(int seconds)
 	checkPointTime = seconds;
 }
 
-bool Waypoint::withinWaypoint(const hkVector4* position)
+bool Waypoint::passedWaypoint(const hkVector4* nextPosition, const hkVector4* prevPosition, const hkVector4* bodyPosition)
 {
-	hkSimdReal distance = wpPosition.distanceTo(*position);
-	hkBool32 distanceLessThanRadius = distance.isLess(radius);
+	hkVector4 temp = *nextPosition;
+	temp.sub(*prevPosition);
+	hkVector4 A = temp;
 
-	if(distanceLessThanRadius){
+	temp = *nextPosition;
+	temp.sub(*bodyPosition);
+	hkVector4 B = temp;
+
+	const hkSimdReal result = A.dot3(B);
+
+	
+	if(result.isLess(0)){
 		return true;
 	}
 	else{

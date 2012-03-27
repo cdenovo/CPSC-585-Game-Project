@@ -13,6 +13,9 @@ public:
 	bool currentlyActive();
 	void updateCooldown();
 	float getBoostValue();
+	void update(int levelOfAbility);
+	int getAbilityLevel();
+	int getLaserDamage();
 
 private:
 	time_t oldTime;
@@ -22,5 +25,7 @@ private:
 	float lengthOfCooldown;
 	float boostDuration;
 	AbilityType abilityType;
+	int abilityLevel;
+	int laserDamage;
 };
 

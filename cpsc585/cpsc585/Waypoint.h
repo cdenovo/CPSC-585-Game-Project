@@ -15,7 +15,7 @@ public:
 	void update();
 	float getRadius();
 	void setRadius(float newRadius);
-	bool withinWaypoint(const hkVector4* position);
+	bool passedWaypoint(const hkVector4* nextPosition, const hkVector4* prevPosition, const hkVector4* bodyPosition);
 	void setCheckPointTime(int seconds);
 	int getCheckPointTime();
 	WPType getWaypointType();

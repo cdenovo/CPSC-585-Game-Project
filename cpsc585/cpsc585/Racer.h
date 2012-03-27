@@ -27,12 +27,15 @@ public:
 	void steer(float seconds, float value);			// between -1.0 and 1.0 (left is negative)
 
 	int getIndex();
-	void reset(hkVector4* resetPos);	// Reset position and set velocity/momentum to 0
+	void reset(hkVector4* resetPos, float rotation);	// Reset position and set velocity/momentum to 0
 
 	void applyForces(float seconds);	// Call this every frame BEFORE stepping physics!
 
 	void fireLaser();
 	void giveDamage(Racer* attacker, int damage);
+
+	void setDamageOutput(int damage);
+	int getDamageOutput();
 	void computeRPM();
 
 private:
@@ -52,6 +55,7 @@ public:
 	int health;
 	int kills;
 	float laserTime;
+	bool laserReady;
 
 	hkVector4 lookDir;
 	float lookHeight;
@@ -73,6 +77,7 @@ private:
 
 	float currentSteering;
 
+	int damageOutput;
 
 	static hkpWorld* physicsWorld;
 

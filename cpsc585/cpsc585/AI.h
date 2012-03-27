@@ -26,6 +26,7 @@ public:
 	void initialize(Renderer* renderer, Input* input, Sound* sound);
 	void simulate(float milliseconds);
 	void displayDebugInfo(Intention intention, float milliseconds);
+	void updateRacerPlacement(int left, int right);
 
 private:
 	std::string getFPSString(float milliseconds);
@@ -44,6 +45,7 @@ private:
 
 	int count;
 	int fps;
+	int currentWaypoint;
 
 	int racerIndex;
 
@@ -65,6 +67,8 @@ private:
 	AIMind* aiMind2;
 	AIMind* aiMind3;
 	AIMind* aiMind4;
+
+	AIMind* racerPlacement[5];
 
 	// World
 	World* world;
@@ -153,12 +157,6 @@ private:
 	Waypoint* wp80;
 
 	// Checkpoints
-	Waypoint* checkpoints[7];
-	Waypoint* cp1;
-	Waypoint* cp2;
-	Waypoint* cp3;
-	Waypoint* cp4;
-	Waypoint* cp5;
-	Waypoint* cp6;
-	Waypoint* cp7;
+	Waypoint* checkpoints[4];
+	Waypoint* prevCheckpoints[4];
 };
