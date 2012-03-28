@@ -5,21 +5,22 @@
 #include <iostream>
 #include <fstream>
 
+
+struct Vertex
+{
+	D3DXVECTOR3 position;
+	D3DXVECTOR3 normal;
+	float u, v; // Texture coordinates
+};
+
 class Mesh
 {
 public:
 	Mesh(void);
 	~Mesh(void);
 	virtual void render(IDirect3DDevice9* device) = 0;
-
+	
 protected:
-	struct Vertex
-	{
-		D3DXVECTOR3 position;
-		D3DXVECTOR3 normal;
-		float u, v; // Texture coordinates
-	};
-
 	IDirect3DVertexBuffer9* vertexBuffer;
 	IDirect3DIndexBuffer9* indexBuffer;
 

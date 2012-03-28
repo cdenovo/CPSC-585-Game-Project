@@ -11,6 +11,7 @@
 #include "Camera.h"
 #include "Drawable.h"
 #include "HUD.h"
+#include "Skybox.h"
 
 
 class Renderer
@@ -52,4 +53,6 @@ private:
 
 	HUD* hud;
 	Camera* camera;
+
+	Skybox* skybox;
 };

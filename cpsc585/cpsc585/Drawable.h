@@ -22,7 +22,7 @@ class Drawable
 {
 public:
 	Drawable(MeshType type, std::string textureName, IDirect3DDevice9* device);
-	~Drawable(void);
+	~Drawable();
 	void render(IDirect3DDevice9* device);
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians

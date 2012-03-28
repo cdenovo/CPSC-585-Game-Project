@@ -13,6 +13,7 @@ public:
 	~Camera(void);
 	void setFocus(Drawable* focus);
 	void update();
+	void updateForSkybox();
 
 	void render();
 	void getViewMatrix(D3DXMATRIX& matrix);
