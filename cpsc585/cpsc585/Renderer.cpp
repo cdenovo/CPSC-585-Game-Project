@@ -123,7 +123,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	float fieldOfView, screenAspect;
 
 	// Setup the projection matrix.
-	fieldOfView = (float)D3DX_PI / 4.0f;
+	fieldOfView = (float)D3DX_PI / 3.0f;
 	screenAspect = (float)width / (float)height;
 
 	// Create the projection matrix for 3D rendering.
@@ -281,12 +281,10 @@ void Renderer::render()
 
 void Renderer::writeText(std::string text, int line)
 {
-	device->SetTransform(D3DTS_PROJECTION, &orthoMatrix);
-
 	RECT rect;
 	SetRect(&rect, 20, 20 + (line*30), 600, 600);
 	
-	font->DrawText(NULL, text.c_str(), -1, &rect, DT_LEFT|DT_NOCLIP, D3DCOLOR_XRGB(255, 255, 255));
+	font->DrawText(NULL, text.c_str(), -1, &rect, DT_LEFT|DT_NOCLIP, D3DCOLOR_XRGB(200, 50, 50));
 }
 
 void Renderer::setText(std::string* sentenceArray, int count)

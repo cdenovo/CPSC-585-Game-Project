@@ -40,7 +40,7 @@ void Camera::update()
 {
 	position = focusObject->getPosition();
 
-	position = position + (lookDir * -9.0f);
+	position = position + (lookDir * -7.0f);
 	position.y += 2.0f;
 
 	lookAt = D3DXVECTOR3(position + lookDir);

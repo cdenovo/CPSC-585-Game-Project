@@ -321,7 +321,7 @@ void HUD::drawHealth()
 			current.left = 16 * 9;
 			current.right = 16 * 10;
 
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos, D3DCOLOR_XRGB(255, 50, 50));
 
 			drawPos.x += 16.0f;
 		}
@@ -330,7 +330,7 @@ void HUD::drawHealth()
 			current.left = 16 * 10;
 			current.right = 16 * 11;
 
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos, D3DCOLOR_XRGB(255, 50, 50));
 
 			drawPos.x += 16.0f;
 		}
@@ -341,7 +341,7 @@ void HUD::drawHealth()
 			current.left = 16 * (num - 1);
 			current.right = 16 * num;
 
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  D3DCOLOR_XRGB(255, 50, 50));
 
 			drawPos.x += 16.0f;
 		}
@@ -378,7 +378,7 @@ void HUD::drawCheckpointTime()
 			current.left = 16 * 9;
 			current.right = 16 * 10;
 
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  D3DCOLOR_XRGB(0, 255, 255));
 
 			drawPos.x += 16.0f;
 		}
@@ -387,7 +387,7 @@ void HUD::drawCheckpointTime()
 			current.left = 16 * 10;
 			current.right = 16 * 11;
 
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  D3DCOLOR_XRGB(0, 255, 255));
 
 			drawPos.x += 16.0f;
 		}
@@ -398,7 +398,7 @@ void HUD::drawCheckpointTime()
 			current.left = 16 * (num - 1);
 			current.right = 16 * num;
 
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  D3DCOLOR_XRGB(0, 255, 255));
 
 			drawPos.x += 16.0f;
 		}
@@ -451,7 +451,7 @@ void HUD::drawLap()
 			current.left = 16 * 9;
 			current.right = 16 * 10;
 
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos, D3DCOLOR_XRGB(0, 0, 255));
 
 			drawPos.x += 16.0f;
 		}
@@ -460,7 +460,7 @@ void HUD::drawLap()
 			current.left = 16 * 10;
 			current.right = 16 * 11;
 
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  D3DCOLOR_XRGB(0, 0, 255));
 
 			drawPos.x += 16.0f;
 		}
@@ -471,7 +471,7 @@ void HUD::drawLap()
 			current.left = 16 * (num - 1);
 			current.right = 16 * num;
 
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  0xFFFFFFFF);
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  D3DCOLOR_XRGB(0, 0, 255));
 
 			drawPos.x += 16.0f;
 		}

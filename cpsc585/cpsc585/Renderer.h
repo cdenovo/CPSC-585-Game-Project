@@ -38,7 +38,6 @@ private:
 
 	D3DXMATRIX projectionMatrix;
 	D3DXMATRIX worldMatrix;
-	D3DXMATRIX orthoMatrix;
 
 	
 	
