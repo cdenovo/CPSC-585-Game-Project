@@ -15,8 +15,7 @@ Ability::Ability(AbilityType _abilityType)
 		boostDuration = 3; // Time in seconds that the boost last
 		break;
 	case LASER:
-		laserDamage = 34;
-		lengthOfCooldown = 3; // Time until boost can be used again
+		lengthOfCooldown = 2; // Time until boost can be used again
 		break;
 	case LEFT:
 		break;
@@ -102,15 +101,7 @@ void Ability::update(int levelOfAbility)
 		}
 		break;
 	case LASER:
-		if(levelOfAbility == 1){
-			laserDamage = 34;
-		}
-		else if(levelOfAbility == 2){
-			laserDamage = 67;
-		}
-		else if(levelOfAbility == 3){
-			laserDamage = 100;
-		}
+		lengthOfCooldown = 1;
 		break;
 	case LEFT:
 		if(levelOfAbility == 1){
@@ -142,9 +133,4 @@ void Ability::update(int levelOfAbility)
 int Ability::getAbilityLevel()
 {
 	return abilityLevel;
-}
-
-int Ability::getLaserDamage()
-{
-	return laserDamage;
 }

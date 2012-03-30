@@ -26,7 +26,6 @@ public:
 	int getSpeedCooldown();
 	int getLaserLevel();
 	int getSpeedLevel();
-	int getLaserDamage();
 	int getOverallPosition();
 	int getCurrentCheckpoint();
 	float getRotationAngle();

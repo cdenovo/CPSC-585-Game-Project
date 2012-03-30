@@ -45,9 +45,7 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 
 	health = 100;
 	kills = 0;
-	laserTime = 5.0f;
 	laserReady = true;
-	damageOutput = 34;
 	laserTime = 0.0f;
 
 	index = -1;
@@ -78,7 +76,7 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 	int collisionGroupFilter = p->getFilter();
 	
 	hkpRigidBodyCinfo info;
-	hkVector4 halfExtent(0.9f, 0.7f, 2.1f);		//Half extent for racer rigid body box
+	hkVector4 halfExtent(0.9f, 0.6f, 2.2f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL;
 	info.m_centerOfMass = hkVector4(0.0f, -0.7f, 0.0f);	// lower CM a bit
@@ -93,6 +91,12 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 	body = new hkpRigidBody(info);		//Create rigid body
 	body->setLinearVelocity(hkVector4(0, 0, 0));
 	info.m_shape->removeReference();
+
+	
+	hkpPropertyValue val;
+	val.setPtr(this);
+
+	body->setProperty(0, val);
 
 	index = r->addDrawable(drawable);
 	p->addRigidBody(body);
@@ -149,10 +153,6 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 	
 	hkpConstraintStabilizationUtil::stabilizeRigidBodyInertia(body);
 
-	hkpPropertyValue val;
-	val.setPtr(NULL);
-	body->addProperty(0, val);
-
 	reset(&(hkVector4(0, 0, 0, 0)), 0);
 
 	emitter = sound->getEmitter();
@@ -193,21 +193,11 @@ void Racer::update()
 {
 	if (drawable && body)
 	{
-		hkpPropertyValue val;
-		val = body->getProperty(0);
-
-		if (val.getPtr() != NULL)
-		{
-			giveDamage((Racer*) val.getPtr(), ((Racer*)val.getPtr())->getDamageOutput());
-			val.setPtr(NULL);
-			body->setProperty(0, val);
-		}
-
 		D3DXMATRIX transMat;
 		(body->getTransform()).get4x4ColumnMajor(transMat);
 		drawable->setTransform(&transMat);
 
-		if (laserTime < 2.0f)
+		if (laserTime < 0.5f)
 		{
 			((LaserModel*)(laserDraw->mesh))->drawLaser = false;
 		}
@@ -981,30 +971,82 @@ body->applyForce(seconds, dragForce);
 
 void Racer::fireLaser()
 {
-	laserTime = 3.0f;
+	laserTime = 1.0f;
 
 	sound->playLaser(emitter);
 
 	hkpWorldRayCastInput input;
+	hkpWorldRayCastOutput output = hkpWorldRayCastOutput();
+	hkVector4 from;
+
+	hkTransform trans = body->getTransform();
+	from.setTransformedPos(trans, attachLaser);
+
+	input = fireWeapon();
+
+	// Check if anything was hit
+	if (input.m_userData == -1)
+		return;
+
+	physicsWorld->castRay(input, output);
+
+	if (output.hasHit())
+	{
+		hkpRigidBody* hitBody = (hkpRigidBody*) output.m_rootCollidable->getOwner();
+
+		Racer* attacked = (Racer*) (hitBody->getProperty(0)).getPtr();
+
+		if ((attacked != NULL) && (attacked != this))
+		{
+			hkVector4 raycastDir = hkVector4(input.m_to);
+			raycastDir.sub(from);
+			raycastDir.normalize3();
+
+			hkVector4 force = hkVector4(raycastDir);
+			force.mul(chassisMass * 40.0f);
+			
+			input.m_to.sub(from);
+			input.m_to.mul(output.m_hitFraction);
+			input.m_to.add(from);
+			
+			hitBody->applyPointImpulse(force, input.m_to);
+
+			attacked->applyDamage(this, LASER_DAMAGE);
+		}
+	}
+}
+
+
+
+
+
+// input.m_userData == -1 if nothing was hit
+hkpWorldRayCastInput Racer::fireWeapon()
+{
+	hkpWorldRayCastInput input;
 	hkpWorldRayCastOutput output;
 	hkVector4 from;
 	hkVector4 to;
-	hkVector4 raycastDir = drawable->getZhkVector();
-	hkTransform transform = body->getTransform();
 
-	hkVector4 attach = hkVector4(attachLaser);
-	attach(1) = -0.6f;
-
-	// Raycast
 	input = hkpWorldRayCastInput();
 	output = hkpWorldRayCastOutput();
 	input.m_filterInfo = body->getCollisionFilterInfo();
 	
-	from.setTransformedPos(transform, attach);
-	to = hkVector4(raycastDir);
 	
-	to.mul(80.0f);	// Laser length
-	to.add(from);
+	// Raycast FROM camera, TO reticule
+	from = body->getPosition();
+	hkVector4 look = hkVector4(lookDir);
+	look.mul(-7.0f);
+	
+	from.add(look);
+	from(1) = from(1) + 2.0f;
+
+	to = hkVector4(from);
+
+	look = hkVector4(lookDir);
+	look.mul(1000.0f);	// Essentially goes on until it hits something
+	to.add(look);
+	
 
 	input.m_from = hkVector4(from);
 	input.m_to = hkVector4(to);
@@ -1013,22 +1055,42 @@ void Racer::fireLaser()
 
 	if (output.hasHit())
 	{
-		hkpRigidBody* hitBody = (hkpRigidBody*) output.m_rootCollidable->getOwner();
-		hkpPropertyValue val;
-		val.setPtr(this);
-		
-		hitBody->setProperty(0, val);
-
-		hkVector4 force = hkVector4(raycastDir);
-		force.mul(chassisMass * 40.0f);
-		
+		// Now raycast from racer's cannon to target
 		to.sub(from);
-		to.mul(output.m_hitFraction);
+		to.mul(output.m_hitFraction * 1.5f);
 		to.add(from);
+
+		hkTransform trans = body->getTransform();
+		from.setTransformedPos(trans, attachLaser);
+
+
+		// TO DO:
+		// Make sure that this ray is within a permissible range
+		// for the racer to fire from
+
+
 		
-		hitBody->applyPointImpulse(force, to);
+		input = hkpWorldRayCastInput();
+		output = hkpWorldRayCastOutput();
+		input.m_filterInfo = body->getCollisionFilterInfo();
+		
+		input.m_from = hkVector4(from);
+		input.m_to = hkVector4(to);
+
+		return input;
 	}
+
+	input.m_userData = -1;
+
+	return input;
 }
+
+
+
+
+
+
+
 
 void Racer::respawn()
 {
@@ -1041,7 +1103,7 @@ void Racer::respawn()
 	body->setPositionAndRotation(deathPos, deathRot);
 }
 
-void Racer::giveDamage(Racer* attacker, int damage)
+void Racer::applyDamage(Racer* attacker, int damage)
 {
 	health -= damage;
 	sound->playCrash(emitter);
@@ -1052,16 +1114,6 @@ void Racer::giveDamage(Racer* attacker, int damage)
 		respawn();
 		attacker->kills += 1;
 	}
-}
-
-void Racer::setDamageOutput(int damage)
-{
-	damageOutput = damage;
-}
-
-int Racer::getDamageOutput()
-{
-	return damageOutput;
 }
 
 void Racer::computeRPM()

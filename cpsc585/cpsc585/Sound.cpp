@@ -151,7 +151,7 @@ void Sound::initialize(int numRacers)
 		emitters[i].InnerRadius = 4.0f;
 		emitters[i].InnerRadiusAngle = X3DAUDIO_PI/4.0;
 
-		emitters[i].CurveDistanceScaler = 6.0f;
+		emitters[i].CurveDistanceScaler = 7.0f;
 		emitters[i].DopplerScaler = 2.0f;
 	}
 	

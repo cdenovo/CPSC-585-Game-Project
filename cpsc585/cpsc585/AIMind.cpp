@@ -483,7 +483,10 @@ void AIMind::upgrade()
 	if(upgradeLaser){
 		if(laserLevel < 3){
 			laser->update(laserLevel + 1);
-			racer->setDamageOutput(laser->getLaserDamage());
+
+			// The following method in racer was removed, since we're changing
+			// the game's mechanics
+			//racer->setDamageOutput(laser->getLaserDamage());
 		}
 	}
 	else if(upgradeSpeed){
@@ -522,7 +525,10 @@ void AIMind::downgrade()
 	if(downgradeLaser){
 		if(laserLevel > 1){
 			laser->update(laserLevel - 1);
-			racer->setDamageOutput(laser->getLaserDamage());
+
+			// The following method has been removed since we're
+			// changing game mechanics
+			//racer->setDamageOutput(laser->getLaserDamage());
 		}
 	}
 	else if(downgradeSpeed){
@@ -576,11 +582,6 @@ int AIMind::getPlacement()
 int AIMind::getLaserLevel()
 {
 	return laser->getAbilityLevel();
-}
-
-int AIMind::getLaserDamage()
-{
-	return laser->getLaserDamage();
 }
 
 int AIMind::getSpeedLevel()

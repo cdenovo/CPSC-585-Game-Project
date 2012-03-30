@@ -13,6 +13,10 @@
 enum RacerType { RACER1, RACER2, RACER3, RACER4, RACER5, RACER6, RACER7, RACER8 };
 enum WheelType { FRONT, REAR };
 
+
+#define LASER_DAMAGE 10
+
+
 class Racer
 {
 public:
@@ -30,12 +34,9 @@ public:
 	void reset(hkVector4* resetPos, float rotation);	// Reset position and set velocity/momentum to 0
 
 	void applyForces(float seconds);	// Call this every frame BEFORE stepping physics!
-
 	void fireLaser();
-	void giveDamage(Racer* attacker, int damage);
-
-	void setDamageOutput(int damage);
-	int getDamageOutput();
+	hkpWorldRayCastInput fireWeapon();
+	void applyDamage(Racer* attacker, int damage);
 	void computeRPM();
 
 private:
@@ -79,8 +80,6 @@ private:
 	RearWheel* wheelRR;
 
 	float currentSteering;
-
-	int damageOutput;
 
 	static hkpWorld* physicsWorld;
 

@@ -15,7 +15,6 @@ public:
 	float getBoostValue();
 	void update(int levelOfAbility);
 	int getAbilityLevel();
-	int getLaserDamage();
 
 private:
 	time_t oldTime;
@@ -26,6 +25,5 @@ private:
 	float boostDuration;
 	AbilityType abilityType;
 	int abilityLevel;
-	int laserDamage;
 };
 
