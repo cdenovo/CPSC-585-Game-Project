@@ -29,175 +29,241 @@ Input::~Input(void)
 }
 
 
-void Input::processWindowsMsg(UINT umessage, WPARAM wparam)
+void Input::processWindowsMsg(UINT umessage, WPARAM wparam, LPARAM lparam)
 {
-	if ((umessage == WM_KEYDOWN) && (wparam == 'Q'))
-		quit = true;
-	else if ((umessage == WM_KEYDOWN) && (wparam == 'B'))
-		debug = !debug;
-	else if ((umessage == WM_KEYUP) && (wparam == 'X'))
-		placeWaypoint = true;
-	else
+	if (umessage == WM_INPUT)
 	{
-		// Process input
-		if (umessage == WM_KEYDOWN)
-		{
-			switch (wparam)
-			{
-			case VK_UP:
-				{
-					intention.rightStickY = 25000;
-					break;
-				}
-			case VK_DOWN:
-				{
-					intention.rightStickY = -25000;
-					break;
-				}
-			case VK_LEFT:
-				{
-					intention.rightStickX = -25000;
-					break;
-				}
-			case VK_RIGHT:
-				{
-					intention.rightStickX = 25000;
-					break;
-				}
-			case VK_SPACE:
-				{
-					intention.rightTrig = 255;
-					break;
-				}
-			case VK_SHIFT:
-				{
-					intention.leftTrig = 255;
-					break;
-				}
-			case 'Z':
-				{
-					intention.yPressed = true;
-					break;
-				}
-			case 'R':
-				{
-					intention.rbumpPressed = true;
-					break;
-				}
-			case 'E':
-				{
-					intention.lbumpPressed = true;
-					break;
-				}
-			case 'A':
-				{
-					intention.leftStickX = -25000;
-					break;
-				}
-			case 'D':
-				{
-					intention.leftStickX = 25000;
-					break;
-				}
-			case 'S':
-				{
-					intention.leftStickY = -25000;
-					break;
-				}
-			case 'W':
-				{
-					intention.leftStickY = 25000;
-					break;
-				}
-			case VK_RETURN:
-				{
-					intention.aPressed = true;
-					break;
-				}
-			}
-		}
-		else if (umessage == WM_KEYUP)
-		{
-			switch (wparam)
-			{
-			case VK_UP:
-				{
-					intention.rightStickY = 0;
-					break;
-				}
-			case VK_DOWN:
-				{
-					intention.rightStickY = 0;
-					break;
-				}
-			case VK_LEFT:
-				{
-					intention.rightStickX = 0;
-					break;
-				}
-			case VK_RIGHT:
-				{
-					intention.rightStickX = 0;
-					break;
-				}
-			case VK_SPACE:
-				{
-					intention.rightTrig = 0;
-					break;
-				}
-			case VK_SHIFT:
-				{
-					intention.leftTrig = 0;
-					break;
-				}
-			case 'Z':
-				{
-					intention.yPressed = false;
-					break;
-				}
-			case 'R':
-				{
-					intention.rbumpPressed = false;
-					break;
-				}
-			case 'E':
-				{
-					intention.lbumpPressed = false;
-					break;
-				}
-			case 'A':
-				{
-					intention.leftStickX = 0;
-					break;
-				}
-			case 'D':
-				{
-					intention.leftStickX = 0;
-					break;
-				}
-			case 'S':
-				{
-					intention.leftStickY = 0;
-					break;
-				}
-			case 'W':
-				{
-					intention.leftStickY = 0;
-					break;
-				}
-			case VK_RETURN:
-				{
-					intention.aPressed = false;
-					break;
-				}
-			}
-		}
+		UINT size = 40;	// This is sizeof(RAWINPUT)
+		static BYTE rawBytes[40];
 
-		// Compute acceleration and steering (between -1.0 and 1.0)
-		intention.acceleration = intention.leftStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
-		intention.cameraX = intention.rightStickX / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
-		intention.cameraY = intention.rightStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
+		GetRawInputData((HRAWINPUT) lparam, RID_INPUT, rawBytes, &size, sizeof(RAWINPUTHEADER));
+			
+		RAWINPUT* raw = (RAWINPUT*) rawBytes;
+
+		if (raw->header.dwType == RIM_TYPEKEYBOARD) 
+		{
+			// PROCESS KEYBOARD INPUT
+			raw->data.keyboard.VKey = raw->data.keyboard.VKey;
+
+			umessage = raw->data.keyboard.Message;
+			wparam = raw->data.keyboard.VKey;
+
+			if ((umessage == WM_KEYDOWN) && (wparam == 'Q'))
+				quit = true;
+			else if ((umessage == WM_KEYDOWN) && (wparam == 'B'))
+				debug = !debug;
+			else if ((umessage == WM_KEYUP) && (wparam == 'X'))
+				placeWaypoint = true;
+			else if (umessage == WM_KEYDOWN)
+			{
+				switch (wparam)
+				{
+				case VK_UP:
+					{
+						intention.rightStickY = 25000;
+						break;
+					}
+				case VK_DOWN:
+					{
+						intention.rightStickY = -25000;
+						break;
+					}
+				case VK_LEFT:
+					{
+						intention.rightStickX = -25000;
+						break;
+					}
+				case VK_RIGHT:
+					{
+						intention.rightStickX = 25000;
+						break;
+					}
+				case VK_SPACE:
+					{
+						intention.rightTrig = 255;
+						break;
+					}
+				case VK_SHIFT:
+					{
+						intention.leftTrig = 255;
+						break;
+					}
+				case 'Z':
+					{
+						intention.yPressed = true;
+						break;
+					}
+				case 'R':
+					{
+						intention.rbumpPressed = true;
+						break;
+					}
+				case 'E':
+					{
+						intention.lbumpPressed = true;
+						break;
+					}
+				case 'A':
+					{
+						intention.leftStickX = -25000;
+						break;
+					}
+				case 'D':
+					{
+						intention.leftStickX = 25000;
+						break;
+					}
+				case 'S':
+					{
+						intention.leftStickY = -25000;
+						break;
+					}
+				case 'W':
+					{
+						intention.leftStickY = 25000;
+						break;
+					}
+				case VK_RETURN:
+					{
+						intention.aPressed = true;
+						break;
+					}
+				}
+			}
+			else if (umessage == WM_KEYUP)
+			{
+				switch (wparam)
+				{
+					case VK_UP:
+						{
+							intention.rightStickY = 0;
+							break;
+						}
+					case VK_DOWN:
+						{
+							intention.rightStickY = 0;
+							break;
+						}
+					case VK_LEFT:
+						{
+							intention.rightStickX = 0;
+							break;
+						}
+					case VK_RIGHT:
+						{
+							intention.rightStickX = 0;
+							break;
+						}
+					case VK_SPACE:
+						{
+							intention.rightTrig = 0;
+							break;
+						}
+					case VK_SHIFT:
+						{
+							intention.leftTrig = 0;
+							break;
+						}
+					case 'Z':
+						{
+							intention.yPressed = false;
+							break;
+						}
+					case 'R':
+						{
+							intention.rbumpPressed = false;
+							break;
+						}
+					case 'E':
+						{
+							intention.lbumpPressed = false;
+							break;
+						}
+					case 'A':
+						{
+							intention.leftStickX = 0;
+							break;
+						}
+					case 'D':
+						{
+							intention.leftStickX = 0;
+							break;
+						}
+					case 'S':
+						{
+							intention.leftStickY = 0;
+							break;
+						}
+					case 'W':
+						{
+							intention.leftStickY = 0;
+							break;
+						}
+					case VK_RETURN:
+						{
+							intention.aPressed = false;
+							break;
+						}
+				}
+			}
+		}
+		else if (raw->header.dwType == RIM_TYPEMOUSE) 
+		{
+			USHORT buttonInfo = raw->data.mouse.usButtonFlags;
+
+			// Process mouse movement data
+			if (raw->data.mouse.usFlags == MOUSE_MOVE_RELATIVE)
+			{
+				int xVal = raw->data.mouse.lLastX;
+				int yVal = raw->data.mouse.lLastY * -1;
+
+				if (xVal != 0)
+				{
+					intention.rightStickX = 3000 * xVal;
+				}
+				else
+				{
+					intention.rightStickX = 0;
+				}
+
+				if (yVal != 0)
+				{
+					intention.rightStickY = 3000 * yVal;
+				}
+				else
+				{
+					intention.rightStickY = 0;
+				}
+			}
+			else
+			{
+				intention.rightStickX = 0;
+				intention.rightStickY = 0;
+			}
+			
+
+			// Process mouse clicks
+			if (buttonInfo == RI_MOUSE_LEFT_BUTTON_DOWN)
+				intention.rightTrig = 255;
+			else if (buttonInfo == RI_MOUSE_LEFT_BUTTON_UP)
+				intention.rightTrig = 0;
+			else if (buttonInfo == RI_MOUSE_RIGHT_BUTTON_DOWN)
+				intention.lbumpPressed = true;
+			else if (buttonInfo == RI_MOUSE_RIGHT_BUTTON_UP)
+				intention.lbumpPressed = false;
+
+		}
+		else
+		{
+			DefRawInputProc(&raw, 1, sizeof(RAWINPUTHEADER));
+		}
 	}
+
+	// Compute acceleration and steering (between -1.0 and 1.0)
+	intention.acceleration = intention.leftStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+	intention.cameraX = intention.rightStickX / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
+	intention.cameraY = intention.rightStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
+	
 
 	return;
 }
@@ -347,6 +413,18 @@ bool Input::update()
 
 Intention Input::getIntention()
 {
+	if (!controllerAvailable)
+	{
+		Intention returnIntention = Intention(intention);
+
+		intention.rightStickX = 0;
+		intention.rightStickY = 0;
+		intention.cameraX = 0;
+		intention.cameraY = 0;
+
+		return returnIntention;
+	}
+
 	return intention;
 }
 

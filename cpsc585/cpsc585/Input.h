@@ -12,7 +12,7 @@ class Input
 public:
 	Input(void);
 	~Input(void);
-	void processWindowsMsg(UINT umessage, WPARAM wparam);
+	void processWindowsMsg(UINT umessage, WPARAM wparam, LPARAM lparam);
 	bool update();
 	Intention getIntention();
 	bool debugging();
