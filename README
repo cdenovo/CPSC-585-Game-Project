@@ -1,7 +1,7 @@
 This is what we will likely be using for this project:
 
 Visual Studio 2010
-DirextX SDK (latest version: June 2010) [We'll be developing for DirectX 9.0c]
+DirectX SDK (latest version: June 2010) [We'll be developing for DirectX 9.0c]
 Havok Physics SDK
 Havok Content Tools (if you're going to be doing stuff with Maya)
 Maya 2012
