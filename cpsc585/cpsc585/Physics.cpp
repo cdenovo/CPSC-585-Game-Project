@@ -1,6 +1,9 @@
 #include "Physics.h"
 #include "Havok.h"	// Leave this define here, don't move it to Physics.h
 
+hkpWorld* Physics::world = NULL;
+void addRigidBody(hkpRigidBody* rb);
+
 Physics::Physics(void)
 {
 	filters = NULL;

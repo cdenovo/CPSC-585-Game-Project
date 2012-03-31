@@ -1,5 +1,7 @@
 #include "Renderer.h"
 
+Renderer* Renderer::renderer = NULL;
+IDirect3DDevice9* Renderer::device = NULL;
 
 Renderer::Renderer()
 {
@@ -15,6 +17,8 @@ Renderer::Renderer()
 	drawables = NULL;
 	currentDrawable = 0;
 	hud = NULL;
+
+	renderer = this;
 }
 
 
@@ -27,6 +31,9 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	numDrawables = numToDraw;
 
 	drawables = new Drawable*[numToDraw];
+	dynamicDrawables = std::vector<Drawable*>();
+	dynamicDrawables.clear();
+	dynamicDrawables.reserve(50);
 	
 	hud = new HUD(width, height);
 
@@ -260,6 +267,17 @@ void Renderer::render()
 		drawables[i]->render(device);
 	}
 
+	std::vector<Drawable*>::iterator iter = dynamicDrawables.begin();
+
+	// Draw dynamic objects that will be removed after this frame (like rockets)
+	for (std::vector<Drawable*>::iterator iter = dynamicDrawables.begin();
+		iter < dynamicDrawables.end(); iter++)
+	{
+		(*iter)->render(device);
+	}
+
+	dynamicDrawables.clear();
+
 
 	for (int i = 0; i < numSentences; i++)
 	{
@@ -349,4 +367,11 @@ HUD* Renderer::getHUD()
 Camera* Renderer::getCamera()
 {
 	return camera;
+}
+
+
+// Adds a drawable that will be drawn for only one frame
+void Renderer::addDynamicDrawable(Drawable* drawable)
+{
+	dynamicDrawables.push_back(drawable);
 }

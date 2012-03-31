@@ -12,11 +12,12 @@
 #include "RearWheelMesh.h"
 #include "WaypointMesh.h"
 #include "LaserModel.h"
+#include "RocketMesh.h"
 
 #include <string>
 
 
-enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, LASERMODEL };
+enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, LASERMODEL, ROCKETMESH };
 
 class Drawable
 {

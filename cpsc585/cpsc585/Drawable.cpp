@@ -56,6 +56,11 @@ void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevic
 			mesh = LaserModel::getInstance(device);
 			break;
 		}
+	case ROCKETMESH:
+		{
+			mesh = RocketMesh::getInstance(device);
+			break;
+		}
 	default:
 		mesh = NULL;
 	}

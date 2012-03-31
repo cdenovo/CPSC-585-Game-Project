@@ -16,8 +16,11 @@ AIMind::AIMind(Racer* _racer, TypeOfRacer _racerType)
 	checkPointTimer = new CheckpointTimer(racer);
 	speedBoost = new Ability(SPEED);
 	laser = new Ability(LASER);
+	rocket = new Ability(ROCKET);
 	knownNumberOfKills = 0;
 	rotationAngle = 0;
+
+	currentRocket = NULL;
 }
 
 AIMind::~AIMind(void)
@@ -38,6 +41,18 @@ AIMind::~AIMind(void)
 	{
 		delete laser;
 		laser = NULL;
+	}
+
+	if (rocket)
+	{
+		delete rocket;
+		rocket = NULL;
+	}
+
+	if (currentRocket)
+	{
+		delete currentRocket;
+		currentRocket = NULL;
 	}
 }
 
@@ -62,6 +77,7 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 		knownNumberOfKills += 1;
 		upgrade();
 	}
+
 
 	switch(racerType){
 		case PLAYER:
@@ -143,6 +159,35 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 					racer->fireLaser();
 				}
 
+				if (hud->getSelectedAbility() == ROCKET && intention.rightTrig && !rocket->onCooldown()){
+					if (currentRocket)
+					{
+						currentRocket->explode();
+						delete currentRocket;
+						currentRocket = NULL;
+					}
+					
+					rocket->startCooldownTimer();
+					hkVector4 rocketDir = racer->fireRocket();
+					rocketDir.normalize3();
+					// Change this so rocket is facing rocketDir when launched
+
+
+					currentRocket = new Rocket(Renderer::device);
+					
+					hkVector4 rocketPos;
+					hkTransform bodyTransform = racer->body->getTransform();
+
+					rocketPos.setTransformedPos(bodyTransform, Racer::attachCannon);
+					currentRocket->body->setTransform(bodyTransform);
+					currentRocket->body->setPosition(rocketPos);
+
+					rocketDir.mul(100.0f);
+					currentRocket->body->setLinearVelocity(rocketDir);
+					currentRocket->update();
+				}
+
+
 				if(speedBoost->onCooldown()){
 					char buf1[33];
 					speedBoost->updateCooldown();
@@ -152,6 +197,10 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 
 				if(laser->onCooldown()){
 					laser->updateCooldown();
+				}
+
+				if(rocket->onCooldown()){
+					rocket->updateCooldown();
 				}
 
 				/************* STEERING CALCULATIONS *************/
@@ -383,6 +432,16 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 	overallPosition = currentWaypoint + (currentLap-1)*80; // 80 represent the number of waypoints
 
 	
+	if (currentRocket && currentRocket->destroyed)
+	{
+		delete currentRocket;
+		currentRocket = NULL;
+	}
+	else if (currentRocket)
+	{
+		currentRocket->update();
+		Renderer::renderer->addDynamicDrawable(currentRocket->drawable);
+	}
 }
 
 float AIMind::calculateAngleToPosition(hkVector4* position)

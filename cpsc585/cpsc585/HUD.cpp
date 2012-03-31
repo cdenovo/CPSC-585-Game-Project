@@ -17,29 +17,29 @@ HUD::HUD(int width, int height)
 	reticuleTexture = NULL;
 
 	laserRect = new RECT();
+	mineRect = new RECT();
+	rocketRect = new RECT();
 	speedRect = new RECT();
-	leftRect = new RECT();
-	rightRect = new RECT();
 
 	laserRect->top = 0;
 	laserRect->bottom = 300;
 	laserRect->right = 300;
 	laserRect->left = 0;
 
-	speedRect->top = 0;
-	speedRect->bottom = 300;
+	mineRect->top = 0;
+	mineRect->bottom = 300;
+	mineRect->right = 600;
+	mineRect->left = 300;
+
+	rocketRect->top = 300;
+	rocketRect->bottom = 600;
+	rocketRect->right = 300;
+	rocketRect->left = 0;
+
+	speedRect->top = 300;
+	speedRect->bottom = 600;
 	speedRect->right = 600;
 	speedRect->left = 300;
-
-	leftRect->top = 300;
-	leftRect->bottom = 600;
-	leftRect->right = 300;
-	leftRect->left = 0;
-
-	rightRect->top = 300;
-	rightRect->bottom = 600;
-	rightRect->right = 600;
-	rightRect->left = 300;
 
 	currentRect = laserRect;
 
@@ -106,22 +106,22 @@ void HUD::shutdown()
 		laserRect = NULL;
 	}
 
+	if (mineRect)
+	{
+		delete mineRect;
+		mineRect = NULL;
+	}
+
+	if (rocketRect)
+	{
+		delete rocketRect;
+		rocketRect = NULL;
+	}
+
 	if (speedRect)
 	{
 		delete speedRect;
 		speedRect = NULL;
-	}
-
-	if (leftRect)
-	{
-		delete leftRect;
-		leftRect = NULL;
-	}
-
-	if (rightRect)
-	{
-		delete rightRect;
-		rightRect = NULL;
 	}
 
 	if (radialMenuTexture)
@@ -179,11 +179,11 @@ void HUD::setSelectedAbility(AbilityType ability)
 	case SPEED:
 		currentRect = speedRect;
 		break;
-	case LEFT:
-		currentRect = leftRect;
+	case ROCKET:
+		currentRect = rocketRect;
 		break;
-	case RIGHT:
-		currentRect = rightRect;
+	case LANDMINE:
+		currentRect = mineRect;
 		break;
 	default:
 		currentRect = laserRect;
@@ -201,13 +201,13 @@ void HUD::update(Intention intention)
 			setSelectedAbility(LASER);
 		}
 		else if(intention.rightStickY < -10000 && intention.rightStickX > -20000 && intention.rightStickX < 20000){ // DOWN
-			setSelectedAbility(SPEED);
+			setSelectedAbility(LANDMINE);
 		}
 		else if(intention.rightStickX > 10000 && intention.rightStickY < 10000 && intention.rightStickY > -10000){ // RIGHT
-			setSelectedAbility(RIGHT);
+			setSelectedAbility(SPEED);
 		}
 		else if(intention.rightStickX < -10000 && intention.rightStickY < 10000 && intention.rightStickY > -10000){ //LEFT
-			setSelectedAbility(LEFT);
+			setSelectedAbility(ROCKET);
 		}
 	}
 	else
@@ -215,10 +215,6 @@ void HUD::update(Intention intention)
 		radialEnabled = false;
 	}
 	
-
-
-	// Code for updating the checkpoint timer
-
 }
 
 

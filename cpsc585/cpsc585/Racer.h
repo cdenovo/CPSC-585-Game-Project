@@ -9,6 +9,7 @@
 #include "RearWheel.h"
 #include "ConfigReader.h"
 #include "LaserModel.h"
+#include "Rocket.h"
 
 enum RacerType { RACER1, RACER2, RACER3, RACER4, RACER5, RACER6, RACER7, RACER8 };
 enum WheelType { FRONT, REAR };
@@ -38,6 +39,8 @@ public:
 	hkpWorldRayCastInput fireWeapon();
 	void applyDamage(Racer* attacker, int damage);
 	void computeRPM();
+
+	hkVector4 fireRocket();
 
 private:
 	void buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* constraint, WheelType type);
@@ -69,6 +72,8 @@ public:
 	
 	X3DAUDIO_EMITTER* emitter;
 
+	static hkVector4 attachCannon;
+
 private:
 	Drawable* laserDraw;
 
@@ -95,7 +100,6 @@ private:
 	static hkVector4 attachFR;
 	static hkVector4 attachRL;
 	static hkVector4 attachRR;
-	static hkVector4 attachLaser;
 
 	static hkReal chassisMass;
 

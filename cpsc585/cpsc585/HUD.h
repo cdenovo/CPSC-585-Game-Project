@@ -2,7 +2,7 @@
 #include "Intention.h"
 #include "Drawable.h"
 
-enum AbilityType { LASER, SPEED, LEFT, RIGHT };
+enum AbilityType { LASER, SPEED, LANDMINE, ROCKET };
 
 class HUD
 {
@@ -36,8 +36,8 @@ private:
 
 	RECT* laserRect;
 	RECT* speedRect;
-	RECT* leftRect;
-	RECT* rightRect;
+	RECT* rocketRect;
+	RECT* mineRect;
 	
 	RECT* currentRect;
 

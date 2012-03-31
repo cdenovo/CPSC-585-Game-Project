@@ -99,6 +99,8 @@
     <ClCompile Include="RearWheel.cpp" />
     <ClCompile Include="RearWheelMesh.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Rocket.cpp" />
+    <ClCompile Include="RocketMesh.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="Waypoint.cpp" />
@@ -130,6 +132,8 @@
     <ClInclude Include="RearWheel.h" />
     <ClInclude Include="RearWheelMesh.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Rocket.h" />
+    <ClInclude Include="RocketMesh.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="Waypoint.h" />

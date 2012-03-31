@@ -4,6 +4,8 @@
 #include "Waypoint.h"
 #include "Ability.h"
 #include "CheckpointTimer.h"
+#include "Physics.h"
+#include "Renderer.h"
 #include <time.h>
 
 #define _USE_MATH_DEFINES
@@ -41,6 +43,7 @@ private:
 
 	Ability* speedBoost;
 	Ability* laser;
+	Ability* rocket;
 
 	CheckpointTimer* checkPointTimer;
 
@@ -60,5 +63,7 @@ private:
 	int numberOfLapsToWin;
 
 	float rotationAngle;
+
+	Rocket* currentRocket;
 };
 

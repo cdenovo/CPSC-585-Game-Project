@@ -15,11 +15,12 @@ Ability::Ability(AbilityType _abilityType)
 		boostDuration = 3; // Time in seconds that the boost last
 		break;
 	case LASER:
-		lengthOfCooldown = 2; // Time until boost can be used again
+		lengthOfCooldown = 2; // Time until laser can be used again
 		break;
-	case LEFT:
+	case ROCKET:
+		lengthOfCooldown = 2; // Time until rocket can be used again
 		break;
-	case RIGHT:
+	case LANDMINE:
 		break;
 	}
 	
@@ -103,7 +104,7 @@ void Ability::update(int levelOfAbility)
 	case LASER:
 		lengthOfCooldown = 1;
 		break;
-	case LEFT:
+	case ROCKET:
 		if(levelOfAbility == 1){
 
 		}
@@ -114,7 +115,7 @@ void Ability::update(int levelOfAbility)
 
 		}
 		break;
-	case RIGHT:
+	case LANDMINE:
 		if(levelOfAbility == 1){
 
 		}

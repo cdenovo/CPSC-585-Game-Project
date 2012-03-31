@@ -6,6 +6,7 @@
 #include <d3dx9.h>
 #include <DxErr.h>
 
+#include <vector>
 #include <string>
 
 #include "Camera.h"
@@ -24,18 +25,20 @@ public:
 	void render();
 	void setText(std::string* sentences, int count);
 	int addDrawable(Drawable* drawable);
+	void addDynamicDrawable(Drawable* drawable);
 	void setFocus(int drawableIndex);
 	IDirect3DDevice9* getDevice();
 	HUD* getHUD();
 	Camera* getCamera();
 	
+	static Renderer* renderer;
+	static IDirect3DDevice9* device;
 
 private:
 	void writeText(std::string text, int line);
 
 	IDirect3D9* d3dObject;
-	IDirect3DDevice9* device;
-
+	
 	D3DXMATRIX projectionMatrix;
 	D3DXMATRIX worldMatrix;
 
@@ -49,6 +52,7 @@ private:
 	int numDrawables;
 	int currentDrawable;
 	Drawable** drawables;
+	std::vector<Drawable*> dynamicDrawables;
 
 	HUD* hud;
 	Camera* camera;

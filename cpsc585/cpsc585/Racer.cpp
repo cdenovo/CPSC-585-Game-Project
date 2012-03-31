@@ -13,7 +13,7 @@ hkVector4 Racer::attachFL = hkVector4(-0.8f, -0.77f, 1.5f);
 hkVector4 Racer::attachFR = hkVector4(0.8f, -0.77f, 1.5f);
 hkVector4 Racer::attachRL = hkVector4(-0.8f, -0.7f, -1.2f);
 hkVector4 Racer::attachRR = hkVector4(0.8f, -0.7f, -1.2f);
-hkVector4 Racer::attachLaser = hkVector4(0.0f, 0.1f, 1.8f);
+hkVector4 Racer::attachCannon = hkVector4(0.0f, 0.5f, 2.0f);
 
 hkReal Racer::chassisMass = config.chassisMass;
 float Racer::grip = config.grip;
@@ -980,7 +980,7 @@ void Racer::fireLaser()
 	hkVector4 from;
 
 	hkTransform trans = body->getTransform();
-	from.setTransformedPos(trans, attachLaser);
+	from.setTransformedPos(trans, attachCannon);
 
 	input = fireWeapon();
 
@@ -1061,7 +1061,7 @@ hkpWorldRayCastInput Racer::fireWeapon()
 		to.add(from);
 
 		hkTransform trans = body->getTransform();
-		from.setTransformedPos(trans, attachLaser);
+		from.setTransformedPos(trans, attachCannon);
 
 
 		// TO DO:
@@ -1086,7 +1086,25 @@ hkpWorldRayCastInput Racer::fireWeapon()
 }
 
 
+hkVector4 Racer::fireRocket()
+{
+	sound->playLaser(emitter);
 
+	hkpWorldRayCastInput input;
+	hkpWorldRayCastOutput output = hkpWorldRayCastOutput();
+	hkVector4 from;
+
+	hkTransform trans = body->getTransform();
+	from.setTransformedPos(trans, attachCannon);
+
+	input = fireWeapon();
+
+	hkVector4 to = input.m_to;
+
+	to.sub(from);
+
+	return to;
+}
 
 
 

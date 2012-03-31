@@ -99,6 +99,12 @@
     <ClCompile Include="Skybox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Rocket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RocketMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AI.h">
@@ -186,6 +192,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rocket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RocketMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
