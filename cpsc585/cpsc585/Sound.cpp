@@ -1,5 +1,6 @@
 #include "Sound.h"
 
+Sound* Sound::sound = NULL;
 
 Sound::Sound(void)
 {
@@ -11,7 +12,6 @@ Sound::Sound(void)
 	smMusic = NULL;
 
 	numClaimedEmitters = 0;
-	numEmitters = 0;
 	emitters = NULL;
 
 	dspSettings.pMatrixCoefficients = NULL;
@@ -24,12 +24,21 @@ Sound::Sound(void)
 	crash = NULL;
 	crashBuffer = NULL;
 	crashBufferDetails = NULL;
-	engine = NULL;
 	engineBuffer = NULL;
 	engineBufferDetails = NULL;
 	boost = NULL;
 	boostBuffer = NULL;
 	boostBufferDetails = NULL;
+
+	sound = this;
+
+	currentVoice = 0;
+	maxVoices = 200;
+	maxReservedVoices = 30;
+	currentReservedVoice = 0;
+
+	voiceBuffer = NULL;
+	voiceBufferReserved = NULL;
 }
 
 
@@ -37,7 +46,7 @@ Sound::~Sound(void)
 {
 }
 
-void Sound::initialize(int numRacers)
+void Sound::initialize()
 {
 	HRESULT res;
 	
@@ -86,17 +95,24 @@ void Sound::initialize(int numRacers)
 	// Set sound effect volume HERE
 	smSFX->SetVolume(2.0f);
 
+	ZeroMemory(&wfm, sizeof(WAVEFORMATEX));
+
+	wfm.wFormatTag = WAVE_FORMAT_PCM;
+	wfm.nChannels = 1;
+	wfm.nSamplesPerSec = 44100;
+	wfm.wBitsPerSample = 16;
+	wfm.nBlockAlign = wfm.nChannels * wfm.wBitsPerSample / 8;
+	wfm.nAvgBytesPerSec = wfm.nSamplesPerSec * wfm.nBlockAlign;
+	wfm.cbSize = 0;
+
+
 	
 	loadMusic(music, "music.wav", musicBuffer);
-	loadSound(laser, "laser.wav", laserBuffer);
-	loadSound(crash, "crash.wav", crashBuffer);
-	loadSound(engine, "engine.wav", engineBuffer);
-	loadSound(boost, "boost.wav", boostBuffer);
-
-
-	crash->SetVolume(1.5f);
-	engine->SetVolume(0.3f);
 	
+	loadSound(CRASHSFX, "crash.wav", crashBuffer);
+	loadSound(ENGINESFX, "engine.wav", engineBuffer);
+	loadSound(BOOSTSFX, "boost.wav", boostBuffer);
+	loadSound(LASERSFX, "laser.wav", laserBuffer);
 
 
 
@@ -139,20 +155,19 @@ void Sound::initialize(int numRacers)
 	listener.Velocity.z = 0.0f;
 
 
-	// Now set up emitters (racers)
+	// Now set up emitters
 
-	numEmitters = numRacers;
-	emitters = new X3DAUDIO_EMITTER[numEmitters];
+	emitters = new X3DAUDIO_EMITTER[NUM_EMITTERS];
 
-	for (int i = 0; i < numEmitters; i++)
+	for (int i = 0; i < NUM_EMITTERS; i++)
 	{
 		ZeroMemory(&(emitters[i]), sizeof(emitters[i]));
 		emitters[i].ChannelCount = 1;
-		emitters[i].InnerRadius = 4.0f;
-		emitters[i].InnerRadiusAngle = X3DAUDIO_PI/4.0;
+		emitters[i].InnerRadius = 5.0f;
+		emitters[i].InnerRadiusAngle = X3DAUDIO_PI * 2.0f;
 
-		emitters[i].CurveDistanceScaler = 7.0f;
-		emitters[i].DopplerScaler = 2.0f;
+		emitters[i].CurveDistanceScaler = 10.0f;
+		emitters[i].DopplerScaler = 1.0f;
 	}
 	
 	ZeroMemory(&dspSettings, sizeof(X3DAUDIO_DSP_SETTINGS));
@@ -161,6 +176,24 @@ void Sound::initialize(int numRacers)
 	dspSettings.SrcChannelCount = 1;
 	dspSettings.DstChannelCount = details.OutputFormat.Format.nChannels;
 	dspSettings.pMatrixCoefficients = mat;
+
+	
+
+	voiceBuffer = new IXAudio2SourceVoice*[maxVoices];
+
+	for (int i = 0; i < maxVoices; i++)
+	{
+		voiceBuffer[i] = NULL;
+		audio->CreateSourceVoice(&(voiceBuffer[i]), &wfm, XAUDIO2_VOICE_USEFILTER, XAUDIO2_MAX_FREQ_RATIO, NULL, &SFXSendList, NULL);
+	}
+
+	voiceBufferReserved = new IXAudio2SourceVoice*[maxReservedVoices];
+
+	for (int i = 0; i < maxReservedVoices; i++)
+	{
+		voiceBufferReserved[i] = NULL;
+		audio->CreateSourceVoice(&(voiceBufferReserved[i]), &wfm, XAUDIO2_VOICE_USEFILTER, XAUDIO2_MAX_FREQ_RATIO, NULL, &SFXSendList, NULL);
+	}
 
 	initialized = true;
 
@@ -176,28 +209,26 @@ void Sound::shutdown()
 		music = NULL;
 	}
 
-	if (laser)
+	if (voiceBuffer)
 	{
-		laser->DestroyVoice();
-		laser = NULL;
+		for (int i = 0; i < maxVoices; i++)
+		{
+			if (voiceBuffer[i])
+				voiceBuffer[i]->DestroyVoice();
+		}
+
+		delete [] voiceBuffer;
 	}
 
-	if (crash)
+	if (voiceBufferReserved)
 	{
-		crash->DestroyVoice();
-		crash = NULL;
-	}
+		for (int i = 0; i < maxReservedVoices; i++)
+		{
+			if (voiceBufferReserved[i])
+				voiceBufferReserved[i]->DestroyVoice();
+		}
 
-	if (engine)
-	{
-		engine->DestroyVoice();
-		engine = NULL;
-	}
-
-	if (boost)
-	{
-		boost->DestroyVoice();
-		boost = NULL;
+		delete [] voiceBufferReserved;
 	}
 
 	if (musicBuffer)
@@ -294,7 +325,7 @@ void Sound::shutdown()
 	}
 }
 
-void Sound::loadSound(IXAudio2SourceVoice* &voice, std::string filename, char* &soundBuffer)
+void Sound::loadSound(SoundEffect type, std::string filename, char* &soundBuffer)
 {
 	std::ifstream filestream(filename, std::ifstream::binary);
 	
@@ -311,43 +342,28 @@ void Sound::loadSound(IXAudio2SourceVoice* &voice, std::string filename, char* &
 		i += 1024;
 	}
 	
-
-	WAVEFORMATEX wfm;
-	ZeroMemory(&wfm, sizeof(WAVEFORMATEX));
-
-	wfm.wFormatTag = WAVE_FORMAT_PCM;
-	wfm.nChannels = 1;
-	wfm.nSamplesPerSec = 44100;
-	wfm.wBitsPerSample = 16;
-	wfm.nBlockAlign = wfm.nChannels * wfm.wBitsPerSample / 8;
-	wfm.nAvgBytesPerSec = wfm.nSamplesPerSec * wfm.nBlockAlign;
-	wfm.cbSize = 0;
-
-	audio->CreateSourceVoice(&voice, &wfm, XAUDIO2_VOICE_USEFILTER, XAUDIO2_MAX_FREQ_RATIO, NULL, &SFXSendList, NULL);
 	
 	XAUDIO2_BUFFER buffer;
 	ZeroMemory(&buffer, sizeof(XAUDIO2_BUFFER));
 	buffer.pAudioData = (BYTE*) soundBuffer;
 	buffer.AudioBytes = attrib.nFileSizeLow;
 	
-	if (voice == laser)
+	if (type == LASERSFX)
 	{
 		laserBufferDetails = new XAUDIO2_BUFFER(buffer);
 	}
-	else if (voice == crash)
+	else if (type == CRASHSFX)
 	{
 		crashBufferDetails = new XAUDIO2_BUFFER(buffer);
 	}
-	else if (voice == engine)
+	else if (type == ENGINESFX)
 	{
 		engineBufferDetails = new XAUDIO2_BUFFER(buffer);
 	}
-	else if (voice == boost)
+	else if (type == BOOSTSFX)
 	{
 		boostBufferDetails = new XAUDIO2_BUFFER(buffer);
 	}
-	
-	voice->SubmitSourceBuffer(&buffer);
 
 	filestream.close();
 }
@@ -398,6 +414,8 @@ void Sound::loadMusic(IXAudio2SourceVoice* &voice, std::string filename, char* &
 
 void Sound::playLaser(X3DAUDIO_EMITTER* emit)
 {
+	laser = getSFXVoice();
+
 	laser->FlushSourceBuffers();
 	laser->SubmitSourceBuffer(laserBufferDetails);
 
@@ -417,6 +435,10 @@ void Sound::playLaser(X3DAUDIO_EMITTER* emit)
 
 void Sound::playCrash(X3DAUDIO_EMITTER* emit)
 {
+	crash = getSFXVoice();
+
+	crash->SetVolume(1.5f);
+
 	crash->FlushSourceBuffers();
 	crash->SubmitSourceBuffer(crashBufferDetails);
 
@@ -428,8 +450,8 @@ void Sound::playCrash(X3DAUDIO_EMITTER* emit)
 	crash->Start(0);
 }
 
-void Sound::playEngine(X3DAUDIO_EMITTER* emit, float freq)
-{
+void Sound::playEngine(X3DAUDIO_EMITTER* emit, float freq, IXAudio2SourceVoice* engine)
+{	
 	engine->FlushSourceBuffers();
 	engine->SubmitSourceBuffer(engineBufferDetails);
 
@@ -449,6 +471,8 @@ void Sound::playEngine(X3DAUDIO_EMITTER* emit, float freq)
 
 void Sound::playBoost(X3DAUDIO_EMITTER* emit)
 {
+	boost = getSFXVoice();
+
 	boost->FlushSourceBuffers();
 	boost->SubmitSourceBuffer(boostBufferDetails);
 
@@ -462,7 +486,6 @@ void Sound::playBoost(X3DAUDIO_EMITTER* emit)
 	XAUDIO2_FILTER_PARAMETERS filterParameters = { LowPassFilter, 2.0f * sinf(X3DAUDIO_PI/6.0f * dspSettings.LPFDirectCoefficient), 1.0f };
 	boost->SetFilterParameters(&filterParameters);
 	
-
 	boost->Start(0);
 }
 
@@ -470,7 +493,7 @@ void Sound::playBoost(X3DAUDIO_EMITTER* emit)
 
 X3DAUDIO_EMITTER* Sound::getEmitter()
 {
-	if (numClaimedEmitters < numEmitters)
+	if (numClaimedEmitters < NUM_EMITTERS)
 	{
 		numClaimedEmitters++;
 
@@ -480,4 +503,58 @@ X3DAUDIO_EMITTER* Sound::getEmitter()
 	{
 		return NULL;
 	}
+}
+
+
+void Sound::returnEmitter()
+{
+	if (numClaimedEmitters > 0)
+	{
+		numClaimedEmitters--;
+	}
+}
+
+
+IXAudio2SourceVoice* Sound::getSFXVoice()
+{
+	currentVoice++;
+
+	if (currentVoice == maxVoices)
+	{
+		currentVoice = 0;
+
+		voiceBuffer[maxVoices - 1]->FlushSourceBuffers();
+		voiceBuffer[maxVoices - 1]->DestroyVoice();
+
+		audio->CreateSourceVoice(&(voiceBuffer[maxVoices - 1]), &wfm,
+			XAUDIO2_VOICE_USEFILTER, XAUDIO2_MAX_FREQ_RATIO, NULL, &SFXSendList, NULL);
+		
+		return voiceBuffer[maxVoices - 1];
+	}
+	
+	voiceBuffer[currentVoice - 1]->FlushSourceBuffers();
+	voiceBuffer[currentVoice - 1]->DestroyVoice();
+
+	audio->CreateSourceVoice(&(voiceBuffer[currentVoice - 1]), &wfm,
+		XAUDIO2_VOICE_USEFILTER, XAUDIO2_MAX_FREQ_RATIO, NULL, &SFXSendList, NULL);
+
+	return voiceBuffer[currentVoice - 1];
+}
+
+IXAudio2SourceVoice* Sound::reserveSFXVoice()
+{
+	currentReservedVoice++;
+
+	if (currentReservedVoice == maxReservedVoices)
+	{
+		return NULL;
+	}
+	
+	voiceBufferReserved[currentReservedVoice - 1]->FlushSourceBuffers();
+	voiceBufferReserved[currentReservedVoice - 1]->DestroyVoice();
+
+	audio->CreateSourceVoice(&(voiceBufferReserved[currentReservedVoice - 1]), &wfm,
+		XAUDIO2_VOICE_USEFILTER, XAUDIO2_MAX_FREQ_RATIO, NULL, &SFXSendList, NULL);
+
+	return voiceBufferReserved[currentReservedVoice - 1];
 }

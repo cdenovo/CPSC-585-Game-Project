@@ -21,7 +21,7 @@ enum WheelType { FRONT, REAR };
 class Racer
 {
 public:
-	Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerType racerType);
+	Racer(IDirect3DDevice9* device, RacerType racerType);
 	~Racer(void);
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians
@@ -67,12 +67,13 @@ public:
 	float currentAcceleration;
 		
 	static ConfigReader config;
-	static Sound* sound;
 
 	
 	X3DAUDIO_EMITTER* emitter;
 
 	static hkVector4 attachCannon;
+	
+	IXAudio2SourceVoice* engineVoice;
 
 private:
 	Drawable* laserDraw;
@@ -85,8 +86,6 @@ private:
 	RearWheel* wheelRR;
 
 	float currentSteering;
-
-	static hkpWorld* physicsWorld;
 
 	// Static elements that are common between all Racers
 	static int xID;

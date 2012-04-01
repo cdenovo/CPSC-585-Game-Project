@@ -50,7 +50,7 @@ public:
 
 	void initialize(int numObjects);
 	void shutdown();
-	static void addRigidBody(hkpRigidBody *rb);
+	void addRigidBody(hkpRigidBody *rb);
 	void step(float seconds);
 
 	void accelerate(float seconds, hkpRigidBody *racer, hkVector4 *accelerationVector);
@@ -60,7 +60,7 @@ public:
 	int getFilter();
 
 	static hkpWorld* world;
-
+	static Physics* physics;
 
 private:
 	hkMemoryRouter* memoryRouter;

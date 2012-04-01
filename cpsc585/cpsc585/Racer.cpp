@@ -13,7 +13,7 @@ hkVector4 Racer::attachFL = hkVector4(-0.8f, -0.77f, 1.5f);
 hkVector4 Racer::attachFR = hkVector4(0.8f, -0.77f, 1.5f);
 hkVector4 Racer::attachRL = hkVector4(-0.8f, -0.7f, -1.2f);
 hkVector4 Racer::attachRR = hkVector4(0.8f, -0.7f, -1.2f);
-hkVector4 Racer::attachCannon = hkVector4(0.0f, 0.5f, 2.0f);
+hkVector4 Racer::attachCannon = hkVector4(0.0f, 0.6f, 2.1f);
 
 hkReal Racer::chassisMass = config.chassisMass;
 float Racer::grip = config.grip;
@@ -32,16 +32,15 @@ float Racer::dragCoeff = chassisMass*accelerationScale/(topSpeed*topSpeed);
 
 bool Racer::inverse = config.inverse;
 
-hkpWorld* Racer::physicsWorld = NULL;
-Sound* Racer::sound = NULL;
 
 
-Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerType racerType)
+Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 {
-	sound = s;
-
+	engineVoice = NULL;
 	laserDraw = new Drawable(LASERMODEL, "laser.dds", device);
-	r->addDrawable(laserDraw);
+	Renderer::renderer->addDrawable(laserDraw);
+
+	engineVoice = Sound::sound->reserveSFXVoice();
 
 	health = 100;
 	kills = 0;
@@ -55,8 +54,6 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 
 	lookDir = hkVector4(0, 0, 1);
 	lookHeight = 0;
-	
-	physicsWorld = p->world;
 
 
 	switch (racerType)
@@ -73,7 +70,7 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 
 
 	// Set up filter group (so the car doesn't collide with the wheels)
-	int collisionGroupFilter = p->getFilter();
+	int collisionGroupFilter = Physics::physics->getFilter();
 	
 	hkpRigidBodyCinfo info;
 	hkVector4 halfExtent(0.9f, 0.6f, 2.2f);		//Half extent for racer rigid body box
@@ -98,29 +95,29 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 
 	body->setProperty(0, val);
 
-	index = r->addDrawable(drawable);
-	p->addRigidBody(body);
+	index = Renderer::renderer->addDrawable(drawable);
+	Physics::physics->addRigidBody(body);
 
 
 	// Create tires
 	wheelFL = new FrontWheel(device, collisionGroupFilter);
-	r->addDrawable(wheelFL->drawable);
-	p->addRigidBody(wheelFL->body);
+	Renderer::renderer->addDrawable(wheelFL->drawable);
+	Physics::physics->addRigidBody(wheelFL->body);
 
 	
 	wheelFR = new FrontWheel(device, collisionGroupFilter);
-	r->addDrawable(wheelFR->drawable);
-	p->addRigidBody(wheelFR->body);
+	Renderer::renderer->addDrawable(wheelFR->drawable);
+	Physics::physics->addRigidBody(wheelFR->body);
 
 
 	wheelRL = new RearWheel(device, collisionGroupFilter);
-	r->addDrawable(wheelRL->drawable);
-	p->addRigidBody(wheelRL->body);
+	Renderer::renderer->addDrawable(wheelRL->drawable);
+	Physics::physics->addRigidBody(wheelRL->body);
 
 
 	wheelRR = new RearWheel(device, collisionGroupFilter);
-	r->addDrawable(wheelRR->drawable);
-	p->addRigidBody(wheelRR->body);
+	Renderer::renderer->addDrawable(wheelRR->drawable);
+	Physics::physics->addRigidBody(wheelRR->body);
 
 	// Now constrain the tires
 	hkpGenericConstraintData* constraint;
@@ -129,25 +126,25 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 	constraint = new hkpGenericConstraintData();
 	buildConstraint(&attachFL, constraint, FRONT);
 	constraintInst = new hkpConstraintInstance(wheelFL->body, body, constraint);
-	p->world->addConstraint(constraintInst);
+	Physics::world->addConstraint(constraintInst);
 	constraint->removeReference();
 
 	constraint = new hkpGenericConstraintData();
 	buildConstraint(&attachFR, constraint, FRONT);
 	constraintInst = new hkpConstraintInstance(wheelFR->body, body, constraint);
-	p->world->addConstraint(constraintInst);
+	Physics::world->addConstraint(constraintInst);
 	constraint->removeReference();
 	
 	constraint = new hkpGenericConstraintData();
 	buildConstraint(&attachRL, constraint, REAR);
 	constraintInst = new hkpConstraintInstance(wheelRL->body, body, constraint);
-	p->world->addConstraint(constraintInst);
+	Physics::world->addConstraint(constraintInst);
 	constraint->removeReference();
 
 	constraint = new hkpGenericConstraintData();
 	buildConstraint(&attachRR, constraint, REAR);
 	constraintInst = new hkpConstraintInstance(wheelRR->body, body, constraint);
-	p->world->addConstraint(constraintInst);
+	Physics::world->addConstraint(constraintInst);
 	constraint->removeReference();
 
 	
@@ -155,7 +152,7 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 
 	reset(&(hkVector4(0, 0, 0, 0)), 0);
 
-	emitter = sound->getEmitter();
+	emitter = Sound::sound->getEmitter();
 }
 
 
@@ -760,7 +757,7 @@ void Racer::applyTireRaycast()
 	input.m_to = hkVector4(to);
 	input.m_filterInfo = collisionFilterInfo;
 
-	physicsWorld->castRay(input, output);
+	Physics::world->castRay(input, output);
 	
 	if (output.hasHit())
 	{
@@ -806,7 +803,7 @@ void Racer::applyTireRaycast()
 	input.m_to = hkVector4(to);
 	input.m_filterInfo = collisionFilterInfo;
 
-	physicsWorld->castRay(input, output);
+	Physics::world->castRay(input, output);
 
 	if (output.hasHit())
 	{
@@ -852,7 +849,7 @@ void Racer::applyTireRaycast()
 	input.m_to = hkVector4(to);
 	input.m_filterInfo = collisionFilterInfo;
 
-	physicsWorld->castRay(input, output);
+	Physics::world->castRay(input, output);
 
 	if (output.hasHit())
 	{
@@ -898,7 +895,7 @@ void Racer::applyTireRaycast()
 	input.m_to = hkVector4(to);
 	input.m_filterInfo = collisionFilterInfo;
 
-	physicsWorld->castRay(input, output);
+	Physics::world->castRay(input, output);
 
 	if (output.hasHit())
 	{
@@ -973,7 +970,7 @@ void Racer::fireLaser()
 {
 	laserTime = 1.0f;
 
-	sound->playLaser(emitter);
+	Sound::sound->playLaser(emitter);
 
 	hkpWorldRayCastInput input;
 	hkpWorldRayCastOutput output = hkpWorldRayCastOutput();
@@ -988,7 +985,7 @@ void Racer::fireLaser()
 	if (input.m_userData == -1)
 		return;
 
-	physicsWorld->castRay(input, output);
+	Physics::world->castRay(input, output);
 
 	if (output.hasHit())
 	{
@@ -1027,7 +1024,7 @@ hkpWorldRayCastInput Racer::fireWeapon()
 	hkpWorldRayCastOutput output;
 	hkVector4 from;
 	hkVector4 to;
-
+	
 	input = hkpWorldRayCastInput();
 	output = hkpWorldRayCastOutput();
 	input.m_filterInfo = body->getCollisionFilterInfo();
@@ -1051,7 +1048,7 @@ hkpWorldRayCastInput Racer::fireWeapon()
 	input.m_from = hkVector4(from);
 	input.m_to = hkVector4(to);
 
-	physicsWorld->castRay(input, output);
+	Physics::world->castRay(input, output);
 
 	if (output.hasHit())
 	{
@@ -1067,11 +1064,8 @@ hkpWorldRayCastInput Racer::fireWeapon()
 		// TO DO:
 		// Make sure that this ray is within a permissible range
 		// for the racer to fire from
-
-
 		
 		input = hkpWorldRayCastInput();
-		output = hkpWorldRayCastOutput();
 		input.m_filterInfo = body->getCollisionFilterInfo();
 		
 		input.m_from = hkVector4(from);
@@ -1088,7 +1082,7 @@ hkpWorldRayCastInput Racer::fireWeapon()
 
 hkVector4 Racer::fireRocket()
 {
-	sound->playLaser(emitter);
+	Sound::sound->playLaser(emitter);
 
 	hkpWorldRayCastInput input;
 	hkpWorldRayCastOutput output = hkpWorldRayCastOutput();
@@ -1124,7 +1118,7 @@ void Racer::respawn()
 void Racer::applyDamage(Racer* attacker, int damage)
 {
 	health -= damage;
-	sound->playCrash(emitter);
+	Sound::sound->playCrash(emitter);
 
 	if (health <= 0)
 	{
@@ -1161,5 +1155,5 @@ void Racer::computeRPM()
 	if (rpm == 0)
 		rpm = 1.0f;
 
-	sound->playEngine(emitter, rpm/ 1024.0f);
+	Sound::sound->playEngine(emitter, rpm/ 1024.0f, engineVoice);
 }

@@ -100,13 +100,14 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 	physics->initialize(5);
 	
 	// Initialize sound
-	s->initialize(NUMRACERS);
+	s->initialize();
 
 	//Initialize Abilities
 	speedBoost = new Ability(SPEED); // Speed boost with cooldown of 15 seconds and aditional speed of 1
 	
 	//Initialize player
-	player = new Racer(r->getDevice(), renderer, physics, sound, RACER1);
+	player = new Racer(r->getDevice(), RACER1);
+	player->engineVoice->SetVolume(0.3f);
 	player->setPosAndRot(-20.0f, -14.0f, -190.0f, 0.0f, 0.0f, 0.0f);
 	playerMind = new AIMind(player, PLAYER);
 	racers[0] = player;
@@ -142,19 +143,19 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 
 void AI::initializeAIRacers()
 {
-	ai1 = new Racer(renderer->getDevice(), renderer, physics, sound, RACER2);
+	ai1 = new Racer(renderer->getDevice(), RACER2);
 	ai1->setPosAndRot(-10.0f, -14.0f, -190.0f, 0.0f, 0.0f, 0.0f);
 	aiMind1 = new AIMind(ai1, COMPUTER);
 	
-	ai2 = new Racer(renderer->getDevice(), renderer, physics, sound, RACER3);
+	ai2 = new Racer(renderer->getDevice(), RACER3);
 	ai2->setPosAndRot(-25.0f, -14.0f, -190.0f, 0.0f, 0.0f, 0.0f);
 	aiMind2 = new AIMind(ai2, COMPUTER);
 
-	ai3 = new Racer(renderer->getDevice(), renderer, physics, sound, RACER4);
+	ai3 = new Racer(renderer->getDevice(), RACER4);
 	ai3->setPosAndRot(-15.0f, -14.0f, -190.0f, 0.0f, 0.0f, 0.0f);
 	aiMind3 = new AIMind(ai3, COMPUTER);
 
-	ai4 = new Racer(renderer->getDevice(), renderer, physics, sound, RACER5);
+	ai4 = new Racer(renderer->getDevice(), RACER5);
 	ai4->setPosAndRot(-5.0f, -14.0f, -190.0f, 0.0f, 0.0f, 0.0f);
 	aiMind4 = new AIMind(ai4, COMPUTER);
 
@@ -571,11 +572,6 @@ void AI::simulate(float seconds)
 
 
 
-
-
-	// To manipulate a Racer, you should use the methods Racer::accelerate(float) and Racer::steer(float)
-	// Both inputs should be between -1.0 and 1.0. negative means backward or left, positive is forward or right.
-
 	// Update Checkpoint Timer
 	//checkPointTimer->update(checkpoints);
 	
@@ -631,7 +627,7 @@ void AI::simulate(float seconds)
 	{
 		D3DXVECTOR3 cwPosition = waypoints[racerMinds[racerIndex]->getCurrentWaypoint()]->drawable->getPosition();
 		float rotation = 0;
-		racers[racerIndex]->reset(new hkVector4(cwPosition.x, cwPosition.y, cwPosition.z), rotation);
+		racers[racerIndex]->reset(&(hkVector4(cwPosition.x, cwPosition.y, cwPosition.z)), rotation);
 	}
 
 	physics->step(seconds);

@@ -6,25 +6,35 @@
 #include <iostream>
 #include <fstream>
 
+enum SoundEffect { LASERSFX, CRASHSFX, ENGINESFX, BOOSTSFX };
+
+#define NUM_EMITTERS 30
+
 class Sound
 {
 public:
 	Sound(void);
 	~Sound(void);
-	void initialize(int numRacers);
+	void initialize();
 	void shutdown();
 	void playLaser(X3DAUDIO_EMITTER* emit);
 	void playCrash(X3DAUDIO_EMITTER* emit);
-	void playEngine(X3DAUDIO_EMITTER* emit, float freq);
+	void playEngine(X3DAUDIO_EMITTER* emit, float freq, IXAudio2SourceVoice* engine);
 	void playBoost(X3DAUDIO_EMITTER* emit);
-	
+	void returnEmitter();
+
+	IXAudio2SourceVoice* getSFXVoice();
+	IXAudio2SourceVoice* reserveSFXVoice();
+
 	bool initialized;
 
 	X3DAUDIO_EMITTER* getEmitter();
 	X3DAUDIO_LISTENER listener;
 
+	static Sound* sound;
+
 private:
-	void loadSound(IXAudio2SourceVoice* &voice, std::string filename, char* &soundBuffer);
+	void loadSound(SoundEffect type, std::string filename, char* &soundBuffer);
 	void loadMusic(IXAudio2SourceVoice* &voice, std::string filename, char* &soundBuffer);
 
 	IXAudio2* audio;
@@ -42,7 +52,6 @@ private:
 
 	X3DAUDIO_HANDLE audio3DHandle;
 
-	int numEmitters;
 	X3DAUDIO_EMITTER* emitters;
 
 	X3DAUDIO_DSP_SETTINGS dspSettings;
@@ -55,7 +64,6 @@ private:
 	IXAudio2SourceVoice* music;
 	IXAudio2SourceVoice* laser;
 	IXAudio2SourceVoice* crash;
-	IXAudio2SourceVoice* engine;
 	IXAudio2SourceVoice* boost;
 
 
@@ -69,4 +77,16 @@ private:
 	char* crashBuffer;
 	char* engineBuffer;
 	char* boostBuffer;
+
+
+	int currentVoice;
+	int maxVoices;
+
+	int currentReservedVoice;
+	int maxReservedVoices;
+
+	IXAudio2SourceVoice** voiceBuffer;
+	IXAudio2SourceVoice** voiceBufferReserved;
+
+	WAVEFORMATEX wfm;
 };

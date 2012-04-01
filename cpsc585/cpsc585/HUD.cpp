@@ -222,7 +222,7 @@ void HUD::render()
 {
 	D3DXMATRIX origTrans;
 	sprite->GetTransform(&origTrans);
-
+	
 	sprite->Begin(D3DXSPRITE_ALPHABLEND);
 
 	// Draw reticule

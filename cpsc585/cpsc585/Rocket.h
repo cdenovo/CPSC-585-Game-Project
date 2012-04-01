@@ -2,6 +2,7 @@
 
 #include "Drawable.h"
 #include "Physics.h"
+#include "Sound.h"
 
 class Rocket
 {
@@ -15,7 +16,7 @@ public:
 	void explode();
 
 private:
-
+	X3DAUDIO_EMITTER* emitter;
 
 public:
 	Drawable* drawable;
@@ -23,6 +24,17 @@ public:
 	bool destroyed;
 
 private:
+	hkpContactListener* listener;
+	IXAudio2SourceVoice* rocketVoice;
 
+};
 
+class RocketListener : public hkpContactListener
+{
+public:
+	RocketListener(Rocket* r);
+	void collisionAddedCallback(const hkpCollisionEvent& ev);
+
+private:
+	Rocket* rocket;
 };

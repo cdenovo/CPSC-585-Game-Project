@@ -11,22 +11,30 @@ Rocket::Rocket(IDirect3DDevice9* device)
 
 	hkpRigidBodyCinfo info;
 	info.m_gravityFactor = 0.0f;
+	info.m_friction = 0.0f;
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_MOVING;
 	info.m_restitution = 0.0f;
 	info.m_angularDamping = 1.0f;
 	hkpMassProperties massProperties;
-	hkpInertiaTensorComputer::computeCylinderVolumeMassProperties(startAxis, endAxis, radius, 50.0f, massProperties);
+	hkpInertiaTensorComputer::computeCylinderVolumeMassProperties(startAxis, endAxis, radius, 1.0f, massProperties);
 	info.setMassProperties(massProperties);
-
+	
 	body = new hkpRigidBody(info);		//Create rigid body
 	body->setLinearVelocity(hkVector4(0, 0, 0));
 	body->setAngularVelocity(hkVector4(0, 0, 0));
 	info.m_shape->removeReference();
 	
-	Physics::addRigidBody(body);
+	
+	listener = new RocketListener(this);
+	body->addContactListener(listener);
+
+	Physics::physics->addRigidBody(body);
 
 	destroyed = false;
+
+	emitter = Sound::sound->getEmitter();
+	rocketVoice = Sound::sound->reserveSFXVoice();
 }
 
 Rocket::Rocket()
@@ -36,10 +44,25 @@ Rocket::Rocket()
 
 Rocket::~Rocket(void)
 {
+	if (listener)
+	{
+		body->removeContactListener(listener);
+		delete listener;
+	}
+	
 	if (body)
 	{
 		body->removeReference();
+		
+		Physics::world->removeEntity(body);
 	}
+
+	if (drawable)
+	{
+		delete drawable;
+	}
+
+	Sound::sound->returnEmitter();
 }
 
 void Rocket::setPosAndRot(float posX, float posY, float posZ,
@@ -66,16 +89,9 @@ void Rocket::update()
 		(body->getTransform()).get4x4ColumnMajor(transMat);
 		drawable->setTransform(&transMat);
 
-		/*
+		
 		// Update 3D sound position
-		hkVector4 vec = hkVector4(lookDir);
-		vec.normalize3();
-		vec(0) = vec(0);
-		emitter->OrientFront.x = vec(0);
-		emitter->OrientFront.y = vec(1);
-		emitter->OrientFront.z = vec(2);
-
-		vec = hkVector4(body->getPosition());
+		hkVector4 vec = hkVector4(body->getPosition());
 
 		emitter->Position.x = vec(0);
 		emitter->Position.y = vec(1);
@@ -85,11 +101,25 @@ void Rocket::update()
 
 		emitter->Velocity.x = vec(0);
 		emitter->Velocity.y = vec(1);
-		emitter->Velocity.z = vec(2);*/
+		emitter->Velocity.z = vec(2);
+
+		Sound::sound->playEngine(emitter, 1.0f, rocketVoice);
 	}
 }
 
 void Rocket::explode()
 {
+	destroyed = true;
+	Sound::sound->playBoost(emitter);
+}
 
+
+RocketListener::RocketListener(Rocket* r)
+{
+	rocket = r;
+}
+
+void RocketListener::collisionAddedCallback(const hkpCollisionEvent& ev)
+{
+	rocket->explode();
 }
