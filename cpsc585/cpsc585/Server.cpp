@@ -19,6 +19,8 @@ Server::Server()
 	}
 	numClients = 1;
 	id = 0;
+
+	seqNum = 0;
 }
 
 Server::~Server()
@@ -392,16 +394,17 @@ int Server::sendLobbyInfo()
 int Server::update(Racer *racers[], int numRacers)
 {
 	//Put data in buffer
-	int size = RACERSIZE*numRacers + 9;
+	int size = RACERSIZE*numRacers + 1 + 3*sizeof(int);
 	char* buffer = new char[size];
 	buffer[0] = WORLDSTATE;
 	memcpy(buffer+1,&size,sizeof(int));
-	memcpy(buffer+5,&numRacers,sizeof(int));
+	memcpy(buffer+5,&seqNum,sizeof(int));
+	memcpy(buffer+9,&numRacers,sizeof(int));
 	for(int i = 0; i < numRacers; i++)
 	{
 		char sBuff[RACERSIZE];
 		racers[i]->serialize(sBuff);
-		memcpy(buffer+9+RACERSIZE*i,sBuff,RACERSIZE);
+		memcpy(buffer+13+RACERSIZE*i,sBuff,RACERSIZE);
 	}
 
 	int err = sendUDPMessage(buffer,size); //Send message

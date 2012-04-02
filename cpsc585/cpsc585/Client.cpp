@@ -17,6 +17,7 @@ Client::Client()
 	{
 		clients[i].millisecond_lag = 0;
 	}
+	seqNum = 0;
 }
 
 Client::~Client()
@@ -333,13 +334,19 @@ void Client::getUDPMessages(float milliseconds)
 				case WORLDSTATE: //Get updated world state
 					{
 						int numRacers;
-						memcpy(&numRacers,buff+5,sizeof(int)); //Get player's ID
-						for(int i = 0; i < numRacers; i++)
+						int newSeqNum;
+						memcpy(&newSeqNum,buff+5,sizeof(int)); //Get the new seqNum
+						if(newSeqNum > seqNum)
 						{
-							memcpy(world[i],buff+9+i*RACERSIZE,RACERSIZE); //Get the button presses
-						}
+							seqNum = newSeqNum;
+							memcpy(&numRacers,buff+9,sizeof(int)); //Get player's ID
+							for(int i = 0; i < numRacers; i++)
+							{
+								memcpy(world[i],buff+9+i*RACERSIZE,RACERSIZE); //Get the button presses
+							}
 
-						newWorldInfo = true;
+							newWorldInfo = true;
+						}
 						break;
 					}
 				}
