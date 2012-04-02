@@ -17,6 +17,8 @@ AI::AI(void)
 	ai3 = NULL;
 	ai4 = NULL;
 	world = NULL;
+
+	dynManager = NULL;
 }
 
 
@@ -81,6 +83,12 @@ void AI::shutdown()
 		delete wpEditor;
 		wpEditor = NULL;
 	}
+
+	if (dynManager)
+	{
+		delete dynManager;
+		dynManager = NULL;
+	}
 }
 
 void AI::initialize(Renderer* r, Input* i, Sound* s)
@@ -91,6 +99,8 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 	count = 25;
 	fps = 0;
 	racerIndex = 0;
+
+	dynManager = new DynamicObjManager();
 
 	wpEditor = new WaypointEditor(renderer);
 	wpEditor->openFile();
@@ -548,20 +558,21 @@ void AI::simulate(float seconds)
 	// ---------- UPDATE SOUND WITH CURRENT CAMERA POSITION/ORIENTATION --------------- //
 
 	X3DAUDIO_LISTENER* listener = &(sound->listener);
-	hkVector4 vec = hkVector4(racers[racerIndex]->lookDir);
+	hkVector4 vec;
+	vec.setXYZ(racers[racerIndex]->lookDir);
 	vec(1) = 0.0f;
 	vec.normalize3();
 	listener->OrientFront.x = vec(0);
 	listener->OrientFront.y = vec(1);
 	listener->OrientFront.z = vec(2);
 	
-	vec = hkVector4(racers[racerIndex]->body->getPosition());
+	vec.setXYZ(racers[racerIndex]->body->getPosition());
 
 	listener->Position.x = vec(0);
 	listener->Position.y = vec(1);
 	listener->Position.z = vec(2);
 
-	vec = hkVector4(racers[racerIndex]->body->getLinearVelocity());
+	vec.setXYZ(racers[racerIndex]->body->getLinearVelocity());
 
 	listener->Velocity.x = vec(0);
 	listener->Velocity.y = vec(1);
@@ -635,6 +646,8 @@ void AI::simulate(float seconds)
 	for(int i = 0; i < 5; i++){
 		racers[i]->update();
 	}
+
+	dynManager->update(seconds);
 
 	return;
 }

@@ -6,9 +6,9 @@
 #include <iostream>
 #include <fstream>
 
-enum SoundEffect { LASERSFX, CRASHSFX, ENGINESFX, BOOSTSFX };
+enum SoundEffect { LASERSFX, CRASHSFX, ENGINESFX, BOOSTSFX, ROCKETSFX };
 
-#define NUM_EMITTERS 30
+#define NUM_EMITTERS 80
 
 class Sound
 {
@@ -22,6 +22,7 @@ public:
 	void playEngine(X3DAUDIO_EMITTER* emit, float freq, IXAudio2SourceVoice* engine);
 	void playBoost(X3DAUDIO_EMITTER* emit);
 	void returnEmitter();
+	void playRocket(X3DAUDIO_EMITTER* emit, IXAudio2SourceVoice* rocket);
 
 	IXAudio2SourceVoice* getSFXVoice();
 	IXAudio2SourceVoice* reserveSFXVoice();
@@ -71,12 +72,14 @@ private:
 	XAUDIO2_BUFFER* crashBufferDetails;
 	XAUDIO2_BUFFER* engineBufferDetails;
 	XAUDIO2_BUFFER* boostBufferDetails;
+	XAUDIO2_BUFFER* rocketBufferDetails;
 
 	char* musicBuffer;
 	char* laserBuffer;
 	char* crashBuffer;
 	char* engineBuffer;
 	char* boostBuffer;
+	char* rocketBuffer;
 
 
 	int currentVoice;

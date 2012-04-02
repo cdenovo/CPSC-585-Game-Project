@@ -1,30 +1,30 @@
-#include "RocketMesh.h"
+#include "LandmineMesh.h"
 
 
-RocketMesh* RocketMesh::mesh = NULL;
+LandmineMesh* LandmineMesh::mesh = NULL;
 
-RocketMesh* RocketMesh::getInstance(IDirect3DDevice9* device)
+LandmineMesh* LandmineMesh::getInstance(IDirect3DDevice9* device)
 {
 	if (mesh == NULL)
 	{
-		mesh = new RocketMesh(device);
+		mesh = new LandmineMesh(device);
 	}
 
 	return mesh;
 }
 
 
-RocketMesh::RocketMesh(IDirect3DDevice9* device)
+LandmineMesh::LandmineMesh(IDirect3DDevice9* device)
 {
 	initialize(device);
 }
 
 
-RocketMesh::~RocketMesh(void)
+LandmineMesh::~LandmineMesh(void)
 {
 }
 
-void RocketMesh::render(IDirect3DDevice9* device)
+void LandmineMesh::render(IDirect3DDevice9* device)
 {
 	device->SetStreamSource(0, vertexBuffer, 0, sizeof(Vertex));
 	device->SetFVF(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX2);
@@ -33,12 +33,12 @@ void RocketMesh::render(IDirect3DDevice9* device)
 }
 
 
-void RocketMesh::initialize(IDirect3DDevice9* device)
+void LandmineMesh::initialize(IDirect3DDevice9* device)
 {
 	Vertex* verts;
 	unsigned long* inds;
 
-	loadMesh("models/rocket.ese");
+	loadMesh("models/landmine.ese");
 
 	device->CreateVertexBuffer(sizeof(Vertex) * vertexCount, D3DUSAGE_WRITEONLY, D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX2,
 		D3DPOOL_MANAGED, &vertexBuffer, NULL);

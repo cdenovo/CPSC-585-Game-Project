@@ -16,6 +16,7 @@
 #include "WaypointEditor.h"
 #include "Ability.h"
 #include "CheckpointTimer.h"
+#include "DynamicObjManager.h"
 
 #define NUMRACERS 5
 
@@ -44,6 +45,8 @@ private:
 	HUD* hud;
 	CheckpointTimer* checkPointTimer;
 	WaypointEditor* wpEditor;
+
+	DynamicObjManager* dynManager;
 
 	int count;
 	int fps;

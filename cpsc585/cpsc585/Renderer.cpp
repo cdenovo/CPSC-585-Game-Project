@@ -31,9 +31,9 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	numDrawables = numToDraw;
 
 	drawables = new Drawable*[numToDraw];
-	dynamicDrawables = std::vector<Drawable*>();
-	dynamicDrawables.clear();
-	dynamicDrawables.reserve(50);
+	dynamicDrawables = new std::vector<Drawable*>();
+	dynamicDrawables->clear();
+	dynamicDrawables->reserve(500);
 	
 	hud = new HUD(width, height);
 
@@ -169,6 +169,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTOP_SELECTARG1);
 	device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);	// Just to be safe (ignored)
 
+	device->SetRenderState(D3DRS_POINTSPRITEENABLE, true);
 
 	// Set up HUD
 	hud->initialize(device);
@@ -184,6 +185,12 @@ void Renderer::shutdown()
 	if (drawables)
 	{
 		// Clean up drawables
+	}
+
+	if (dynamicDrawables)
+	{
+		dynamicDrawables->clear();
+		delete dynamicDrawables;
 	}
 
 	if (hud)
@@ -266,18 +273,19 @@ void Renderer::render()
 	{
 		drawables[i]->render(device);
 	}
-
-	std::vector<Drawable*>::iterator iter = dynamicDrawables.begin();
-
-	// Draw dynamic objects that will be removed after this frame (like rockets)
-	for (std::vector<Drawable*>::iterator iter = dynamicDrawables.begin();
-		iter < dynamicDrawables.end(); iter++)
+	
+	// Draw dynamic objects that will be removed after this frame (like rockets and smoke)
+	if (!(dynamicDrawables->empty()))
 	{
-		(*iter)->render(device);
+		for (std::vector<Drawable*>::iterator iter = dynamicDrawables->begin();
+			iter < dynamicDrawables->end(); iter++)
+		{
+			(*iter)->render(device);
+		}
+
+		dynamicDrawables->erase(dynamicDrawables->begin(), dynamicDrawables->end());
 	}
-
-	dynamicDrawables.clear();
-
+	
 
 	for (int i = 0; i < numSentences; i++)
 	{
@@ -373,5 +381,5 @@ Camera* Renderer::getCamera()
 // Adds a drawable that will be drawn for only one frame
 void Renderer::addDynamicDrawable(Drawable* drawable)
 {
-	dynamicDrawables.push_back(drawable);
+	dynamicDrawables->push_back(drawable);
 }

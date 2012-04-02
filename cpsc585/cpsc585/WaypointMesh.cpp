@@ -37,7 +37,7 @@ void WaypointMesh::initialize(IDirect3DDevice9* device)
 	Vertex* verts;
 	unsigned long* inds;
 
-	loadMesh("waypoint.ese");
+	loadMesh("models/waypoint.ese");
 
 	device->CreateVertexBuffer(sizeof(Vertex) * vertexCount, D3DUSAGE_WRITEONLY, D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX2,
 		D3DPOOL_MANAGED, &vertexBuffer, NULL);

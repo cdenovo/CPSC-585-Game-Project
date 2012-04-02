@@ -1,5 +1,6 @@
 #pragma once
 #include "HUD.h"
+#include "DynamicObjManager.h"
 
 class Ability
 {

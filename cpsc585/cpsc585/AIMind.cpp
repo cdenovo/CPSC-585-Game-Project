@@ -19,8 +19,6 @@ AIMind::AIMind(Racer* _racer, TypeOfRacer _racerType)
 	rocket = new Ability(ROCKET);
 	knownNumberOfKills = 0;
 	rotationAngle = 0;
-
-	currentRocket = NULL;
 }
 
 AIMind::~AIMind(void)
@@ -47,12 +45,6 @@ AIMind::~AIMind(void)
 	{
 		delete rocket;
 		rocket = NULL;
-	}
-
-	if (currentRocket)
-	{
-		delete currentRocket;
-		currentRocket = NULL;
 	}
 }
 
@@ -131,7 +123,7 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 
 						finalLookDir(1) = height;
 
-						racer->lookDir.set(finalLookDir(0), finalLookDir(1), finalLookDir(2));
+						racer->lookDir.setXYZ(finalLookDir);
 					}
 				}
 
@@ -159,35 +151,35 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 					racer->fireLaser();
 				}
 
-				if (hud->getSelectedAbility() == ROCKET && intention.rightTrig && !rocket->onCooldown()){
-					if (currentRocket)
-					{
-						currentRocket->explode();
-						delete currentRocket;
-						currentRocket = NULL;
-					}
-					
+				if (hud->getSelectedAbility() == ROCKET && intention.rightTrig && !rocket->onCooldown())
+				{
 					rocket->startCooldownTimer();
 					hkVector4 rocketDir = racer->fireRocket();
 					rocketDir.normalize3();
 					// Change this so rocket is facing rocketDir when launched
+					
+					
+					Rocket* currentRocket = new Rocket(Renderer::device);
+					
+					currentRocket->owner = racer;
 
-					
-					currentRocket = new Rocket(Renderer::device);
-					
 					hkVector4 rocketPos;
 					hkTransform bodyTransform = racer->body->getTransform();
 
-					hkVector4 rocketAttach = hkVector4(Racer::attachCannon);
+					hkVector4 rocketAttach;
+					rocketAttach.setXYZ(Racer::attachCannon);
 					rocketAttach(2) = rocketAttach(2) + 0.7f;
 
 					rocketPos.setTransformedPos(bodyTransform, rocketAttach);
 					currentRocket->body->setTransform(bodyTransform);
 					currentRocket->body->setPosition(rocketPos);
 
-					rocketDir.mul(10.0f);
+					rocketDir.mul(120.0f);
 					currentRocket->body->setLinearVelocity(rocketDir);
-					currentRocket->update();
+					currentRocket->update(0.0f);
+
+					DynamicObjManager::manager->addObject(currentRocket);
+					currentRocket = NULL;
 				}
 
 
@@ -209,7 +201,9 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 				/************* STEERING CALCULATIONS *************/
 				hkVector4 A = racer->drawable->getZhkVector();
 				hkVector4 C = racer->body->getPosition();
-				hkVector4 B = hkVector4(racer->lookDir(0), 0, racer->lookDir(2));
+				hkVector4 B;
+				B.setXYZ(racer->lookDir);
+				B(1) = 0.0f;
 
 				float angle = acos(B.dot3(A));
 
@@ -289,7 +283,9 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 						hkVector4 position = racers[i]->body->getPosition();
 						float angle = calculateAngleToPosition(&position);
 						hkVector4 A = racer->drawable->getZhkVector();
-						hkVector4 B = hkVector4(racer->lookDir(0), 0, racer->lookDir(2));
+						hkVector4 B;
+						B.setXYZ(racer->lookDir);
+						B(1) = 0.0f;
 
 						B.dot3(A);
 						// Sign determines if it is pointing to the right or the left of the current waypoint
@@ -311,7 +307,9 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 					hkVector4 position = target->body->getPosition();
 					float angle = calculateAngleToPosition(&position);
 					hkVector4 A = racer->drawable->getZhkVector();
-					hkVector4 B = hkVector4(racer->lookDir(0), 0, racer->lookDir(2));
+					hkVector4 B;
+					B.setXYZ(racer->lookDir);
+					B(1) = 0.0f;
 
 					B.dot3(A);
 					// Sign determines if it is pointing to the right or the left of the current waypoint
@@ -353,7 +351,9 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 					float angle = calculateAngleToPosition(&position);
 
 					hkVector4 A = racer->drawable->getZhkVector();
-					hkVector4 B = hkVector4(racer->lookDir(0), 0, racer->lookDir(2));
+					hkVector4 B;
+					B.setXYZ(racer->lookDir);
+					B(1) = 0.0f;
 
 					B.dot3(A);
 					// Sign determines if it is pointing to the right or the left of the current waypoint
@@ -405,9 +405,14 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 		if(distanceTo < 1){
 			D3DXVECTOR3 cwPosition = waypoints[currentWaypoint]->drawable->getPosition();
 			D3DXVECTOR3 nextPosition = waypoints[currentWaypoint+1]->drawable->getPosition();
-			hkVector4 wayptVec = hkVector4(nextPosition.x, nextPosition.y, nextPosition.z);
+			hkVector4 wayptVec;
+			wayptVec.set(nextPosition.x, nextPosition.y, nextPosition.z);
+
 			wayptVec.sub(hkVector4(cwPosition.x, cwPosition.y, cwPosition.z));
-			hkVector4 resetPosition = hkVector4(cwPosition.x, cwPosition.y, cwPosition.z);
+
+			hkVector4 resetPosition;
+			resetPosition.set(cwPosition.x, cwPosition.y, cwPosition.z);
+
 			racer->reset(&resetPosition, 0);
 			wayptVec(1) = 0.0f;
 			wayptVec.normalize3();
@@ -433,18 +438,6 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 	}
 
 	overallPosition = currentWaypoint + (currentLap-1)*80; // 80 represent the number of waypoints
-
-	
-	if (currentRocket && currentRocket->destroyed)
-	{
-		delete currentRocket;
-		currentRocket = NULL;
-	}
-	else if (currentRocket)
-	{
-		currentRocket->update();
-		Renderer::renderer->addDynamicDrawable(currentRocket->drawable);
-	}
 }
 
 float AIMind::calculateAngleToPosition(hkVector4* position)
@@ -455,7 +448,9 @@ float AIMind::calculateAngleToPosition(hkVector4* position)
 
 	hkVector4 A = racer->drawable->getZhkVector();
 	hkVector4 C = racer->body->getPosition();
-	hkVector4 B = hkVector4(racer->lookDir(0), 0, racer->lookDir(2));
+	hkVector4 B;
+	B.setXYZ(racer->lookDir);
+	B(1) = 0.0f;
 
 	float angle = acos(B.dot3(A));
 

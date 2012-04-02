@@ -3,29 +3,34 @@
 #include "Drawable.h"
 #include "Physics.h"
 #include "Sound.h"
+#include "Racer.h"
+#include "Explosion.h"
+#include "DynamicObj.h"
+#include "DynamicObjManager.h"
 
-class Rocket
+class Rocket :
+	public DynamicObj
 {
 public:
-	Rocket();
 	Rocket(IDirect3DDevice9* device);
 	~Rocket(void);
-	void update();
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians
 	void explode();
+	void update(float seconds);
 
 private:
 	X3DAUDIO_EMITTER* emitter;
 
 public:
-	Drawable* drawable;
+	Racer* owner;
 	hkpRigidBody* body;
-	bool destroyed;
 
 private:
 	hkpContactListener* listener;
-	IXAudio2SourceVoice* rocketVoice;
+	static IXAudio2SourceVoice* rocketVoice;
+	float lifetime;
+
 
 };
 

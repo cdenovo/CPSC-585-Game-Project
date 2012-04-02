@@ -9,7 +9,6 @@
 #include "RearWheel.h"
 #include "ConfigReader.h"
 #include "LaserModel.h"
-#include "Rocket.h"
 
 enum RacerType { RACER1, RACER2, RACER3, RACER4, RACER5, RACER6, RACER7, RACER8 };
 enum WheelType { FRONT, REAR };
@@ -72,6 +71,7 @@ public:
 	X3DAUDIO_EMITTER* emitter;
 
 	static hkVector4 attachCannon;
+	static hkReal chassisMass;
 	
 	IXAudio2SourceVoice* engineVoice;
 
@@ -99,8 +99,6 @@ private:
 	static hkVector4 attachFR;
 	static hkVector4 attachRL;
 	static hkVector4 attachRR;
-
-	static hkReal chassisMass;
 
 	static float rearSpringK;
 	static float frontSpringK;

@@ -70,11 +70,11 @@ HUD::HUD(int width, int height)
 
 void HUD::initialize(IDirect3DDevice9* device)
 {
-	D3DXCreateTextureFromFile(device, "radialMenu.dds", &radialMenuTexture);
-	D3DXCreateTextureFromFile(device, "reticule.dds", &reticuleTexture);
-	D3DXCreateTextureFromFile(device, "speedometer.dds", &speedoTexture);
-	D3DXCreateTextureFromFile(device, "needle.dds", &needleTexture);
-	D3DXCreateTextureFromFile(device, "LCD.dds", &numbersTexture);
+	D3DXCreateTextureFromFile(device, "textures/radialMenu.dds", &radialMenuTexture);
+	D3DXCreateTextureFromFile(device, "textures/reticule.dds", &reticuleTexture);
+	D3DXCreateTextureFromFile(device, "textures/speedometer.dds", &speedoTexture);
+	D3DXCreateTextureFromFile(device, "textures/needle.dds", &needleTexture);
+	D3DXCreateTextureFromFile(device, "textures/LCD.dds", &numbersTexture);
 	D3DXCreateSprite(device, &sprite);
 }
 

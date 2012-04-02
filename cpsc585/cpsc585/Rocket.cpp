@@ -1,12 +1,18 @@
 #include "Rocket.h"
 
+IXAudio2SourceVoice* Rocket::rocketVoice = NULL;
+
 
 Rocket::Rocket(IDirect3DDevice9* device)
 {
-	drawable = new Drawable(ROCKETMESH, "rocket.dds", device);
+	drawable = new Drawable(ROCKETMESH, "textures/rocket.dds", device);
 
-	hkVector4 startAxis = hkVector4(0, 0, -0.5f);
-	hkVector4 endAxis = hkVector4(0, 0, 0.5f);
+	hkVector4 startAxis;
+	startAxis.set(0, 0, -0.5f);
+
+	hkVector4 endAxis;
+	endAxis.set(0, 0, 0.5f);
+
 	hkReal radius = 0.1f;
 
 	hkpRigidBodyCinfo info;
@@ -14,11 +20,11 @@ Rocket::Rocket(IDirect3DDevice9* device)
 	info.m_friction = 0.0f;
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_MOVING;
-	info.m_restitution = 0.0f;
+	//info.m_restitution = 0.0f;
 	info.m_angularDamping = 1.0f;
-	hkpMassProperties massProperties;
-	hkpInertiaTensorComputer::computeCylinderVolumeMassProperties(startAxis, endAxis, radius, 1.0f, massProperties);
-	info.setMassProperties(massProperties);
+	//hkpMassProperties massProperties;
+	//hkpInertiaTensorComputer::computeCylinderVolumeMassProperties(startAxis, endAxis, radius, 1000.0f, massProperties);
+	//info.setMassProperties(massProperties);
 	
 	body = new hkpRigidBody(info);		//Create rigid body
 	body->setLinearVelocity(hkVector4(0, 0, 0));
@@ -34,13 +40,19 @@ Rocket::Rocket(IDirect3DDevice9* device)
 	destroyed = false;
 
 	emitter = Sound::sound->getEmitter();
-	rocketVoice = Sound::sound->reserveSFXVoice();
+
+
+	if (!rocketVoice)
+		rocketVoice = Sound::sound->reserveSFXVoice();
+
+	rocketVoice->SetVolume(0.6f);
+
+	owner = NULL;
+
+	lifetime = 3.0f;
 }
 
-Rocket::Rocket()
-{
 
-}
 
 Rocket::~Rocket(void)
 {
@@ -76,12 +88,13 @@ void Rocket::setPosAndRot(float posX, float posY, float posZ,
 	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotY));
 	quat.mul(hkQuaternion(hkVector4(0.0f, 0.0f, 1.0f), rotZ));
 
-	hkVector4 pos = hkVector4(posX, posY, posZ);
+	hkVector4 pos;
+	pos.set(posX, posY, posZ);
 
 	body->setPositionAndRotation(hkVector4(posX, posY, posZ), quat);
 }
 
-void Rocket::update()
+void Rocket::update(float seconds)
 {
 	if (drawable && body)
 	{
@@ -89,28 +102,42 @@ void Rocket::update()
 		(body->getTransform()).get4x4ColumnMajor(transMat);
 		drawable->setTransform(&transMat);
 
-		
 		// Update 3D sound position
-		hkVector4 vec = hkVector4(body->getPosition());
+		hkVector4 vec;
+		vec.setXYZ(body->getPosition());
 
 		emitter->Position.x = vec(0);
 		emitter->Position.y = vec(1);
 		emitter->Position.z = vec(2);
 
-		vec = hkVector4(body->getLinearVelocity());
+		vec.setXYZ(body->getLinearVelocity());
 
 		emitter->Velocity.x = vec(0);
 		emitter->Velocity.y = vec(1);
 		emitter->Velocity.z = vec(2);
 
-		Sound::sound->playEngine(emitter, 1.0f, rocketVoice);
+		Sound::sound->playRocket(emitter, rocketVoice);
+		
+		lifetime -= seconds;
+		
+		if (lifetime <= 0.0f)
+			destroyed = true;
 	}
 }
 
 void Rocket::explode()
 {
 	destroyed = true;
+	rocketVoice->Stop();
+
 	Sound::sound->playBoost(emitter);
+
+	Explosion* explosion = new Explosion(Renderer::device, &(body->getTransform()), owner);
+
+	explosion->doDamage();
+
+	DynamicObjManager::manager->addObject(explosion);
+	explosion = NULL;
 }
 
 
@@ -121,5 +148,6 @@ RocketListener::RocketListener(Rocket* r)
 
 void RocketListener::collisionAddedCallback(const hkpCollisionEvent& ev)
 {
-	rocket->explode();
+	if (!(rocket->destroyed))
+		rocket->explode();
 }

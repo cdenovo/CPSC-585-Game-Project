@@ -61,6 +61,11 @@ void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevic
 			mesh = RocketMesh::getInstance(device);
 			break;
 		}
+	case LANDMINEMESH:
+		{
+			mesh = LandmineMesh::getInstance(device);
+			break;
+		}
 	default:
 		mesh = NULL;
 	}

@@ -29,6 +29,8 @@ Sound::Sound(void)
 	boost = NULL;
 	boostBuffer = NULL;
 	boostBufferDetails = NULL;
+	rocketBuffer = NULL;
+	rocketBufferDetails = NULL;
 
 	sound = this;
 
@@ -107,12 +109,12 @@ void Sound::initialize()
 
 
 	
-	loadMusic(music, "music.wav", musicBuffer);
-	
-	loadSound(CRASHSFX, "crash.wav", crashBuffer);
-	loadSound(ENGINESFX, "engine.wav", engineBuffer);
-	loadSound(BOOSTSFX, "boost.wav", boostBuffer);
-	loadSound(LASERSFX, "laser.wav", laserBuffer);
+	loadMusic(music, "sounds/music.wav", musicBuffer);
+	loadSound(ROCKETSFX, "sounds/rocket.wav", rocketBuffer);
+	loadSound(CRASHSFX, "sounds/crash.wav", crashBuffer);
+	loadSound(ENGINESFX, "sounds/engine.wav", engineBuffer);
+	loadSound(BOOSTSFX, "sounds/boost.wav", boostBuffer);
+	loadSound(LASERSFX, "sounds/laser.wav", laserBuffer);
 
 
 
@@ -261,6 +263,12 @@ void Sound::shutdown()
 		boostBuffer = NULL;
 	}
 
+	if (rocketBuffer)
+	{
+		delete [] rocketBuffer;
+		rocketBuffer = NULL;
+	}
+
 	if (laserBufferDetails)
 	{
 		delete laserBufferDetails;
@@ -283,6 +291,12 @@ void Sound::shutdown()
 	{
 		delete boostBufferDetails;
 		boostBufferDetails = NULL;
+	}
+
+	if (rocketBufferDetails)
+	{
+		delete rocketBufferDetails;
+		rocketBufferDetails = NULL;
 	}
 
 
@@ -363,6 +377,10 @@ void Sound::loadSound(SoundEffect type, std::string filename, char* &soundBuffer
 	else if (type == BOOSTSFX)
 	{
 		boostBufferDetails = new XAUDIO2_BUFFER(buffer);
+	}
+	else if (type ==ROCKETSFX)
+	{
+		rocketBufferDetails = new XAUDIO2_BUFFER(buffer);
 	}
 
 	filestream.close();
@@ -451,7 +469,7 @@ void Sound::playCrash(X3DAUDIO_EMITTER* emit)
 }
 
 void Sound::playEngine(X3DAUDIO_EMITTER* emit, float freq, IXAudio2SourceVoice* engine)
-{	
+{
 	engine->FlushSourceBuffers();
 	engine->SubmitSourceBuffer(engineBufferDetails);
 
@@ -467,6 +485,25 @@ void Sound::playEngine(X3DAUDIO_EMITTER* emit, float freq, IXAudio2SourceVoice* 
 	
 
 	engine->Start(0);
+}
+
+void Sound::playRocket(X3DAUDIO_EMITTER* emit, IXAudio2SourceVoice* rocket)
+{	
+	rocket->FlushSourceBuffers();
+	rocket->SubmitSourceBuffer(rocketBufferDetails);
+
+	X3DAudioCalculate(audio3DHandle, &listener, emit,
+		X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_LPF_DIRECT,
+		&dspSettings);
+	rocket->SetFrequencyRatio(dspSettings.DopplerFactor);
+	
+	rocket->SetOutputMatrix(smSFX, 1, details.OutputFormat.Format.nChannels, dspSettings.pMatrixCoefficients);
+
+	XAUDIO2_FILTER_PARAMETERS filterParameters = { LowPassFilter, 2.0f * sinf(X3DAUDIO_PI/6.0f * dspSettings.LPFDirectCoefficient), 1.0f };
+	rocket->SetFilterParameters(&filterParameters);
+	
+
+	rocket->Start(0);
 }
 
 void Sound::playBoost(X3DAUDIO_EMITTER* emit)
@@ -493,16 +530,18 @@ void Sound::playBoost(X3DAUDIO_EMITTER* emit)
 
 X3DAUDIO_EMITTER* Sound::getEmitter()
 {
-	if (numClaimedEmitters < NUM_EMITTERS)
-	{
-		numClaimedEmitters++;
+	_ASSERT(numClaimedEmitters < NUM_EMITTERS);
+	numClaimedEmitters++;
 
-		return &(emitters[numClaimedEmitters - 1]);
-	}
-	else
-	{
-		return NULL;
-	}
+	X3DAUDIO_EMITTER* emitter = &(emitters[numClaimedEmitters - 1]);
+	emitter->Position.x = 0.0f;
+	emitter->Position.y = 0.0f;
+	emitter->Position.z = 0.0f;
+	emitter->Velocity.x = 0.0f;
+	emitter->Velocity.y = 0.0f;
+	emitter->Velocity.z = 0.0f;
+
+	return emitter;
 }
 
 
@@ -547,7 +586,15 @@ IXAudio2SourceVoice* Sound::reserveSFXVoice()
 
 	if (currentReservedVoice == maxReservedVoices)
 	{
-		return NULL;
+		currentReservedVoice = 0;
+
+		voiceBufferReserved[maxReservedVoices - 1]->FlushSourceBuffers();
+		voiceBufferReserved[maxReservedVoices - 1]->DestroyVoice();
+
+		audio->CreateSourceVoice(&(voiceBufferReserved[maxReservedVoices - 1]), &wfm,
+			XAUDIO2_VOICE_USEFILTER, XAUDIO2_MAX_FREQ_RATIO, NULL, &SFXSendList, NULL);
+		
+		return voiceBufferReserved[maxReservedVoices - 1];
 	}
 	
 	voiceBufferReserved[currentReservedVoice - 1]->FlushSourceBuffers();

@@ -23,9 +23,9 @@ Waypoint::Waypoint(IDirect3DDevice9* device, WPType _wpType)
 		checkPointTime = 20;
 	}
 
-	drawable = new Drawable(WAYPOINT, "checker.dds", device);
+	drawable = new Drawable(WAYPOINT, "textures/checker.dds", device);
 
-	wpPosition = hkVector4(0,0,0);
+	wpPosition.set(0,0,0);
 }
 
 

@@ -37,7 +37,7 @@ bool Racer::inverse = config.inverse;
 Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 {
 	engineVoice = NULL;
-	laserDraw = new Drawable(LASERMODEL, "laser.dds", device);
+	laserDraw = new Drawable(LASERMODEL, "textures/laser.dds", device);
 	Renderer::renderer->addDrawable(laserDraw);
 
 	engineVoice = Sound::sound->reserveSFXVoice();
@@ -52,20 +52,20 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	currentSteering = 0.0f;
 	currentAcceleration = 0.0f;
 
-	lookDir = hkVector4(0, 0, 1);
+	lookDir.set(0, 0, 1);
 	lookHeight = 0;
 
 
 	switch (racerType)
 	{
 	case RACER1:
-		drawable = new Drawable(RACER, "racer1.dds", device);
+		drawable = new Drawable(RACER, "textures/racer1.dds", device);
 		break;
 	case RACER2:
-		drawable = new Drawable(RACER, "racer2.dds", device);
+		drawable = new Drawable(RACER, "textures/racer2.dds", device);
 		break;
 	default:
-		drawable = new Drawable(RACER, "racer2.dds", device);
+		drawable = new Drawable(RACER, "textures/racer2.dds", device);
 	}
 
 
@@ -76,7 +76,7 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	hkVector4 halfExtent(0.9f, 0.6f, 2.2f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL;
-	info.m_centerOfMass = hkVector4(0.0f, -0.7f, 0.0f);	// lower CM a bit
+	info.m_centerOfMass.set(0.0f, -0.7f, 0.0f);	// lower CM a bit
 	info.m_restitution = 0.0f;
 	info.m_maxAngularVelocity = 180.0f;
 	info.m_maxLinearVelocity = 170.0f;
@@ -175,7 +175,8 @@ void Racer::setPosAndRot(float posX, float posY, float posZ,
 	quat.mul(hkQuaternion(hkVector4(0.0f, 1.0f, 0.0f), rotY));
 	quat.mul(hkQuaternion(hkVector4(0.0f, 0.0f, 1.0f), rotZ));
 
-	hkVector4 pos = hkVector4(posX, posY, posZ);
+	hkVector4 pos;
+	pos.set(posX, posY, posZ);
 
 	body->setPositionAndRotation(hkVector4(posX, posY, posZ), quat);
 
@@ -255,20 +256,21 @@ void Racer::update()
 
 
 		// Update 3D sound position
-		hkVector4 vec = hkVector4(lookDir);
+		hkVector4 vec;
+		vec.setXYZ(lookDir);
 		vec.normalize3();
-		vec(0) = vec(0);
+		
 		emitter->OrientFront.x = vec(0);
 		emitter->OrientFront.y = vec(1);
 		emitter->OrientFront.z = vec(2);
 
-		vec = hkVector4(body->getPosition());
+		vec.setXYZ(body->getPosition());
 
 		emitter->Position.x = vec(0);
 		emitter->Position.y = vec(1);
 		emitter->Position.z = vec(2);
 
-		vec = hkVector4(body->getLinearVelocity());
+		vec.setXYZ(body->getLinearVelocity());
 
 		emitter->Velocity.x = vec(0);
 		emitter->Velocity.y = vec(1);
@@ -293,7 +295,8 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 	kit->setLinearDofA(zAxis, zID);
 	kit->setLinearDofB(zAxis, zID);
 	
-	hkVector4 wheelAttach = hkVector4(0,0,0);
+	hkVector4 wheelAttach;
+	wheelAttach.set(0,0,0);
 
 	kit->setPivotA(wheelAttach);
 	kit->setPivotB(*attachmentPt);
@@ -555,7 +558,8 @@ void Racer::steer(float seconds, float value)
 	centripScale *= yComponent * yComponent;
 
 
-	hkVector4 force = hkVector4(drawable->getXhkVector());
+	hkVector4 force;
+	force.setXYZ(drawable->getXhkVector());
 	
 	if (force.dot3(vel) < 0.0f)
 	{
@@ -563,7 +567,7 @@ void Racer::steer(float seconds, float value)
 		body->applyForce(seconds, force, body->getPosition());
 	}
 
-	force = hkVector4(yVec);
+	force.setXYZ(yVec);
 	force.mul(deltaAngularSpeed * chassisMass * torqueScale);
 	body->applyTorque(seconds, force);
 }
@@ -571,8 +575,13 @@ void Racer::steer(float seconds, float value)
 
 void Racer::reset(hkVector4* resetPos, float rotation)
 {
-	hkVector4 reset = hkVector4(0.0f, 0.0f, 0.0f);
-	setPosAndRot((float)resetPos->getComponent(0), (float)resetPos->getComponent(1), (float)resetPos->getComponent(2), 0, rotation, 0);
+	hkVector4 reset;
+	reset.set(0.0f, 0.0f, 0.0f);
+
+	hkVector4 resetPosition;
+	resetPosition.setXYZ(*resetPos);
+
+	setPosAndRot(resetPosition(0), resetPosition(1), resetPosition(2), 0, rotation, 0);
 	body->setLinearVelocity(reset);
 	wheelFL->body->setLinearVelocity(reset);
 	wheelFR->body->setLinearVelocity(reset);
@@ -672,14 +681,14 @@ hkVector4 Racer::getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach,
 		}
 	}
 
-	force = hkVector4(*up);
+	force.setXYZ(*up);
 	force.mul(k * displacement);
 
 	body->getPointVelocity(restPos, pointVel);
 
 	speedOfDisplacement = pointVel.dot3(*up);
 
-	damperForce = hkVector4(*up);
+	damperForce.setXYZ(*up);
 	damperForce.mul(c * -speedOfDisplacement);
 
 	force.add(damperForce);
@@ -745,16 +754,16 @@ void Racer::applyTireRaycast()
 
 	// FRONT LEFT TIRE
 	from.setTransformedPos(transform, attachFL);
-	to = hkVector4(raycastDir);
+	to.setXYZ(raycastDir);
 	to.mul(frontExtents + 0.35f);
 	to.add(from);
 
-	from = hkVector4(raycastDir);
+	from.setXYZ(raycastDir);
 	from.mul(-frontExtents * 2.0f - 0.35f);
 	from.add(to);
 	
-	input.m_from = hkVector4(from);
-	input.m_to = hkVector4(to);
+	input.m_from.setXYZ(from);
+	input.m_to.setXYZ(to);
 	input.m_filterInfo = collisionFilterInfo;
 
 	Physics::world->castRay(input, output);
@@ -791,16 +800,16 @@ void Racer::applyTireRaycast()
 
 	// FRONT RIGHT TIRE
 	from.setTransformedPos(transform, attachFR);
-	to = hkVector4(raycastDir);
+	to.setXYZ(raycastDir);
 	to.mul(frontExtents + 0.35f);
 	to.add(from);
 
-	from = hkVector4(raycastDir);
+	from.setXYZ(raycastDir);
 	from.mul(-frontExtents * 2.0f - 0.35f);
 	from.add(to);
 
-	input.m_from = hkVector4(from);
-	input.m_to = hkVector4(to);
+	input.m_from.setXYZ(from);
+	input.m_to.setXYZ(to);
 	input.m_filterInfo = collisionFilterInfo;
 
 	Physics::world->castRay(input, output);
@@ -837,16 +846,16 @@ void Racer::applyTireRaycast()
 
 	// REAR LEFT TIRE
 	from.setTransformedPos(transform, attachRL);
-	to = hkVector4(raycastDir);
+	to.setXYZ(raycastDir);
 	to.mul(rearExtents + 0.42f);
 	to.add(from);
 
-	from = hkVector4(raycastDir);
+	from.setXYZ(raycastDir);
 	from.mul(-rearExtents * 2.0f - 0.42f);
 	from.add(to);
 
-	input.m_from = hkVector4(from);
-	input.m_to = hkVector4(to);
+	input.m_from.setXYZ(from);
+	input.m_to.setXYZ(to);
 	input.m_filterInfo = collisionFilterInfo;
 
 	Physics::world->castRay(input, output);
@@ -883,16 +892,16 @@ void Racer::applyTireRaycast()
 
 	// REAR RIGHT TIRE
 	from.setTransformedPos(transform, attachRR);
-	to = hkVector4(raycastDir);
+	to.setXYZ(raycastDir);
 	to.mul(rearExtents + 0.42f);
 	to.add(from);
 
-	from = hkVector4(raycastDir);
+	from.setXYZ(raycastDir);
 	from.mul(-rearExtents * 2.0f - 0.42f);
 	from.add(to);
 
-	input.m_from = hkVector4(from);
-	input.m_to = hkVector4(to);
+	input.m_from.setXYZ(from);
+	input.m_to.setXYZ(to);
 	input.m_filterInfo = collisionFilterInfo;
 
 	Physics::world->castRay(input, output);
@@ -995,11 +1004,15 @@ void Racer::fireLaser()
 
 		if ((attacked != NULL) && (attacked != this))
 		{
-			hkVector4 raycastDir = hkVector4(input.m_to);
+			hkVector4 raycastDir;
+			raycastDir.setXYZ(input.m_to);
+
 			raycastDir.sub(from);
 			raycastDir.normalize3();
 
-			hkVector4 force = hkVector4(raycastDir);
+			hkVector4 force;
+			force.setXYZ(raycastDir);
+
 			force.mul(chassisMass * 40.0f);
 			
 			input.m_to.sub(from);
@@ -1032,21 +1045,22 @@ hkpWorldRayCastInput Racer::fireWeapon()
 	
 	// Raycast FROM camera, TO reticule
 	from = body->getPosition();
-	hkVector4 look = hkVector4(lookDir);
+	hkVector4 look;
+	look.setXYZ(lookDir);
 	look.mul(-7.0f);
 	
 	from.add(look);
 	from(1) = from(1) + 2.0f;
 
-	to = hkVector4(from);
+	to.setXYZ(from);
 
-	look = hkVector4(lookDir);
+	look.setXYZ(lookDir);
 	look.mul(1000.0f);	// Essentially goes on until it hits something
 	to.add(look);
 	
 
-	input.m_from = hkVector4(from);
-	input.m_to = hkVector4(to);
+	input.m_from.setXYZ(from);
+	input.m_to.setXYZ(to);
 
 	Physics::world->castRay(input, output);
 
@@ -1054,7 +1068,7 @@ hkpWorldRayCastInput Racer::fireWeapon()
 	{
 		// Now raycast from racer's cannon to target
 		to.sub(from);
-		to.mul(output.m_hitFraction * 1.5f);
+		to.mul(output.m_hitFraction * 1.1f);
 		to.add(from);
 
 		hkTransform trans = body->getTransform();
@@ -1068,8 +1082,8 @@ hkpWorldRayCastInput Racer::fireWeapon()
 		input = hkpWorldRayCastInput();
 		input.m_filterInfo = body->getCollisionFilterInfo();
 		
-		input.m_from = hkVector4(from);
-		input.m_to = hkVector4(to);
+		input.m_from.setXYZ(from);
+		input.m_to.setXYZ(to);
 
 		return input;
 	}
@@ -1124,7 +1138,19 @@ void Racer::applyDamage(Racer* attacker, int damage)
 	{
 		health = 100;
 		respawn();
-		attacker->kills += 1;
+
+		if (attacker)
+		{
+			if (attacker != this)
+			{
+				attacker->kills += 1;
+			}
+			else
+			{
+				// Suicide! Minus a kill
+				kills -= 1;
+			}
+		}
 	}
 }
 
@@ -1138,6 +1164,9 @@ void Racer::computeRPM()
 	hkVector4 forward = drawable->getZhkVector();
 	hkVector4 vel = body->getLinearVelocity();
 	float forwardSpeed = vel.dot3(forward);
+
+	if (forwardSpeed < 0.0f)
+		forwardSpeed *= -1;
 
 	float angularVel = forwardSpeed/0.42f;
 	float wheelRPM = angularVel*30.0f/3.14159f;

@@ -52,7 +52,7 @@ private:
 	int numDrawables;
 	int currentDrawable;
 	Drawable** drawables;
-	std::vector<Drawable*> dynamicDrawables;
+	std::vector<Drawable*>* dynamicDrawables;
 
 	HUD* hud;
 	Camera* camera;

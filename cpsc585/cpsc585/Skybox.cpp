@@ -36,12 +36,12 @@ Skybox::Skybox(IDirect3DDevice9* device)
 
 	indexBuffer->Unlock();
 
-	D3DXCreateTextureFromFile(device, "front.dds", &frontTex);
-	D3DXCreateTextureFromFile(device, "back.dds", &backTex);
-	D3DXCreateTextureFromFile(device, "left.dds", &leftTex);
-	D3DXCreateTextureFromFile(device, "right.dds", &rightTex);
-	D3DXCreateTextureFromFile(device, "top.dds", &topTex);
-	D3DXCreateTextureFromFile(device, "bottom.dds", &bottomTex);
+	D3DXCreateTextureFromFile(device, "textures/front.dds", &frontTex);
+	D3DXCreateTextureFromFile(device, "textures/back.dds", &backTex);
+	D3DXCreateTextureFromFile(device, "textures/left.dds", &leftTex);
+	D3DXCreateTextureFromFile(device, "textures/right.dds", &rightTex);
+	D3DXCreateTextureFromFile(device, "textures/top.dds", &topTex);
+	D3DXCreateTextureFromFile(device, "textures/bottom.dds", &bottomTex);
 
 	float scale = 2.0f;
 

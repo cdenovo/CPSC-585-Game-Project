@@ -15,6 +15,7 @@
 #include <Physics/Collide/Agent/ConvexAgent/BoxBox/hkpBoxBoxAgent.h>
 #include <Physics/Collide/Shape/Convex/Box/hkpBoxShape.h>
 #include <Physics/Collide/Shape/Convex/Cylinder/hkpCylinderShape.h>
+#include <Physics/Collide/Shape/Convex/Sphere/hkpSphereShape.h>
 #include <Physics/Collide/Shape/Compound/Tree/Mopp/hkpMoppBvTreeShape.h>
 #include <Physics/Collide/Shape/Compound/Tree/Mopp/hkpMoppUtility.h>
 #include <Physics/Collide/Shape/Compound/Tree/Mopp/hkpMoppCompilerInput.h>
@@ -38,6 +39,10 @@
 #include <Physics/Collide/Query/CastUtil/hkpWorldRayCastInput.h>
 #include <Physics/Collide/Query/CastUtil/hkpWorldRayCastOutput.h>
 #include <Physics/Dynamics/Phantom/hkpAabbPhantom.h>
+#include <Physics/Dynamics/Phantom/hkpShapePhantom.h>
+#include <Physics/Dynamics/Phantom/hkpSimpleShapePhantom.h>
+#include <Physics/Collide/Query/Collector/BodyPairCollector/hkpAllCdBodyPairCollector.h>
+#include <Physics/Collide/Query/Collector/BodyPairCollector/hkpRootCdBodyPair.h>
 
 
 static void HK_CALL errorReport(const char* msg, void* userContext);
