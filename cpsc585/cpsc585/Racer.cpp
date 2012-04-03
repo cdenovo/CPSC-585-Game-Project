@@ -1,4 +1,6 @@
 #include "Racer.h"
+#include "Rocket.h"
+#include "Landmine.h"
 
 int Racer::xID = 0;
 int Racer::yID = 1;
@@ -1023,6 +1025,12 @@ void Racer::fireLaser()
 
 			attacked->applyDamage(this, LASER_DAMAGE);
 		}
+		else if ((hitBody->getProperty(1)).getPtr())
+		{
+			Landmine* mine = ((Landmine*)(hitBody->getProperty(1)).getPtr());
+			mine->owner = this;
+			mine->explode();
+		}
 	}
 }
 
@@ -1094,7 +1102,7 @@ hkpWorldRayCastInput Racer::fireWeapon()
 }
 
 
-hkVector4 Racer::fireRocket()
+void Racer::fireRocket()
 {
 	Sound::sound->playLaser(emitter);
 
@@ -1111,11 +1119,55 @@ hkVector4 Racer::fireRocket()
 
 	to.sub(from);
 
-	return to;
+	to.normalize3();
+	// Change this so rocket is facing rocketDir when launched
+					
+					
+	Rocket* currentRocket = new Rocket(Renderer::device);
+					
+	currentRocket->owner = this;
+
+	hkVector4 rocketPos;
+	hkTransform bodyTransform = body->getTransform();
+
+	hkVector4 rocketAttach;
+	rocketAttach.setXYZ(Racer::attachCannon);
+	rocketAttach(2) = rocketAttach(2) + 0.7f;
+
+	rocketPos.setTransformedPos(bodyTransform, rocketAttach);
+	currentRocket->body->setTransform(bodyTransform);
+	currentRocket->body->setPosition(rocketPos);
+
+	to.mul(120.0f);
+	currentRocket->body->setLinearVelocity(to);
+	currentRocket->update(0.0f);
+
+	DynamicObjManager::manager->addObject(currentRocket);
+	currentRocket = NULL;
 }
 
 
+void Racer::dropMine()
+{
+	Sound::sound->playLaser(emitter);
 
+	Landmine* currentMine = new Landmine(Renderer::device);
+					
+	currentMine->owner = this;
+
+	hkVector4 minePos;
+	hkTransform bodyTransform = body->getTransform();
+
+	hkVector4 dropPoint;
+	dropPoint.set(0, 0, -2.3f);
+
+	minePos.setTransformedPos(bodyTransform, dropPoint);
+	currentMine->body->setTransform(bodyTransform);
+	currentMine->body->setPosition(minePos);
+
+	DynamicObjManager::manager->addObject(currentMine);
+	currentMine = NULL;
+}
 
 
 void Racer::respawn()

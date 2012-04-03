@@ -8,7 +8,7 @@
 
 enum SoundEffect { LASERSFX, CRASHSFX, ENGINESFX, BOOSTSFX, ROCKETSFX };
 
-#define NUM_EMITTERS 80
+#define NUM_EMITTERS 500
 
 class Sound
 {

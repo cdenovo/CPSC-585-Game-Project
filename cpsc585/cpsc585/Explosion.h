@@ -2,9 +2,8 @@
 
 #include "Drawable.h"
 #include "Physics.h"
-#include "Sound.h"
-#include "Racer.h"
 #include "DynamicObj.h"
+#include "Racer.h"
 
 #define BLAST_RADIUS 10.0
 #define BLAST_DAMAGE 25.0
@@ -28,5 +27,4 @@ public:
 private:
 	hkVector4 pos;
 	float lifetime;
-	X3DAUDIO_EMITTER* emitter;
 };

@@ -9,6 +9,7 @@
 #include "RearWheel.h"
 #include "ConfigReader.h"
 #include "LaserModel.h"
+#include "DynamicObjManager.h"
 
 enum RacerType { RACER1, RACER2, RACER3, RACER4, RACER5, RACER6, RACER7, RACER8 };
 enum WheelType { FRONT, REAR };
@@ -32,14 +33,13 @@ public:
 
 	int getIndex();
 	void reset(hkVector4* resetPos, float rotation);	// Reset position and set velocity/momentum to 0
-
 	void applyForces(float seconds);	// Call this every frame BEFORE stepping physics!
 	void fireLaser();
-	hkpWorldRayCastInput fireWeapon();
+	void fireRocket();
+	void dropMine();
 	void applyDamage(Racer* attacker, int damage);
 	void computeRPM();
-
-	hkVector4 fireRocket();
+	
 
 private:
 	void buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* constraint, WheelType type);
@@ -49,6 +49,7 @@ private:
 	void applyDrag(float seconds);
 	void applyTireRaycast();
 	void respawn();
+	hkpWorldRayCastInput fireWeapon();
 
 public:
 	Drawable* drawable;

@@ -21,7 +21,7 @@ Ability::Ability(AbilityType _abilityType)
 		lengthOfCooldown = 1.0f; // Time until rocket can be used again
 		break;
 	case LANDMINE:
-		lengthOfCooldown = 0.1f;
+		lengthOfCooldown = 0.5f; // Time until landmine can be used again
 		break;
 	}
 	

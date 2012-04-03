@@ -1,4 +1,5 @@
 #include "Explosion.h"
+#include "Landmine.h"
 
 Explosion::Explosion(IDirect3DDevice9* device, const hkTransform* trans, Racer* owns)
 {
@@ -74,6 +75,15 @@ void Explosion::doDamage()
 			racerPos.normalize3();
 			racerPos.mul((const hkReal) (10.0 * racer->chassisMass * BLAST_RADIUS / distance));
 			body->applyLinearImpulse(racerPos);
+		}
+		else if (((hkpRigidBody*) iter->m_rootCollidableB->getOwner())->getProperty(1).getPtr())
+		{
+			body = (hkpRigidBody*) iter->m_rootCollidableB->getOwner();
+			Landmine* mine;
+			mine = (Landmine*) body->getProperty(1).getPtr();
+
+			if (!mine->destroyed)
+				mine->explode();
 		}
 
 		iter++;

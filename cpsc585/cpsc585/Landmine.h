@@ -8,12 +8,12 @@
 
 class Racer;
 
-class Rocket :
+class Landmine :
 	public DynamicObj
 {
 public:
-	Rocket(IDirect3DDevice9* device);
-	~Rocket(void);
+	Landmine(IDirect3DDevice9* device);
+	~Landmine(void);
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians
 	void explode();
@@ -25,21 +25,21 @@ private:
 public:
 	Racer* owner;
 	hkpRigidBody* body;
+	bool activated;
 
 private:
 	hkpContactListener* listener;
-	static IXAudio2SourceVoice* rocketVoice;
-	float lifetime;
+	float activationTime;
 
 
 };
 
-class RocketListener : public hkpContactListener
+class LandmineListener : public hkpContactListener
 {
 public:
-	RocketListener(Rocket* r);
+	LandmineListener(Landmine* r);
 	void collisionAddedCallback(const hkpCollisionEvent& ev);
 
 private:
-	Rocket* rocket;
+	Landmine* landmine;
 };

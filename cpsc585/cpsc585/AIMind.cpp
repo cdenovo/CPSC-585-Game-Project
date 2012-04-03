@@ -17,6 +17,7 @@ AIMind::AIMind(Racer* _racer, TypeOfRacer _racerType)
 	speedBoost = new Ability(SPEED);
 	laser = new Ability(LASER);
 	rocket = new Ability(ROCKET);
+	landmine = new Ability(LANDMINE);
 	knownNumberOfKills = 0;
 	rotationAngle = 0;
 }
@@ -45,6 +46,12 @@ AIMind::~AIMind(void)
 	{
 		delete rocket;
 		rocket = NULL;
+	}
+
+	if (landmine)
+	{
+		delete landmine;
+		landmine = NULL;
 	}
 }
 
@@ -154,32 +161,13 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 				if (hud->getSelectedAbility() == ROCKET && intention.rightTrig && !rocket->onCooldown())
 				{
 					rocket->startCooldownTimer();
-					hkVector4 rocketDir = racer->fireRocket();
-					rocketDir.normalize3();
-					// Change this so rocket is facing rocketDir when launched
-					
-					
-					Rocket* currentRocket = new Rocket(Renderer::device);
-					
-					currentRocket->owner = racer;
+					racer->fireRocket();
+				}
 
-					hkVector4 rocketPos;
-					hkTransform bodyTransform = racer->body->getTransform();
-
-					hkVector4 rocketAttach;
-					rocketAttach.setXYZ(Racer::attachCannon);
-					rocketAttach(2) = rocketAttach(2) + 0.7f;
-
-					rocketPos.setTransformedPos(bodyTransform, rocketAttach);
-					currentRocket->body->setTransform(bodyTransform);
-					currentRocket->body->setPosition(rocketPos);
-
-					rocketDir.mul(120.0f);
-					currentRocket->body->setLinearVelocity(rocketDir);
-					currentRocket->update(0.0f);
-
-					DynamicObjManager::manager->addObject(currentRocket);
-					currentRocket = NULL;
+				if (hud->getSelectedAbility() == LANDMINE && intention.rightTrig && !landmine->onCooldown())
+				{
+					landmine->startCooldownTimer();
+					racer->dropMine();
 				}
 
 
@@ -196,6 +184,10 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 
 				if(rocket->onCooldown()){
 					rocket->updateCooldown(seconds);
+				}
+
+				if(landmine->onCooldown()){
+					landmine->updateCooldown(seconds);
 				}
 
 				/************* STEERING CALCULATIONS *************/

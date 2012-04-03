@@ -1,34 +1,36 @@
-#include "Rocket.h"
-
-IXAudio2SourceVoice* Rocket::rocketVoice = NULL;
+#include "Landmine.h"
 
 
-Rocket::Rocket(IDirect3DDevice9* device)
+Landmine::Landmine(IDirect3DDevice9* device)
 {
-	drawable = new Drawable(ROCKETMESH, "textures/rocket.dds", device);
+	drawable = new Drawable(LANDMINEMESH, "textures/landmine.dds", device);
 
 	hkVector4 startAxis;
-	startAxis.set(0, 0, -0.5f);
+	startAxis.set(0, -0.1f, 0);
 
 	hkVector4 endAxis;
-	endAxis.set(0, 0, 0.5f);
+	endAxis.set(0, 0.1f, 0);
 
-	hkReal radius = 0.1f;
+	hkReal radius = 1.0f;
 
 	hkpRigidBodyCinfo info;
-	info.m_gravityFactor = 0.0f;
-	info.m_friction = 0.0f;
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_MOVING;
 	info.m_angularDamping = 1.0f;
-	
+	hkpMassProperties massProperties;
+	hkpInertiaTensorComputer::computeCylinderVolumeMassProperties(startAxis, endAxis, radius, 20.0, massProperties);
+	info.setMassProperties(massProperties);
 	body = new hkpRigidBody(info);		//Create rigid body
 	body->setLinearVelocity(hkVector4(0, 0, 0));
 	body->setAngularVelocity(hkVector4(0, 0, 0));
 	info.m_shape->removeReference();
+
+	hkpPropertyValue val;
+	val.setPtr(this);
+	body->setProperty(1, val);
 	
 	
-	listener = new RocketListener(this);
+	listener = new LandmineListener(this);
 	body->addContactListener(listener);
 
 	Physics::physics->addRigidBody(body);
@@ -37,20 +39,15 @@ Rocket::Rocket(IDirect3DDevice9* device)
 
 	emitter = Sound::sound->getEmitter();
 
-
-	if (!rocketVoice)
-		rocketVoice = Sound::sound->reserveSFXVoice();
-
-	rocketVoice->SetVolume(0.6f);
-
 	owner = NULL;
 
-	lifetime = 3.0f;
+	activationTime = 1.0f;
+	activated = false;
 }
 
 
 
-Rocket::~Rocket(void)
+Landmine::~Landmine(void)
 {
 	if (listener)
 	{
@@ -73,7 +70,7 @@ Rocket::~Rocket(void)
 	Sound::sound->returnEmitter();
 }
 
-void Rocket::setPosAndRot(float posX, float posY, float posZ,
+void Landmine::setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ)	// In Radians
 {
 	drawable->setPosAndRot(posX, posY, posZ,
@@ -90,7 +87,7 @@ void Rocket::setPosAndRot(float posX, float posY, float posZ,
 	body->setPositionAndRotation(hkVector4(posX, posY, posZ), quat);
 }
 
-void Rocket::update(float seconds)
+void Landmine::update(float seconds)
 {
 	if (drawable && body)
 	{
@@ -112,19 +109,24 @@ void Rocket::update(float seconds)
 		emitter->Velocity.y = vec(1);
 		emitter->Velocity.z = vec(2);
 
-		Sound::sound->playRocket(emitter, rocketVoice);
 		
-		lifetime -= seconds;
+		if (!activated)
+		{
+			activationTime -= seconds;
 		
-		if (lifetime <= 0.0f)
-			destroyed = true;
+			if (activationTime <= 0.0f)
+			{
+				activated = true;
+				IXAudio2SourceVoice* voice = Sound::sound->getSFXVoice();
+				Sound::sound->playRocket(emitter, voice);
+			}
+		}
 	}
 }
 
-void Rocket::explode()
+void Landmine::explode()
 {
 	destroyed = true;
-	rocketVoice->Stop();
 
 	Sound::sound->playBoost(emitter);
 
@@ -137,13 +139,13 @@ void Rocket::explode()
 }
 
 
-RocketListener::RocketListener(Rocket* r)
+LandmineListener::LandmineListener(Landmine* l)
 {
-	rocket = r;
+	landmine = l;
 }
 
-void RocketListener::collisionAddedCallback(const hkpCollisionEvent& ev)
+void LandmineListener::collisionAddedCallback(const hkpCollisionEvent& ev)
 {
-	if (!(rocket->destroyed))
-		rocket->explode();
+	if ((landmine->activated) && !(landmine->destroyed))
+		landmine->explode();
 }

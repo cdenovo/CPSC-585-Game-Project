@@ -6,8 +6,6 @@
 #include "CheckpointTimer.h"
 #include "Physics.h"
 #include "Renderer.h"
-#include "Rocket.h"
-#include "DynamicObjManager.h"
 #include <time.h>
 
 #define _USE_MATH_DEFINES
@@ -46,6 +44,7 @@ private:
 	Ability* speedBoost;
 	Ability* laser;
 	Ability* rocket;
+	Ability* landmine;
 
 	CheckpointTimer* checkPointTimer;
 
