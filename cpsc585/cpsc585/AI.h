@@ -57,7 +57,7 @@ private:
 	Sound* sound;
 	HUD* hud;
 	CheckpointTimer* checkPointTimer;
-	WaypointEditor* wpEditor
+	WaypointEditor* wpEditor;
 
 	int count;
 	int fps;
