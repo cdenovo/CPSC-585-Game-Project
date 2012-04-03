@@ -209,47 +209,212 @@ void Racer::update()
 		}
 		
 		// Now update wheels
-		hkRotation carRot = body->getTransform().getRotation();
-		hkTransform wheelTransform = wheelRL->body->getTransform();
+
+		// rot1 = car rotation, trans1 = car translation
+		D3DXMATRIX rot1, trans1;
+		D3DXVECTOR3 scale, trans;
+		D3DXQUATERNION rot;
+		
+		hkVector4 currentPos;
+		double dist = 0;
+		hkVector4 zDir;
+		hkTransform wheelTransform;
+		hkRotation carRot;
+
+		carRot = body->getTransform().getRotation();
+
+
+		wheelTransform = wheelRL->body->getTransform();
 		wheelTransform.setRotation(carRot);
+
+		if (wheelRL->touchingGround)
+		{
+			currentPos.setXYZ(wheelRL->body->getPosition());
+			currentPos.sub(wheelRL->lastPos);
+
+			zDir.setXYZ(drawable->getZhkVector());
+
+			dist = currentPos.dot3(zDir);
+			dist /= (0.42);
+			dist *= D3DX_PI;
+			
+			
+
+
+			
+			dist += wheelRL->rotation;
+
+			if (hkMath::abs(dist) > D3DX_PI)
+			{
+				if (dist < 0.0)
+					dist += 2.0 * D3DX_PI;
+				else
+					dist -= 2.0 * D3DX_PI;
+			}
+
+			wheelRL->lastPos.setXYZ(wheelRL->body->getPosition());
+			wheelRL->rotation = dist;
+		}
+
 		wheelTransform.get4x4ColumnMajor(transMat);
+
+		D3DXMatrixDecompose(&scale, &rot, &trans, &transMat);
+		
+		D3DXMatrixRotationQuaternion(&rot1, &rot);
+		D3DXMatrixRotationX(&transMat, (float) wheelRL->rotation);
+		D3DXMatrixTranslation(&trans1, trans.x, trans.y, trans.z);
+		
+		D3DXMatrixMultiply(&transMat, &transMat, &rot1);
+		D3DXMatrixMultiply(&transMat, &transMat, &trans1);
 		wheelRL->drawable->setTransform(&transMat);
+
+
+
 
 		wheelTransform = wheelRR->body->getTransform();
 		wheelTransform.setRotation(carRot);
+
+		if (wheelRR->touchingGround)
+		{
+			currentPos.setXYZ(wheelRR->body->getPosition());
+			currentPos.sub(wheelRR->lastPos);
+
+			zDir.setXYZ(drawable->getZhkVector());
+
+			dist = currentPos.dot3(zDir);
+			dist /= (0.42);
+			dist *= D3DX_PI;
+			
+			dist += wheelRR->rotation;
+
+			if (hkMath::abs(dist) > D3DX_PI)
+			{
+				if (dist < 0.0)
+					dist += 2.0 * D3DX_PI;
+				else
+					dist -= 2.0 * D3DX_PI;
+			}
+
+			wheelRR->lastPos.setXYZ(wheelRR->body->getPosition());
+			wheelRR->rotation = dist;
+		}
+
 		wheelTransform.get4x4ColumnMajor(transMat);
+
+		D3DXMatrixDecompose(&scale, &rot, &trans, &transMat);
+		
+		D3DXMatrixRotationQuaternion(&rot1, &rot);
+		D3DXMatrixRotationX(&transMat, (float) wheelRR->rotation);
+		D3DXMatrixTranslation(&trans1, trans.x, trans.y, trans.z);
+		
+		D3DXMatrixMultiply(&transMat, &transMat, &rot1);
+		D3DXMatrixMultiply(&transMat, &transMat, &trans1);
 		wheelRR->drawable->setTransform(&transMat);
 
 
 
-		(wheelFL->body->getTransform()).get4x4ColumnMajor(transMat);
+
 		wheelTransform = wheelFL->body->getTransform();
 		wheelTransform.setRotation(carRot);
 		wheelTransform.get4x4ColumnMajor(transMat);
 
-
-		D3DXMATRIX rot1, rot2, trans1;
-		D3DXVECTOR3 scale, trans;
-		D3DXQUATERNION rot;
-		
 		D3DXMatrixDecompose(&scale, &rot, &trans, &transMat);
 		
 		D3DXMatrixRotationQuaternion(&rot1, &rot);
-		D3DXMatrixRotationAxis(&rot2, &(drawable->getYVector()), currentSteering * 1.11f);
+		D3DXMatrixRotationY(&transMat, currentSteering * 1.11f);
+		
+		D3DXMatrixMultiply(&transMat, &transMat, &rot1);
+		wheelFL->drawable->setTransform(&transMat);
+
+		wheelTransform.setRotation(carRot);
+
+		if (wheelFL->touchingGround)
+		{
+			currentPos.setXYZ(wheelFL->body->getPosition());
+			currentPos.sub(wheelFL->lastPos);
+
+			zDir.setXYZ(wheelFL->drawable->getZhkVector());
+
+			dist = currentPos.dot3(zDir);
+			dist /= (0.35);
+			dist *= D3DX_PI;
+			
+			dist += wheelFL->rotation;
+
+			if (hkMath::abs(dist) > D3DX_PI)
+			{
+				if (dist < 0.0)
+					dist += 2.0 * D3DX_PI;
+				else
+					dist -= 2.0 * D3DX_PI;
+			}
+
+			wheelFL->lastPos.setXYZ(wheelFL->body->getPosition());
+			wheelFL->rotation = dist;
+		}
+
+		wheelTransform.get4x4ColumnMajor(transMat);
+
+		D3DXMatrixDecompose(&scale, &rot, &trans, &transMat);
+		
+		D3DXMatrixRotationQuaternion(&rot1, &rot);
+		D3DXMatrixRotationYawPitchRoll(&transMat, currentSteering * 1.11f, (float) wheelFL->rotation, 0);
 		D3DXMatrixTranslation(&trans1, trans.x, trans.y, trans.z);
 		
-		D3DXMatrixMultiply(&transMat, &rot1, &rot2);
+		D3DXMatrixMultiply(&transMat, &transMat, &rot1);
 		D3DXMatrixMultiply(&transMat, &transMat, &trans1);
 		wheelFL->drawable->setTransform(&transMat);
 
-		(wheelFR->body->getTransform()).get4x4ColumnMajor(transMat);
+		
+
 		wheelTransform = wheelFR->body->getTransform();
 		wheelTransform.setRotation(carRot);
 		wheelTransform.get4x4ColumnMajor(transMat);
 
-		D3DXMatrixTranslation(&trans1, transMat._41, transMat._42, transMat._43);
+		D3DXMatrixDecompose(&scale, &rot, &trans, &transMat);
+		
+		D3DXMatrixRotationQuaternion(&rot1, &rot);
+		D3DXMatrixRotationY(&transMat, currentSteering * 1.11f);
+		
+		D3DXMatrixMultiply(&transMat, &transMat, &rot1);
+		wheelFR->drawable->setTransform(&transMat);
 
-		D3DXMatrixMultiply(&transMat, &rot1, &rot2);
+		wheelTransform.setRotation(carRot);
+
+		if (wheelFR->touchingGround)
+		{
+			currentPos.setXYZ(wheelFR->body->getPosition());
+			currentPos.sub(wheelFR->lastPos);
+
+			zDir.setXYZ(wheelFR->drawable->getZhkVector());
+
+			dist = currentPos.dot3(zDir);
+			dist /= (0.35);
+			dist *= D3DX_PI;
+			
+			dist += wheelFR->rotation;
+
+			if (hkMath::abs(dist) > D3DX_PI)
+			{
+				if (dist < 0.0)
+					dist += 2.0 * D3DX_PI;
+				else
+					dist -= 2.0 * D3DX_PI;
+			}
+
+			wheelFR->lastPos.setXYZ(wheelFR->body->getPosition());
+			wheelFR->rotation = dist;
+		}
+
+		wheelTransform.get4x4ColumnMajor(transMat);
+
+		D3DXMatrixDecompose(&scale, &rot, &trans, &transMat);
+		
+		D3DXMatrixRotationQuaternion(&rot1, &rot);
+		D3DXMatrixRotationYawPitchRoll(&transMat, currentSteering * 1.11f, (float) wheelFR->rotation, 0);
+		D3DXMatrixTranslation(&trans1, trans.x, trans.y, trans.z);
+		
+		D3DXMatrixMultiply(&transMat, &transMat, &rot1);
 		D3DXMatrixMultiply(&transMat, &transMat, &trans1);
 		wheelFR->drawable->setTransform(&transMat);
 
@@ -781,6 +946,7 @@ void Racer::applyTireRaycast()
 		to.add(raycastDir);
 
 		wheelFL->body->setPosition(to);
+		wheelFL->lastPos.setXYZ(to);
 	}
 	else
 	{
@@ -827,6 +993,7 @@ void Racer::applyTireRaycast()
 		to.add(raycastDir);
 
 		wheelFR->body->setPosition(to);
+		wheelFR->lastPos.setXYZ(to);
 	}
 	else
 	{
@@ -873,6 +1040,7 @@ void Racer::applyTireRaycast()
 		to.add(raycastDir);
 
 		wheelRL->body->setPosition(to);
+		wheelRL->lastPos.setXYZ(to);
 	}
 	else
 	{
@@ -919,6 +1087,7 @@ void Racer::applyTireRaycast()
 		to.add(raycastDir);
 
 		wheelRR->body->setPosition(to);
+		wheelRR->lastPos.setXYZ(to);
 	}
 	else
 	{

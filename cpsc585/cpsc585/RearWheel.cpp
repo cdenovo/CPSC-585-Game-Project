@@ -24,6 +24,9 @@ RearWheel::RearWheel(IDirect3DDevice9* device, int filter)
 	body = new hkpRigidBody(info);		//Create rigid body
 	body->setLinearVelocity(hkVector4(0, 0, 0));
 	info.m_shape->removeReference();
+
+	lastPos.set(0,0,0);
+	rotation = 0.0;
 }
 
 

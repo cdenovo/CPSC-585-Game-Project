@@ -20,6 +20,8 @@ public:
 	Drawable* drawable;
 	hkpRigidBody* body;
 	bool touchingGround;
+	hkVector4 lastPos;
+	double rotation;
 
 private:
 
