@@ -58,6 +58,7 @@ public:
 
 	int health;
 	int kills;
+	int suicides;
 	float laserTime;
 	bool laserReady;
 
@@ -65,7 +66,7 @@ public:
 	float lookHeight;
 
 	float currentAcceleration;
-		
+	bool braking;
 	static ConfigReader config;
 
 	

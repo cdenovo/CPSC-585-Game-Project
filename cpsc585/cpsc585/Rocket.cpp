@@ -13,14 +13,13 @@ Rocket::Rocket(IDirect3DDevice9* device)
 	hkVector4 endAxis;
 	endAxis.set(0, 0, 0.5f);
 
-	hkReal radius = 0.1f;
+	hkReal radius = 0.2f;
 
 	hkpRigidBodyCinfo info;
 	info.m_gravityFactor = 0.0f;
 	info.m_friction = 0.0f;
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);
-	info.m_qualityType = HK_COLLIDABLE_QUALITY_MOVING;
-	info.m_angularDamping = 1.0f;
+	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL;
 	
 	body = new hkpRigidBody(info);		//Create rigid body
 	body->setLinearVelocity(hkVector4(0, 0, 0));

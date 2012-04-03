@@ -15,13 +15,13 @@ Ability::Ability(AbilityType _abilityType)
 		boostDuration = 3; // Time in seconds that the boost lasts
 		break;
 	case LASER:
-		lengthOfCooldown = 2; // Time until laser can be used again
+		lengthOfCooldown = 2.0f; // Time until laser can be used again
 		break;
 	case ROCKET:
-		lengthOfCooldown = 1.0f; // Time until rocket can be used again
+		lengthOfCooldown = 2.0f; // Time until rocket can be used again
 		break;
 	case LANDMINE:
-		lengthOfCooldown = 0.5f; // Time until landmine can be used again
+		lengthOfCooldown = 1.0f; // Time until landmine can be used again
 		break;
 	}
 	

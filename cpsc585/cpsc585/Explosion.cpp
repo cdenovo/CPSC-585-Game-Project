@@ -73,7 +73,7 @@ void Explosion::doDamage()
 			racer->applyDamage(owner, damage);
 
 			racerPos.normalize3();
-			racerPos.mul((const hkReal) (10.0 * racer->chassisMass * BLAST_RADIUS / distance));
+			racerPos.mul((const hkReal) (5.0 * racer->chassisMass * BLAST_RADIUS / distance));
 			body->applyLinearImpulse(racerPos);
 		}
 		else if (((hkpRigidBody*) iter->m_rootCollidableB->getOwner())->getProperty(1).getPtr())
@@ -82,8 +82,8 @@ void Explosion::doDamage()
 			Landmine* mine;
 			mine = (Landmine*) body->getProperty(1).getPtr();
 
-			if (!mine->destroyed)
-				mine->explode();
+			if (!mine->triggered && !mine->destroyed)
+				mine->trigger();
 		}
 
 		iter++;

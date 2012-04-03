@@ -6,10 +6,10 @@ Landmine::Landmine(IDirect3DDevice9* device)
 	drawable = new Drawable(LANDMINEMESH, "textures/landmine.dds", device);
 
 	hkVector4 startAxis;
-	startAxis.set(0, -0.1f, 0);
+	startAxis.set(0, -0.075f, 0);
 
 	hkVector4 endAxis;
-	endAxis.set(0, 0.1f, 0);
+	endAxis.set(0, 0.075f, 0);
 
 	hkReal radius = 1.0f;
 
@@ -36,11 +36,13 @@ Landmine::Landmine(IDirect3DDevice9* device)
 	Physics::physics->addRigidBody(body);
 
 	destroyed = false;
+	triggered = false;
 
 	emitter = Sound::sound->getEmitter();
-
+	
 	owner = NULL;
 
+	triggeredTime = 0.1f;
 	activationTime = 1.0f;
 	activated = false;
 }
@@ -121,6 +123,15 @@ void Landmine::update(float seconds)
 				Sound::sound->playRocket(emitter, voice);
 			}
 		}
+		else if (triggered)
+		{
+			triggeredTime -= seconds;
+
+			if (triggeredTime <= 0.0f)
+			{
+				explode();
+			}
+		}
 	}
 }
 
@@ -139,6 +150,15 @@ void Landmine::explode()
 }
 
 
+void Landmine::trigger()
+{
+	if (!triggered && activated)
+	{
+		triggered = true;
+		Sound::sound->playLaser(emitter);
+	}
+}
+
 LandmineListener::LandmineListener(Landmine* l)
 {
 	landmine = l;
@@ -146,6 +166,6 @@ LandmineListener::LandmineListener(Landmine* l)
 
 void LandmineListener::collisionAddedCallback(const hkpCollisionEvent& ev)
 {
-	if ((landmine->activated) && !(landmine->destroyed))
-		landmine->explode();
+	if (!(landmine->triggered) && (landmine->activated) && !(landmine->destroyed))
+		landmine->trigger();
 }

@@ -46,6 +46,7 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 
 	health = 100;
 	kills = 0;
+	suicides = 0;
 	laserReady = true;
 	laserTime = 0.0f;
 
@@ -155,6 +156,8 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	reset(&(hkVector4(0, 0, 0, 0)), 0);
 
 	emitter = Sound::sound->getEmitter();
+
+	braking = false;
 }
 
 
@@ -227,7 +230,7 @@ void Racer::update()
 		wheelTransform = wheelRL->body->getTransform();
 		wheelTransform.setRotation(carRot);
 
-		if (wheelRL->touchingGround)
+		if (!braking && wheelRL->touchingGround)
 		{
 			currentPos.setXYZ(wheelRL->body->getPosition());
 			currentPos.sub(wheelRL->lastPos);
@@ -237,10 +240,6 @@ void Racer::update()
 			dist = currentPos.dot3(zDir);
 			dist /= (0.42);
 			dist *= D3DX_PI;
-			
-			
-
-
 			
 			dist += wheelRL->rotation;
 
@@ -255,6 +254,7 @@ void Racer::update()
 			wheelRL->lastPos.setXYZ(wheelRL->body->getPosition());
 			wheelRL->rotation = dist;
 		}
+		
 
 		wheelTransform.get4x4ColumnMajor(transMat);
 
@@ -274,7 +274,7 @@ void Racer::update()
 		wheelTransform = wheelRR->body->getTransform();
 		wheelTransform.setRotation(carRot);
 
-		if (wheelRR->touchingGround)
+		if (!braking && wheelRR->touchingGround)
 		{
 			currentPos.setXYZ(wheelRR->body->getPosition());
 			currentPos.sub(wheelRR->lastPos);
@@ -328,7 +328,7 @@ void Racer::update()
 
 		wheelTransform.setRotation(carRot);
 
-		if (wheelFL->touchingGround)
+		if (!braking && wheelFL->touchingGround)
 		{
 			currentPos.setXYZ(wheelFL->body->getPosition());
 			currentPos.sub(wheelFL->lastPos);
@@ -381,7 +381,7 @@ void Racer::update()
 
 		wheelTransform.setRotation(carRot);
 
-		if (wheelFR->touchingGround)
+		if (!braking && wheelFR->touchingGround)
 		{
 			currentPos.setXYZ(wheelFR->body->getPosition());
 			currentPos.sub(wheelFR->lastPos);
@@ -494,6 +494,8 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 void Racer::brake(float seconds)
 {
 	// Braking. Apply force to all wheels
+	braking = true;
+
 	hkVector4 point, forward;
 	hkTransform trans = body->getTransform();
 
@@ -571,45 +573,50 @@ void Racer::accelerate(float seconds, float value)
 
 	if ((dot > 0.1f) && (value < 0.0f))
 	{
-		// Braking. Apply force to all wheels
-		accelForce /= 4.0f;
-
-		if (wheelFL->touchingGround)
+		if (value < -0.9f)
 		{
-			forward = wheelFL->body->getLinearVelocity();
-			forward.normalize3IfNotZero();
-			forward.mul(accelForce);
-			point.setTransformedPos(trans, attachFL);
-			body->applyForce(seconds, forward, point);
+			brake(seconds);
 		}
-
-		if (wheelFR->touchingGround)
+		else
 		{
-			forward = wheelFR->body->getLinearVelocity();
-			forward.normalize3IfNotZero();
-			forward.mul(accelForce);
-			point.setTransformedPos(trans, attachFR);
-			body->applyForce(seconds, forward, point);
-		}
+			accelForce /= 4.0f;
 
-		if (wheelRL->touchingGround)
-		{
-			forward = wheelRL->body->getLinearVelocity();
-			forward.normalize3IfNotZero();
-			forward.mul(accelForce);
-			point.setTransformedPos(trans, attachRL);
-			body->applyForce(seconds, forward, point);
-		}
+			if (wheelFL->touchingGround)
+			{
+				forward = wheelFL->body->getLinearVelocity();
+				forward.normalize3IfNotZero();
+				forward.mul(accelForce);
+				point.setTransformedPos(trans, attachFL);
+				body->applyForce(seconds, forward, point);
+			}
 
-		if (wheelRR->touchingGround)
-		{
-			forward = wheelRR->body->getLinearVelocity();
-			forward.normalize3IfNotZero();
-			forward.mul(accelForce);
-			point.setTransformedPos(trans, attachRR);
-			body->applyForce(seconds, forward, point);
-		}
+			if (wheelFR->touchingGround)
+			{
+				forward = wheelFR->body->getLinearVelocity();
+				forward.normalize3IfNotZero();
+				forward.mul(accelForce);
+				point.setTransformedPos(trans, attachFR);
+				body->applyForce(seconds, forward, point);
+			}
 
+			if (wheelRL->touchingGround)
+			{
+				forward = wheelRL->body->getLinearVelocity();
+				forward.normalize3IfNotZero();
+				forward.mul(accelForce);
+				point.setTransformedPos(trans, attachRL);
+				body->applyForce(seconds, forward, point);
+			}
+
+			if (wheelRR->touchingGround)
+			{
+				forward = wheelRR->body->getLinearVelocity();
+				forward.normalize3IfNotZero();
+				forward.mul(accelForce);
+				point.setTransformedPos(trans, attachRR);
+				body->applyForce(seconds, forward, point);
+			}
+		}
 	}
 	else
 	{
@@ -664,7 +671,7 @@ void Racer::steer(float seconds, float value)
 	float maxAngularSpeed = 5.0f;
 
 
-	if (dot == 0.0f)
+	if (dot < 0.1f)
 	{
 		maxAngularSpeed = 0.0f;
 	}
@@ -880,7 +887,7 @@ void Racer::applyForces(float seconds)
 
 	// Only want to be automatically braking if the player
 	// isn't trying to move or already moving
-	if ((dot > 0.0f) && (dot < 6.0f) && (aDot != 0.0f) &&
+	if (((dot > 0.0f) && (dot < 6.0f) && (aDot != 0.0f)) &&
 		(currentAcceleration == 0.0f))
 	{
 		brake(seconds);
@@ -1198,7 +1205,9 @@ void Racer::fireLaser()
 		{
 			Landmine* mine = ((Landmine*)(hitBody->getProperty(1)).getPtr());
 			mine->owner = this;
-			mine->explode();
+
+			if (!mine->triggered && !mine->destroyed)
+				mine->trigger();
 		}
 	}
 }
@@ -1307,7 +1316,7 @@ void Racer::fireRocket()
 	currentRocket->body->setTransform(bodyTransform);
 	currentRocket->body->setPosition(rocketPos);
 
-	to.mul(120.0f);
+	to.mul(125.0f);
 	currentRocket->body->setLinearVelocity(to);
 	currentRocket->update(0.0f);
 
@@ -1368,8 +1377,8 @@ void Racer::applyDamage(Racer* attacker, int damage)
 			}
 			else
 			{
-				// Suicide! Minus a kill
-				kills -= 1;
+				// Suicide
+				suicides += 1;
 			}
 		}
 	}

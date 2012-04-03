@@ -18,6 +18,7 @@ public:
 		float rotX, float rotY, float rotZ);	// In Radians
 	void explode();
 	void update(float seconds);
+	void trigger();
 
 private:
 	X3DAUDIO_EMITTER* emitter;
@@ -26,10 +27,12 @@ public:
 	Racer* owner;
 	hkpRigidBody* body;
 	bool activated;
+	bool triggered;
 
 private:
 	hkpContactListener* listener;
 	float activationTime;
+	float triggeredTime;
 
 
 };
