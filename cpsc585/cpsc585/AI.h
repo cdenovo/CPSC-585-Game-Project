@@ -22,6 +22,7 @@
 #include "TopMenu.h"
 
 #define NUMRACERS 5
+#define NETWORKTIME 0.03
 
 class AI
 {
@@ -56,7 +57,7 @@ private:
 	Sound* sound;
 	HUD* hud;
 	CheckpointTimer* checkPointTimer;
-	WaypointEditor* wpEditor;
+	WaypointEditor* wpEditor
 
 	int count;
 	int fps;
@@ -194,6 +195,7 @@ private:
 	Intention prevIntent;
 	bool isClient;
 	bool isServer;
+	float networkTime;
 
 	//Menu
 	TopMenu *menu;

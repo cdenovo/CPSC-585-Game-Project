@@ -90,6 +90,8 @@ void AI::initialize(Renderer* r, Input* i, Sound* s, TopMenu* m)
 	fps = 0;
 	racerIndex = 0;
 
+	networkTime = (float) NETWORKTIME;
+
 	wpEditor = new WaypointEditor(renderer);
 	wpEditor->openFile();
 
@@ -764,7 +766,9 @@ void AI::runNetworking(float milliseconds)
 				milliseconds = 0;
 
 				//if(!intent.equals(prevIntent))
+				if (networkTime <= 0.0f)
 				{
+					networkTime = (float) NETWORKTIME;
 					client.sendButtonState(intent);
 
 					//a msg was sent
@@ -821,6 +825,8 @@ bool AI::simulate(float seconds)
 	Intention intention = input->getIntention();
 
 	quit = input->quitOn();
+
+	networkTime -= seconds;
 
 	// Debugging Information ---------------------------------------
 	if(input->debugging()){

@@ -1,6 +1,6 @@
 #include "Server.h"
 
-const int CLIENT_TIMEOUT = 5;
+const int CLIENT_TIMEOUT = 50;
 
 Server::Server()
 {
@@ -408,6 +408,7 @@ int Server::update(Racer *racers[], int numRacers)
 	}
 
 	int err = sendUDPMessage(buffer,size); //Send message
+	seqNum++;
 
 	delete[] buffer;
 
@@ -521,7 +522,7 @@ void Server::getTCPMessages(float milliseconds)
 
 								//Make sure colour is not in use
 								bool used = false;
-								for(int j = 0; j < MAXCLIENTS; i++)
+								for(int j = 0; j < MAXCLIENTS; j++)
 								{
 									if(clients[j].connected && clients[j].color == color)
 									{

@@ -1,7 +1,7 @@
 #include "Client.h"
 
 //new timeout feature (TAG1)
-const int SERVER_TIMEOUT = 5;
+const int SERVER_TIMEOUT = 50;
 
 Client::Client()
 {
