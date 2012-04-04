@@ -1,6 +1,12 @@
 #include "Drawable.h"
 
 
+Drawable::Drawable(void)
+{
+	texture = NULL;
+}
+
+
 Drawable::Drawable(MeshType type, std::string textureName, IDirect3DDevice9* device)
 {
 	D3DXMatrixIdentity(&transform);
@@ -141,4 +147,23 @@ hkVector4 Drawable::getYhkVector()
 hkVector4 Drawable::getZhkVector()
 {
 	return hkVector4(transform._31, transform._32, transform._33);
+}
+
+
+IDirect3DTexture9* Drawable::getTexture()
+{
+	return texture;
+}
+
+void Drawable::setTexture(IDirect3DTexture9* tex)
+{
+	texture = tex;
+}
+
+
+IDirect3DTexture9* Drawable::getTextureFromFile(IDirect3DDevice9* device, std::string textureName)
+{
+	IDirect3DTexture9* tex = NULL;
+	D3DXCreateTextureFromFile(device, textureName.c_str(), &tex);
+	return tex;
 }

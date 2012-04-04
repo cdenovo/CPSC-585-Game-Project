@@ -37,13 +37,17 @@ public:
 
 private:
 	void writeText(std::string text, int line);
+	void drawShadows();
+
+	inline DWORD FtoDw(float f)
+	{
+	    return *((DWORD*)&f);
+	}
 
 	IDirect3D9* d3dObject;
 	
 	D3DXMATRIX projectionMatrix;
 	D3DXMATRIX worldMatrix;
-
-	
 	
 	ID3DXFont* font;
 	

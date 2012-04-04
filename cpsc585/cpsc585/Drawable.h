@@ -23,9 +23,10 @@ enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, LASERMOD
 class Drawable
 {
 public:
+	Drawable(void);
 	Drawable(MeshType type, std::string textureName, IDirect3DDevice9* device);
-	~Drawable();
-	void render(IDirect3DDevice9* device);
+	virtual ~Drawable();
+	virtual void render(IDirect3DDevice9* device);
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians
 	void setTransform(D3DXMATRIX* input);
@@ -39,14 +40,20 @@ public:
 	hkVector4 getYhkVector();
 	hkVector4 getZhkVector();
 
+	IDirect3DTexture9* getTexture();
+	void setTexture(IDirect3DTexture9* tex);
+	IDirect3DTexture9* getTextureFromFile(IDirect3DDevice9* device, std::string textureName);
+
 private:
-	void initialize(MeshType type, std::string textureName, IDirect3DDevice9* device);
+	virtual void initialize(MeshType type, std::string textureName, IDirect3DDevice9* device);
 
 
 public:
 	Mesh* mesh;
 
-private:
+protected:
 	D3DXMATRIX transform;
+
+private:
 	IDirect3DTexture9* texture;
 };

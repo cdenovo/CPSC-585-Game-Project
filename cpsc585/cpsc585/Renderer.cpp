@@ -33,7 +33,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	drawables = new Drawable*[numToDraw];
 	dynamicDrawables = new std::vector<Drawable*>();
 	dynamicDrawables->clear();
-	dynamicDrawables->reserve(500);
+	dynamicDrawables->reserve(100);
 	
 	hud = new HUD(width, height);
 
@@ -169,7 +169,13 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTOP_SELECTARG1);
 	device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);	// Just to be safe (ignored)
 
-	device->SetRenderState(D3DRS_POINTSPRITEENABLE, true);
+	device->SetRenderState(D3DRS_POINTSPRITEENABLE, TRUE);
+	device->SetRenderState(D3DRS_POINTSCALEENABLE, TRUE);
+	device->SetRenderState(D3DRS_POINTSCALE_A, FtoDw(0.0f));
+	device->SetRenderState(D3DRS_POINTSCALE_B, FtoDw(0.0f));
+	device->SetRenderState(D3DRS_POINTSCALE_C, FtoDw(1.0f));
+	device->SetRenderState(D3DRS_POINTSIZE_MIN, FtoDw(0.1f));
+	device->SetRenderState(D3DRS_POINTSIZE_MAX, FtoDw(128.0f));
 
 	// Set up HUD
 	hud->initialize(device);
@@ -229,7 +235,6 @@ void Renderer::render()
 {
 	D3DXMATRIX viewMatrix;
 	
-	
 	// Draw skybox
 
 	camera->updateForSkybox();
@@ -260,6 +265,8 @@ void Renderer::render()
 
 	camera->update();
 
+
+
 	// Get view matrix
 	camera->getViewMatrix(viewMatrix);
 
@@ -274,7 +281,14 @@ void Renderer::render()
 		drawables[i]->render(device);
 	}
 	
-	// Draw dynamic objects that will be removed after this frame (like rockets and smoke)
+
+	// Draw shadows
+	drawShadows();
+
+
+
+
+	// Draw dynamic objects that will be removed after this frame (like rockets, lasers, landmines)
 	if (!(dynamicDrawables->empty()))
 	{
 		for (std::vector<Drawable*>::iterator iter = dynamicDrawables->begin();
@@ -283,9 +297,22 @@ void Renderer::render()
 			(*iter)->render(device);
 		}
 
-		dynamicDrawables->erase(dynamicDrawables->begin(), dynamicDrawables->end());
+		dynamicDrawables->clear();
 	}
 	
+
+	// Render SmokeSystem particles
+
+
+	// Render ExplosionSystem particles
+
+
+	// Render RainSystem particles
+
+
+	// Render LaserSystem particles (beginning and end points of shots)
+
+
 
 	for (int i = 0; i < numSentences; i++)
 	{
@@ -382,4 +409,20 @@ Camera* Renderer::getCamera()
 void Renderer::addDynamicDrawable(Drawable* drawable)
 {
 	dynamicDrawables->push_back(drawable);
+}
+
+void Renderer::drawShadows()
+{
+	// Disable lighting
+
+	// Disable writing to depth-buffer
+
+	// DepthFun = LEQUAL
+
+	// Enable stencil test
+
+	// Don't draw to color buffer
+
+	// StencilFunc = always
+
 }

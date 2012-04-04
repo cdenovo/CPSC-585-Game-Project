@@ -6,7 +6,7 @@ DynamicObjManager::DynamicObjManager(void)
 {
 	objList = new std::vector<DynamicObj*>();
 	objList->clear();
-	objList->reserve(500);
+	objList->reserve(100);
 
 	manager = this;
 }
@@ -30,18 +30,22 @@ void DynamicObjManager::update(float seconds)
 
 	if (!(objList->empty()))
 	{
-		for (std::vector<DynamicObj*>::iterator iter = objList->begin();
-			iter < objList->end(); iter++)
+		std::vector<DynamicObj*>::size_type index = 0;
+		while (index < objList->size())
 		{
-			if ((*iter) && (*iter)->destroyed)
+			if (((*objList)[index]) && (*objList)[index]->destroyed)
 			{
-				(*iter)->~DynamicObj();
+				(*objList)[index]->~DynamicObj();
+
+				objList->erase(objList->begin() + index);
 			}
-			else if ((*iter) && !((*iter)->destroyed))
+			else if ((*objList)[index] && !((*objList)[index]->destroyed))
 			{
-				(*iter)->update(seconds);
-				Renderer::renderer->addDynamicDrawable((*iter)->drawable);
+				(*objList)[index]->update(seconds);
+				Renderer::renderer->addDynamicDrawable((*objList)[index]->drawable);
 				empty = false;
+
+				index++;
 			}
 		}
 	}

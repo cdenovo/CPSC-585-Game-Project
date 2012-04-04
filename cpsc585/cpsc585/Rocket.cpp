@@ -116,7 +116,22 @@ void Rocket::update(float seconds)
 		lifetime -= seconds;
 		
 		if (lifetime <= 0.0f)
+		{
 			destroyed = true;
+		}
+		else
+		{
+			Smoke* smoke = new Smoke(Renderer::device);
+
+			hkVector4 pos;
+			pos.setXYZ(body->getPosition());
+			pos(2) -= 0.7f;
+
+			smoke->setPos(&pos);
+			smoke->initialize(Renderer::device, 1.5f);
+			DynamicObjManager::manager->addObject(smoke);
+			smoke = NULL;
+		}
 	}
 }
 
