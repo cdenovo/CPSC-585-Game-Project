@@ -35,7 +35,7 @@ void DynamicObjManager::update(float seconds)
 		{
 			if (((*objList)[index]) && (*objList)[index]->destroyed)
 			{
-				(*objList)[index]->~DynamicObj();
+				delete (*objList)[index];
 
 				objList->erase(objList->begin() + index);
 			}
