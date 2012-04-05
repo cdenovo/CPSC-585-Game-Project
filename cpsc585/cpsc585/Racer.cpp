@@ -79,7 +79,7 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	hkVector4 halfExtent(0.9f, 0.6f, 2.2f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL;
-	info.m_centerOfMass.set(0.0f, -0.7f, 0.0f);	// lower CM a bit
+	info.m_centerOfMass.set(0.0f, -0.5f, 0.0f);	// lower CM a bit
 	info.m_restitution = 0.0f;
 	info.m_maxAngularVelocity = 180.0f;
 	info.m_maxLinearVelocity = 170.0f;
@@ -1337,7 +1337,7 @@ void Racer::dropMine()
 	hkTransform bodyTransform = body->getTransform();
 
 	hkVector4 dropPoint;
-	dropPoint.set(0, 0, -2.3f);
+	dropPoint.set(0, -0.7f, 2.3f);
 
 	minePos.setTransformedPos(bodyTransform, dropPoint);
 	currentMine->body->setTransform(bodyTransform);
