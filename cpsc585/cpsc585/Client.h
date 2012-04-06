@@ -8,6 +8,8 @@
 #include "NetworkInfo.h"
 #include "Racer.h"
 
+#define BULLY_TIMEOUT 3.0
+
 class Client
 {
 public:
@@ -16,7 +18,7 @@ public:
 
 	bool connectToServer(int port, std::string ipAddress);
 	void getTCPMessages(float milliseconds);
-	void getUDPMessages(float milliseconds);
+	int getUDPMessages(float milliseconds);
 
 	int setupWSA();
 	int setupUDPSocket();
@@ -26,7 +28,10 @@ public:
 	int setColor(int color);
 
 	int sendAliveMessage();
-	int sendButtonState(Intention intention);
+	int sendElectionMessage();
+	int sendButtonState(Intention &intention);
+	int sendLeaderMessage();
+	int sendBullyMessage(int);
 
 	std::string track;
 	bool isReady;
@@ -35,6 +40,7 @@ public:
 	bool end;
 	bool newWorldInfo;
 	int numClients;
+	int serverID;
 	ClientInfo clients[MAXCLIENTS];
 	char world[MAXCLIENTS][RACERSIZE];
 
@@ -43,6 +49,7 @@ private:
 	int sendTCPMessage(std::string message);
 	int sendTCPMessage(const char* message, int length);
 	int sendUDPMessage(const char* message, int length);
+	int sendUDPMessageTo(int,char*,int);
 	void closeConnection();
 
 	SOCKET sTCP;
@@ -52,5 +59,16 @@ private:
 	bool wsa_ready;
 	WSADATA w; //holds winsock info
 	int seqNum;
+
+	int election_winner;
+	bool is_electing;
+	bool was_bullied;
+	bool to_be_leader;
+
+	double bullied_no_leader_timer;
+	double leader_nack_timer;
+	double no_response_timer;
+
+
 };
 

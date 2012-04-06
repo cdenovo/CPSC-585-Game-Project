@@ -56,7 +56,6 @@ Racer::Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerT
 	
 	physicsWorld = p->world;
 
-
 	switch (racerType)
 	{
 	case RACER1:
@@ -1164,6 +1163,9 @@ void Racer::serialize(char buff[])
 	memcpy(buff+sizeof(hkVector4)*4+sizeof(hkQuaternion),&wheelFR->body->getPosition(),sizeof(hkVector4)); //FR wheel
 	memcpy(buff+sizeof(hkVector4)*5+sizeof(hkQuaternion),&wheelRL->body->getPosition(),sizeof(hkVector4)); //RL wheel
 	memcpy(buff+sizeof(hkVector4)*6+sizeof(hkQuaternion),&wheelRR->body->getPosition(),sizeof(hkVector4)); //RR wheel
+	memcpy(buff+sizeof(hkVector4)*7+sizeof(hkQuaternion),&lookDir,sizeof(hkVector4)); //Look direction
+	memcpy(buff+sizeof(hkVector4)*8+sizeof(hkQuaternion),&lookHeight,sizeof(float)); //Look height
+	memcpy(buff+sizeof(hkVector4)*8+sizeof(hkQuaternion)+sizeof(float),&laserReady,sizeof(bool)); //Laser status
 }
 
 void Racer::unserialize(char buff[])
@@ -1197,4 +1199,15 @@ void Racer::unserialize(char buff[])
 	memcpy(&data,buff+sizeof(hkVector4)*6+sizeof(hkQuaternion),sizeof(hkVector4)); //RR wheel
 	wheelRR->body->setPosition(data);
 	wheelRR->body->setRotation(rot);
+
+	memcpy(&lookDir,buff+sizeof(hkVector4)*7+sizeof(hkQuaternion),sizeof(hkVector4)); //Look direction
+
+	memcpy(&lookHeight,buff+sizeof(hkVector4)*8+sizeof(hkQuaternion),sizeof(float)); //Look height
+
+	bool lready;
+	memcpy(&lready,buff+sizeof(hkVector4)*8+sizeof(hkQuaternion)+sizeof(float),sizeof(bool)); //Is the laser ready to be firing?
+	if(!lready && laserReady)
+	{
+		fireLaser();
+	}
 }

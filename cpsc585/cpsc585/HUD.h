@@ -16,6 +16,8 @@ public:
 	void render();
 	void shutdown();
 
+	int width;
+	int height;
 private:
 	void showRadial(bool enabled);
 

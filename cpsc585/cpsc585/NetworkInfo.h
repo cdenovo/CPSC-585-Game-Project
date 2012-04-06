@@ -12,6 +12,9 @@ const char READY = 'R';
 const char UNREADY = 'U';
 const char COLOR = 'C';
 const char ALIVE = 'A';
+const char ELECTION = 'O';
+const char BULLY = 'Y';
+const char LEADER = 'D';
 
 //Server headers
 const char TRACK = 'T';

@@ -13,7 +13,7 @@
 enum RacerType { RACER1, RACER2, RACER3, RACER4, RACER5, RACER6, RACER7, RACER8 };
 enum WheelType { FRONT, REAR };
 
-const int RACERSIZE = sizeof(hkVector4)*7 + sizeof(hkQuaternion);
+const int RACERSIZE = sizeof(hkVector4)*8 + sizeof(hkQuaternion) + sizeof(float) + sizeof(bool);
 
 class Racer
 {

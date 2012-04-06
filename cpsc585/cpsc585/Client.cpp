@@ -1,10 +1,11 @@
 #include "Client.h"
 
 //new timeout feature (TAG1)
-const int SERVER_TIMEOUT = 50;
+const int SERVER_TIMEOUT = 5;
 
 Client::Client()
 {
+	serverID = 0;
 	start = false;
 	end = false;
 	isReady = false;
@@ -18,6 +19,11 @@ Client::Client()
 		clients[i].millisecond_lag = 0;
 	}
 	seqNum = 0;
+
+	election_winner = MAXCLIENTS;
+	is_electing = false;
+	was_bullied = false;
+	to_be_leader = false;
 }
 
 Client::~Client()
@@ -178,12 +184,12 @@ void Client::getTCPMessages(float milliseconds)
 	bool hasError = false;
 
 	//add milliseconds passed to lag timer for server (TAG1)
-	clients[0].millisecond_lag += milliseconds;
+	clients[serverID].millisecond_lag += milliseconds;
 
 	//check for timeout (TAG1)
-	if (clients[0].millisecond_lag > SERVER_TIMEOUT)
+	if (clients[serverID].millisecond_lag > SERVER_TIMEOUT)
 	{
-		clients[0].connected = false;
+		clients[serverID].connected = false;
 		std::cout << "Server timeout in getTCP" << std::endl;
 	}
 
@@ -200,14 +206,14 @@ void Client::getTCPMessages(float milliseconds)
 			hasError = true;
 			if(err != WSAEWOULDBLOCK)
 			{
-				clients[0].connected = false;
+				clients[serverID].connected = false;
 			}
 		}
 
 		if(!hasError)
 		{
 			//assumes there was no error (TAG1)
-			clients[0].millisecond_lag = 0;
+			clients[serverID].millisecond_lag = 0;
 
 			int size = *((int*)(buff+1)); //Get size
 
@@ -221,7 +227,7 @@ void Client::getTCPMessages(float milliseconds)
 				hasError = true;
 				if(err != WSAEWOULDBLOCK)
 				{
-					clients[0].connected = false;
+					clients[serverID].connected = false;
 				}
 			}
 			else
@@ -254,6 +260,9 @@ void Client::getTCPMessages(float milliseconds)
 					{
 						memcpy(reinterpret_cast<char *>(&clients[i]),buff+9+i*sizeof(ClientInfo),sizeof(ClientInfo));
 					}
+
+
+
 					break;
 					}
 
@@ -276,19 +285,24 @@ void Client::getTCPMessages(float milliseconds)
 /**
  * Receives any UDP messages in the buffer
  */
-void Client::getUDPMessages(float milliseconds)
+int Client::getUDPMessages(float milliseconds)
 {
+	bullied_no_leader_timer -= milliseconds;
+	no_response_timer -= milliseconds;
+	leader_nack_timer -= milliseconds;
+
 	char buff[1000];
 
 	int err = 0;
 
 	//add milliseconds passed to lag timer for server (TAG1)
-	clients[0].millisecond_lag += milliseconds;
+	clients[serverID].millisecond_lag += milliseconds;
 
 	//check for timeout (TAG1)
-	if (clients[0].millisecond_lag > SERVER_TIMEOUT)
+	if (clients[serverID].millisecond_lag > SERVER_TIMEOUT && !is_electing)
 	{
-		clients[0].connected = false;
+		clients[serverID].connected = false;
+		sendElectionMessage();
 		std::cout << "Server timeout in getUDP" << std::endl;
 	}
 
@@ -296,6 +310,8 @@ void Client::getUDPMessages(float milliseconds)
 
 	while(!hasError || err == 10040)
 	{
+		hasError = false;
+
 		//Find out the size of the message
 		err = recv(sUDP, buff, 5, MSG_PEEK);
 		if(err == -1)
@@ -304,12 +320,13 @@ void Client::getUDPMessages(float milliseconds)
 			hasError = true;
 			if(err != WSAEWOULDBLOCK)
 			{
-				clients[0].connected = false;
+				clients[serverID].connected = false;
 			}
 		}
 
 		if(!hasError || err == 10040)
 		{
+			hasError = false;
 			int size = *((int*)(buff+1)); //Get size
 
 			//Get the message
@@ -321,31 +338,80 @@ void Client::getUDPMessages(float milliseconds)
 				//we should handle this properly (TAG1)
 				if(err != WSAEWOULDBLOCK)
 				{
-					clients[0].connected = false;
+					clients[serverID].connected = false;
 				}
 			}
 			else
 			{
-				clients[0].millisecond_lag = 0;
+				clients[serverID].millisecond_lag = 0;
 
 				//Call the correct function depending on the message
 				switch(buff[0])
 				{
 				case WORLDSTATE: //Get updated world state
 					{
+						int id_in = 0;
+						memcpy(&id_in, buff+5,sizeof(int));
+
+						if (id_in != serverID)
+						{
+							break;
+						}
+
 						int numRacers;
 						int newSeqNum;
-						memcpy(&newSeqNum,buff+5,sizeof(int)); //Get the new seqNum
+						memcpy(&newSeqNum,buff+9,sizeof(int)); //Get the new seqNum
 						if(newSeqNum > seqNum)
 						{
 							seqNum = newSeqNum;
-							memcpy(&numRacers,buff+9,sizeof(int)); //Get player's ID
+							memcpy(&numRacers,buff+13,sizeof(int)); //Get player's ID
 							for(int i = 0; i < numRacers; i++)
 							{
-								memcpy(world[i],buff+9+i*RACERSIZE,RACERSIZE); //Get the button presses
+								memcpy(world[i],buff+17+i*RACERSIZE,RACERSIZE); //Get the button presses
 							}
 
 							newWorldInfo = true;
+						}
+						break;
+					}
+				case ELECTION:
+					{
+						int id_in = 0;
+						memcpy(&id_in, buff+5,sizeof(int));
+						if (id_in > id)
+						{
+							sendBullyMessage(id_in);
+							sendElectionMessage(); //sets is_electing to true
+						}
+						break;
+					}
+				case BULLY:
+					{
+						bullied_no_leader_timer = BULLY_TIMEOUT;
+						was_bullied = true;
+						to_be_leader = false;
+						break;
+					}
+				case LEADER:
+					{
+						int id_in = 0;
+						memcpy(&id_in, buff+5,sizeof(int));
+
+						if (id_in > id)
+						{
+							sendBullyMessage(id_in);
+						} 
+						else if (id_in < election_winner)
+						{
+							election_winner = id_in;							
+						}
+						else if (id_in == election_winner)
+						{
+							is_electing = false;
+							was_bullied = false;
+							to_be_leader = false;
+							serverID = election_winner;
+							return serverID;
 						}
 						break;
 					}
@@ -353,6 +419,30 @@ void Client::getUDPMessages(float milliseconds)
 			}
 		}
 	}
+
+	if (is_electing)
+	{
+		if (!was_bullied & (no_response_timer <= 0))
+		{
+			sendLeaderMessage();
+			to_be_leader = true;
+		}
+		else if (was_bullied & (bullied_no_leader_timer < 0))
+		{
+			sendElectionMessage();
+			was_bullied = false;
+		}
+		else if (to_be_leader & (leader_nack_timer < 0))
+		{
+			sendLeaderMessage();
+			is_electing = false;
+			was_bullied = false;
+			to_be_leader = false;
+			return -1;
+		}
+	}
+
+	return -2;
 }
 
 int Client::sendTCPMessage(const char* message, int length)
@@ -368,6 +458,11 @@ int Client::sendTCPMessage(std::string message)
 int Client::sendUDPMessage(const char* message, int length)
 {
 	return sendto(sUDP, message, length, 0, (SOCKADDR*) &target, sizeof(target));
+}
+
+int Client::sendUDPMessageTo(int _player_id, char* _message, int _length)
+{
+	return sendto(sUDP, _message, _length, 0, (SOCKADDR*) &clients[_player_id].addr, sizeof(clients[_player_id].addr));
 }
 
 /**
@@ -440,10 +535,65 @@ int Client::sendAliveMessage()
 	return err;
 }
 
+int Client::sendElectionMessage()
+{
+	int size = 9;
+	char* buffer = new char[size];
+	buffer[0] = ELECTION;
+	memcpy(buffer+1,&size,sizeof(int));
+	memcpy(buffer+5,&id,sizeof(int));
+
+	int err = 0;
+	for (int i = id-1; i >= 0 ; i--)
+	{
+		err = sendUDPMessageTo(i,buffer, size);
+	}
+
+	is_electing = true;
+	no_response_timer = BULLY_TIMEOUT;
+	election_winner = MAXCLIENTS;
+
+	delete[] buffer;
+	return err;
+}
+
+int Client::sendBullyMessage(int bullyID)
+{
+	int size = 5;
+	char* buffer = new char[size];
+	buffer[0] = BULLY;
+	memcpy(buffer+1,&size,sizeof(int));
+
+	int err = sendUDPMessageTo(bullyID,buffer,size);
+
+	delete[] buffer;
+	return err;
+}
+
+int Client::sendLeaderMessage()
+{
+	int size = 9;
+	char* buffer = new char[size];
+	buffer[0] = LEADER;
+	memcpy(buffer+1,&size,sizeof(int));
+	memcpy(buffer+5,&id,sizeof(int));
+
+	int err = 0; 
+	for(int i = 0; i < MAXCLIENTS; i++)
+	{
+		err = sendUDPMessageTo(i,buffer, size);
+	}
+
+	leader_nack_timer = BULLY_TIMEOUT;
+
+	delete[] buffer;
+	return err;
+}
+
 /**
  * Sends the button state of the controller to the server.
  */
-int Client::sendButtonState(Intention intention)
+int Client::sendButtonState(Intention &intention)
 {
 	std::string msg = intention.serialize(); //Get serialized button input
 

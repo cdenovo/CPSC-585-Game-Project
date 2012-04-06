@@ -7,6 +7,9 @@ HUD::~HUD(void)
 
 HUD::HUD(int width, int height)
 {
+	this->width = width;
+	this->height = height;
+
 	radialEnabled = false;
 	selectedAbility = LASER;
 	sprite = NULL;

@@ -22,7 +22,7 @@ Sound::~Sound(void)
 
 void Sound::initialize()
 {
-	XAudio2Create(&audio, 0, XAUDIO2_DEFAULT_PROCESSOR);
+	/*XAudio2Create(&audio, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	audio->CreateMasteringVoice(&mVoice);
 
 	mVoice->SetVolume(1.0f);
@@ -33,7 +33,7 @@ void Sound::initialize()
 
 	laser->SetVolume(0.15f);
 
-	music->Start(0);
+	music->Start(0);*/
 }
 
 void Sound::shutdown()
@@ -102,7 +102,7 @@ void Sound::shutdown()
 
 void Sound::loadSound(IXAudio2SourceVoice* &voice, std::string filename, char* &soundBuffer)
 {
-	std::ifstream filestream(filename, std::ifstream::binary);
+	/*std::ifstream filestream(filename, std::ifstream::binary);
 	
 	_WIN32_FILE_ATTRIBUTE_DATA attrib;
 
@@ -151,20 +151,20 @@ void Sound::loadSound(IXAudio2SourceVoice* &voice, std::string filename, char* &
 	
 	voice->SubmitSourceBuffer(&buffer);
 
-	filestream.close();
+	filestream.close();*/
 }
 
 
 void Sound::playLaser()
 {
-	laser->FlushSourceBuffers();
-	laser->SubmitSourceBuffer(laserBufferDetails);
-	laser->Start(0);
+	//laser->FlushSourceBuffers();
+	//laser->SubmitSourceBuffer(laserBufferDetails);
+	//laser->Start(0);
 }
 
 void Sound::playCrash()
 {
-	crash->FlushSourceBuffers();
-	crash->SubmitSourceBuffer(crashBufferDetails);
-	crash->Start(0);
+	//crash->FlushSourceBuffers();
+	//crash->SubmitSourceBuffer(crashBufferDetails);
+	//crash->Start(0);
 }

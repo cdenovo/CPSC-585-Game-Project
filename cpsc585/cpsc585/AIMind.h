@@ -9,7 +9,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-enum TypeOfRacer { PLAYER, COMPUTER };
+enum TypeOfRacer { PLAYER, COMPUTER, NETWORK, CLIENT };
 
 class AIMind
 {
@@ -17,6 +17,7 @@ public:
 	AIMind(Racer* racer, TypeOfRacer _racerType);
 	~AIMind(void);
 	void update(HUD* hud, Intention intention, float seconds, Waypoint* waypoints[], Waypoint* checkpoints[]);
+	void setType(TypeOfRacer type);
 	void togglePlayerComputerAI();
 	int getCheckpointTime();
 	int getCurrentLap();
@@ -43,5 +44,7 @@ private:
 	int currentWaypoint;
 	int checkPointTime;
 	int currentLap;
+
+	HUD* racerHUD;
 };
 

@@ -1,6 +1,6 @@
 #include "Server.h"
 
-const int CLIENT_TIMEOUT = 50;
+const int CLIENT_TIMEOUT = 5;
 
 Server::Server()
 {
@@ -394,17 +394,18 @@ int Server::sendLobbyInfo()
 int Server::update(Racer *racers[], int numRacers)
 {
 	//Put data in buffer
-	int size = RACERSIZE*numRacers + 1 + 3*sizeof(int);
+	int size = RACERSIZE*numRacers + 1 + 4*sizeof(int);
 	char* buffer = new char[size];
 	buffer[0] = WORLDSTATE;
 	memcpy(buffer+1,&size,sizeof(int));
-	memcpy(buffer+5,&seqNum,sizeof(int));
-	memcpy(buffer+9,&numRacers,sizeof(int));
+	memcpy(buffer+5,&id,sizeof(int));
+	memcpy(buffer+9,&seqNum,sizeof(int));
+	memcpy(buffer+13,&numRacers,sizeof(int));
 	for(int i = 0; i < numRacers; i++)
 	{
 		char sBuff[RACERSIZE];
 		racers[i]->serialize(sBuff);
-		memcpy(buffer+13+RACERSIZE*i,sBuff,RACERSIZE);
+		memcpy(buffer+17+RACERSIZE*i,sBuff,RACERSIZE);
 	}
 
 	int err = sendUDPMessage(buffer,size); //Send message
@@ -603,6 +604,8 @@ void Server::getUDPMessages(float seconds)
 
 	while(!hasError || err == 10040)
 	{
+		hasError = false;
+
 		//Find out the size of the message
 		err = recv(sUDP, buff, 5, MSG_PEEK);
 		if(err == -1)
@@ -614,6 +617,8 @@ void Server::getUDPMessages(float seconds)
 		if(!hasError || err == 10040)
 		{
 			int size = *((int*)(buff+1)); //Get size
+
+			hasError = false;
 
 			//Get the message
 			err = recv(sUDP, buff, size, 0);

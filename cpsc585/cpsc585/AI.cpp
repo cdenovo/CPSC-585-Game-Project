@@ -98,9 +98,6 @@ void AI::initialize(Renderer* r, Input* i, Sound* s, TopMenu* m)
 	//Initialize physics
 	physics = new Physics();
 	physics->initialize(5);
-
-	
-	hud = renderer->getHUD();
 	
 	//Initialize Abilities
 	speedBoost = new Ability(SPEED); // Speed boost with cooldown of 15 seconds and aditional speed of 1
@@ -586,11 +583,23 @@ void AI::connectToServer()
 
 void AI::switchToServer()
 {
+	server.id = client.id;
+	isClient = false;
+	isServer = true;
+	server.gameStarted = true;
+	memcpy(server.clients,client.clients,sizeof(ClientInfo)*MAXCLIENTS);
+	server.setupUDPSocket();
+	server.numClients = MAXCLIENTS;
+
 	for(int i = 0; i < server.numClients; i++)
 	{
-		if(server.clients[i].connected && racerMinds[i]->getType() == COMPUTER)
+		if(server.clients[i].connected && racers[i] != player)
 		{
-			racerMinds[i]->togglePlayerComputerAI();
+			racerMinds[i]->setType(NETWORK);
+		}
+		else if(racers[i] == player)
+		{
+			racerMinds[i]->setType(PLAYER);
 		}
 	}
 }
@@ -629,9 +638,9 @@ void AI::runNetworking(float milliseconds)
 			//Check if any racers have disconnected and if they have, switch them to AI
 			for(int i = 0; i < NUMRACERS; i++)
 			{
-				if(racerMinds[i]->getType() == PLAYER && !server.clients[i].connected)
+				if(racerMinds[i]->getType() == NETWORK && !server.clients[i].connected)
 				{
-					racerMinds[i]->togglePlayerComputerAI();
+					racerMinds[i]->setType(COMPUTER);
 				}
 			}
 			server.update(racers,NUMRACERS);
@@ -644,7 +653,7 @@ void AI::runNetworking(float milliseconds)
 			if(racerMinds[i]->getType() == COMPUTER && server.clients[i].connected)
 			{
 				ss << "Player " << i << " has joined.\n";
-				racerMinds[i]->togglePlayerComputerAI();
+				racerMinds[i]->setType(NETWORK);
 			}
 		}
 		std::string stringArray[] = {"You are a server.",hostName,ss.str()};
@@ -701,9 +710,9 @@ void AI::runNetworking(float milliseconds)
 					//Delete any minds for racers now over the network
 					for(int i = 0; i < NUMRACERS; i++)
 					{
-						if(racerMinds[i]->getType() == COMPUTER)
+						if(racerMinds[i]->getType() != CLIENT)
 						{
-							racerMinds[i]->togglePlayerComputerAI();
+							racerMinds[i]->setType(CLIENT);
 						}
 					}
 				}
@@ -761,7 +770,16 @@ void AI::runNetworking(float milliseconds)
 			else
 			{
 				client.getTCPMessages(milliseconds);
-				client.getUDPMessages(milliseconds);
+
+				int temp = client.getUDPMessages(milliseconds);
+				if (temp == -1)
+				{
+					switchToServer();	
+				}
+				else if (temp > -1)
+				{
+					temp = temp;
+				}
 				//set milliseconds to 0 in case another get function is called (TAG1)
 				milliseconds = 0;
 
@@ -857,7 +875,7 @@ bool AI::simulate(float seconds)
 
 	for(int i = 0; i < NUMRACERS; i++)
 	{
-		if(racerMinds[i]->getType() != COMPUTER && player != racers[i] && server.gameStarted) //If we are running as the server, update the racers based on networked button presses
+		if(player != racers[i] && server.gameStarted && server.clients[i].connected) //If we are running as the server, update the racers based on networked button presses
 		{
 			//racers[i]->steer(seconds, server.intents[i].steering);
 			//racers[i]->accelerate(seconds, server.intents[i].acceleration);
