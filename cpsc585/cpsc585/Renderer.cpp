@@ -32,6 +32,7 @@ Renderer::~Renderer()
 bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float zFar, int numToDraw, char* msg)
 {
 	numDrawables = numToDraw;
+	useTwoSidedStencils = false;
 
 	drawables = new Drawable*[numToDraw];
 	dynamicDrawables = new std::vector<Drawable*>();
@@ -52,6 +53,9 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 		
 		return false;
 	}
+
+
+	useTwoSidedStencils = ((caps.StencilCaps & D3DSTENCILCAPS_TWOSIDED) != 0);
 
 
 	D3DPRESENT_PARAMETERS params;
@@ -313,10 +317,9 @@ void Renderer::render()
 	{
 		drawables[i]->render(device);
 	}
-
+	
 	// Draw stencil shadows
 	drawShadows();
-	
 
 	// Draw dynamic objects that will be removed after this frame (like rockets, lasers, landmines)
 	if (!(dynamicDrawables->empty()))
@@ -329,6 +332,7 @@ void Renderer::render()
 
 		dynamicDrawables->clear();
 	}
+
 
 	
 	
@@ -457,9 +461,9 @@ void Renderer::drawShadows()
 	// the code in turn from the DirectX SDK
 	device->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
 
-	device->SetRenderState(D3DRS_STENCILFUNC,  D3DCMP_ALWAYS);
+	device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
     device->SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
-    device->SetRenderState(D3DRS_STENCILFAIL,  D3DSTENCILOP_KEEP);
+    device->SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
 
     // If z-test passes, inc/decrement stencil buffer value
     device->SetRenderState(D3DRS_STENCILMASK, 0xffffffff);
@@ -471,30 +475,56 @@ void Renderer::drawShadows()
     device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
     device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
-	// Draw front-side of shadow volume in stencil/z only
-	for (int i = 0; i < currentDrawable; i++)
+
+	// Two-sided stencil functionality makes shadows faster
+	// (one pass instead of two)
+	if (useTwoSidedStencils)
 	{
-		if ((drawables[i]->meshType == RACER) || (drawables[i]->meshType == REARWHEEL)
-			|| (drawables[i]->meshType == FRONTWHEEL))
+		device->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, TRUE);
+		device->SetRenderState(D3DRS_CCW_STENCILFUNC, D3DCMP_ALWAYS);
+		device->SetRenderState(D3DRS_CCW_STENCILZFAIL, D3DSTENCILOP_KEEP);
+		device->SetRenderState(D3DRS_CCW_STENCILFAIL, D3DSTENCILOP_KEEP);
+		device->SetRenderState(D3DRS_CCW_STENCILPASS, D3DSTENCILOP_DECR);
+		device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+
+		// Now render in only one pass!
+		for (int i = 0; i < currentDrawable; i++)
 		{
-			drawables[i]->renderShadowVolume(device);
+			if ((drawables[i]->meshType == RACER) || (drawables[i]->meshType == REARWHEEL)
+				|| (drawables[i]->meshType == FRONTWHEEL))
+			{
+				drawables[i]->renderShadowVolume(device);
+			}
 		}
+
+		device->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, FALSE);
 	}
-
-    // Now reverse cull order so back sides of shadow volume are written.
-    device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
-
-    // Decrement stencil buffer value
-    device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_DECR);
-
-
-    // Draw back-side of shadow volume in stencil/z only
-    for (int i = 0; i < currentDrawable; i++)
+	else	// Do two passes for shadows if two-sided stencil unavailable
 	{
-		if ((drawables[i]->meshType == RACER) || (drawables[i]->meshType == REARWHEEL)
-			|| (drawables[i]->meshType == FRONTWHEEL))
+		// Draw front-side of shadow volume in stencil/z only
+		for (int i = 0; i < currentDrawable; i++)
 		{
-			drawables[i]->renderShadowVolume(device);
+			if ((drawables[i]->meshType == RACER) || (drawables[i]->meshType == REARWHEEL)
+				|| (drawables[i]->meshType == FRONTWHEEL))
+			{
+				drawables[i]->renderShadowVolume(device);
+			}
+		}
+
+		// Now reverse cull order so back sides of shadow volume are written.
+		device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+
+		// Decrement stencil buffer value
+		device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_DECR);
+
+		// Draw back-side of shadow volume in stencil/z only
+		for (int i = 0; i < currentDrawable; i++)
+		{
+			if ((drawables[i]->meshType == RACER) || (drawables[i]->meshType == REARWHEEL)
+				|| (drawables[i]->meshType == FRONTWHEEL))
+			{
+				drawables[i]->renderShadowVolume(device);
+			}
 		}
 	}
 

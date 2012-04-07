@@ -72,4 +72,6 @@ private:
 	Skybox* skybox;
 
 	IDirect3DVertexBuffer9* shadowQuadVertexBuffer;
+
+	bool useTwoSidedStencils;
 };

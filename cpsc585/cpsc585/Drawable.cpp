@@ -4,6 +4,7 @@
 Drawable::Drawable(void)
 {
 	texture = NULL;
+	edges = NULL;
 }
 
 
@@ -12,6 +13,7 @@ Drawable::Drawable(MeshType type, std::string textureName, IDirect3DDevice9* dev
 	D3DXMatrixIdentity(&transform);
 	meshType = type;
 	shadowVertexBuffer = NULL;
+	edges = NULL;
 	shadowVertCount = 0;
 	initialize(type, textureName, device);
 }
@@ -24,12 +26,18 @@ Drawable::~Drawable(void)
 		texture->Release();
 		texture = NULL;
 	}
+
+	if (edges)
+	{
+		delete [] edges;
+	}
 }
 
 
 void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevice9* device)
 {
 	texture = NULL;
+	edges = NULL;
 
 	D3DXCreateTextureFromFile(device, textureName.c_str(), &texture);
 
@@ -42,6 +50,8 @@ void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevic
 			// Racers have shadows: set up vertex & index buffers
 			device->CreateVertexBuffer(sizeof(D3DXVECTOR3) * mesh->indexCount * 6, D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, D3DFVF_XYZ,
 				D3DPOOL_DEFAULT, &shadowVertexBuffer, NULL);
+
+			edges = new unsigned long[mesh->indexCount * 2];
 
 			break;
 		}
@@ -58,6 +68,8 @@ void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevic
 			device->CreateVertexBuffer(sizeof(D3DXVECTOR3) * mesh->indexCount * 6, D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, D3DFVF_XYZ,
 				D3DPOOL_DEFAULT, &shadowVertexBuffer, NULL);
 
+			edges = new unsigned long[mesh->indexCount * 2];
+
 			break;
 		}
 	case REARWHEEL:
@@ -67,6 +79,8 @@ void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevic
 			// Wheels have shadows: set up vertex & index buffers
 			device->CreateVertexBuffer(sizeof(D3DXVECTOR3) * mesh->indexCount * 6, D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, D3DFVF_XYZ,
 				D3DPOOL_DEFAULT, &shadowVertexBuffer, NULL);
+
+			edges = new unsigned long[mesh->indexCount * 2];
 
 			break;
 		}
@@ -204,7 +218,7 @@ void Drawable::buildShadowVolume(D3DXVECTOR3 light)
 	light.x = -temp.x;
 	light.y = -temp.y;
 	light.z = -temp.z;
-	D3DXVec3Normalize(&light, &light);
+	//D3DXVec3Normalize(&light, &light);
 
 	Vertex* vertices = mesh->vertices;
 	unsigned long* indices = mesh->indices;
@@ -213,28 +227,30 @@ void Drawable::buildShadowVolume(D3DXVECTOR3 light)
 
 	int numFaces = indexCount / 3;
 
-	unsigned long* edges = new unsigned long[numFaces * 6];
+	ZeroMemory(edges, numFaces * 6 * sizeof(unsigned long));
 
 	int numEdges = 0;
 
+	unsigned long index0, index1, index2;
+
 	for (int i = 0; i < numFaces; ++i)
 	{
-		unsigned long face0 = indices[3*i];
-		unsigned long face1 = indices[3*i+1];
-		unsigned long face2 = indices[3*i+2];
+		index0 = indices[3*i];
+		index1 = indices[3*i+1];
+		index2 = indices[3*i+2];
 
-		D3DXVECTOR3 v0 = vertices[face0].position;
-        D3DXVECTOR3 v1 = vertices[face1].position;
-        D3DXVECTOR3 v2 = vertices[face2].position;
+		D3DXVECTOR3 v0 = vertices[index0].position;
+        D3DXVECTOR3 v1 = vertices[index1].position;
+        D3DXVECTOR3 v2 = vertices[index2].position;
 
-		D3DXVECTOR3 norm = vertices[face0].normal + vertices[face1].normal + vertices[face2].normal;
+		D3DXVECTOR3 norm = vertices[index0].normal + vertices[index1].normal + vertices[index2].normal;
 		norm /= 3.0f;
 
 		if (D3DXVec3Dot(&norm, &light) > 0.0f)
 		{
-			addEdge(edges, numEdges, face0, face1);
-			addEdge(edges, numEdges, face1, face2);
-			addEdge(edges, numEdges, face2, face0);
+			addEdge(edges, numEdges, index0, index1);
+			addEdge(edges, numEdges, index1, index2);
+			addEdge(edges, numEdges, index2, index0);
 		}
 	}
 
@@ -244,14 +260,15 @@ void Drawable::buildShadowVolume(D3DXVECTOR3 light)
 	shadowVertexBuffer->Lock(0, sizeof(D3DXVECTOR3) * mesh->indexCount * 6, (void**) &points, NULL);
 
 	int numVertices = 0;
+	D3DXVECTOR3 v0, v1, v2, v3;
 
 
 	for (int i = 0; i < numEdges; i++)
 	{
-		D3DXVECTOR3 v0 = vertices[edges[2*i]].position;
-		D3DXVECTOR3 v1 = vertices[edges[2*i + 1]].position;
-		D3DXVECTOR3 v2 = v0 - light*800;
-		D3DXVECTOR3 v3 = v1 - light*800;
+		v0 = vertices[edges[2*i]].position;
+		v1 = vertices[edges[2*i + 1]].position;
+		v2 = v0 - light*800;
+		v3 = v1 - light*800;
 
 		points[numVertices++] = v0;
 		points[numVertices++] = v1;
@@ -262,7 +279,6 @@ void Drawable::buildShadowVolume(D3DXVECTOR3 light)
 		points[numVertices++] = v2;
 	}
 
-	delete [] edges;
 	shadowVertexBuffer->Unlock();
 
 	shadowVertCount = numVertices;

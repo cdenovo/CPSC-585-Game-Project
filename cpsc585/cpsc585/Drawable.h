@@ -17,17 +17,6 @@
 
 #include <string>
 
-struct Edge
-{
-	D3DXVECTOR3 p0;
-	D3DXVECTOR3 p1;
-
-	bool operator==(const Edge &e)
-	{
-		return ((p0 == (e.p0) && p1 == (e.p1)) || (p0 == (e.p1) && p1 == (e.p0)));
-	}
-};
-
 
 enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, LASERMODEL, ROCKETMESH, LANDMINEMESH };
 
@@ -76,4 +65,6 @@ private:
 
 	IDirect3DVertexBuffer9* shadowVertexBuffer;
 	int shadowVertCount;
+
+	unsigned long* edges;
 };
