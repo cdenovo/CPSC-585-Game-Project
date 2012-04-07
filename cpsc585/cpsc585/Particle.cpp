@@ -57,7 +57,6 @@ void Particle::render(IDirect3DDevice9* device)
 	device->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 
 
-	//device->SetRenderState(D3DRS_ZENABLE, FALSE);
 	// Apply transforms, THEN call render on the mesh
 	D3DXMatrixTranslation(&transform, position(0), position(1), position(2));
 	device->SetTransform(D3DTS_WORLD, &transform);
@@ -67,8 +66,6 @@ void Particle::render(IDirect3DDevice9* device)
 	device->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
 	device->SetStreamSource(0, vertexBuffer, 0, sizeof(ParticlePoint));
 	device->DrawPrimitive(D3DPT_POINTLIST, 0, 1);
-	//device->SetRenderState(D3DRS_ZENABLE, TRUE);
-	device->SetRenderState(D3DRS_LIGHTING, TRUE);
 }
 
 void Particle::initialize(IDirect3DDevice9* device, int frameCount, std::string* frameList, float sz,
@@ -101,7 +98,7 @@ void Particle::initialize(IDirect3DDevice9* device, int frameCount, std::string*
 
 		ParticlePoint particlePoints[1];
 		particlePoints[0].pos = D3DXVECTOR3(0,0,0);
-		particlePoints[0].color = D3DCOLOR_ARGB(200, 100,100,100);
+		particlePoints[0].color = D3DCOLOR_ARGB(200, 100, 100, 140);
 
 		ParticlePoint* points;
 

@@ -44,7 +44,7 @@ Rocket::Rocket(IDirect3DDevice9* device)
 
 	owner = NULL;
 
-	lifetime = 3.0f;
+	lifetime = 6.0f;
 }
 
 

@@ -42,6 +42,6 @@ void Mesh::loadMesh(std::string filename)
 	}
 
 	filestream.close();
-
+	
 	return;
 }

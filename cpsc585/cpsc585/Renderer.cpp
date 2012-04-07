@@ -2,6 +2,7 @@
 
 Renderer* Renderer::renderer = NULL;
 IDirect3DDevice9* Renderer::device = NULL;
+D3DXVECTOR3 Renderer::lightDir = D3DXVECTOR3(0,-0.5f,1);
 
 Renderer::Renderer()
 {
@@ -17,6 +18,8 @@ Renderer::Renderer()
 	drawables = NULL;
 	currentDrawable = 0;
 	hud = NULL;
+
+	shadowQuadVertexBuffer = NULL;
 
 	renderer = this;
 }
@@ -61,16 +64,16 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	
 	params.BackBufferWidth = width;
 	params.BackBufferHeight = height;
-	params.MultiSampleType=D3DMULTISAMPLE_NONE;
 	params.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	params.hDeviceWindow = hwnd;
 	params.EnableAutoDepthStencil = TRUE;
+	params.Flags = D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL;
 
 	// VSYNC. Change to INTERVAL_IMMEDIATE to turn off VSYNC, change to INTERVAL_ONE to turn on VSYNC
 	params.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 
 	// Now need to set up the depth stencil format.
-	D3DFORMAT formats[] = { D3DFMT_D32, D3DFMT_D24X8, D3DFMT_D16 };
+	D3DFORMAT formats[] = { D3DFMT_D24S8, D3DFMT_D24X4S4, D3DFMT_D24FS8 };
 	
 	D3DFORMAT format = (D3DFORMAT) 0;
 	
@@ -142,6 +145,8 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	
 	device->SetRenderState(D3DRS_LIGHTING, TRUE);
 	device->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_XRGB(100, 100, 100));
+	device->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_MIRROR);
+	device->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_MIRROR);
 	
 	
 	D3DLIGHT9 light;    // create the light struct
@@ -149,8 +154,10 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	
 	ZeroMemory(&light, sizeof(light));    // clear out the light struct for use
 	light.Type = D3DLIGHT_DIRECTIONAL;    // make the light type 'directional light'
-	light.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);    // set the light's color
-	light.Direction = D3DXVECTOR3(1.0f, -0.5f, 1.0f);
+	light.Diffuse = D3DXCOLOR(0.8f, 0.5f, 0.5f, 1.0f);    // set the light's color
+
+	D3DXVec3Normalize(&lightDir, &lightDir);
+	light.Direction = lightDir;
 	
     device->SetLight(0, &light);    // send the light struct properties to light #0
 	device->LightEnable(0, TRUE);    // turn on light #0
@@ -168,6 +175,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 
 	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTOP_SELECTARG1);
 	device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);	// Just to be safe (ignored)
+	device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 
 	device->SetRenderState(D3DRS_POINTSPRITEENABLE, TRUE);
 	device->SetRenderState(D3DRS_POINTSCALEENABLE, TRUE);
@@ -182,6 +190,26 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 
 	// Set up Skybox
 	skybox = new Skybox(device);
+
+	ShadowPoint* points;
+
+	// Set up shadow texture
+	device->CreateVertexBuffer(sizeof(ShadowPoint) * 4, D3DUSAGE_WRITEONLY, D3DFVF_XYZRHW | D3DFVF_DIFFUSE,
+		D3DPOOL_MANAGED, &shadowQuadVertexBuffer, NULL);
+
+	shadowQuadVertexBuffer->Lock(0, sizeof(ShadowPoint) * 4, (void**) &points, NULL);
+
+	points[0].position = D3DXVECTOR4(0, (FLOAT) height, 0, 1);
+	points[1].position = D3DXVECTOR4(0, 0, 0, 1);
+	points[2].position = D3DXVECTOR4((FLOAT) width, (FLOAT) height, 0, 1);
+	points[3].position = D3DXVECTOR4((FLOAT) width, 0, 0, 1);
+	points[0].color = D3DCOLOR_ARGB(150,0,0,0);
+	points[1].color = D3DCOLOR_ARGB(150,0,0,0);
+	points[2].color = D3DCOLOR_ARGB(150,0,0,0);
+	points[3].color = D3DCOLOR_ARGB(150,0,0,0);
+
+	shadowQuadVertexBuffer->Unlock();
+
 
 	return true;
 }
@@ -242,10 +270,19 @@ void Renderer::render()
 	// Get view matrix
 	camera->getViewMatrix(viewMatrix);
 
-
-	device->Clear(0, NULL, D3DCLEAR_ZBUFFER, NULL, 1.0, 0);
+	// Build shadow volumes for all racers
+	for (int i = 0; i < currentDrawable; i++)
+	{
+		if ((drawables[i]->meshType == RACER) || (drawables[i]->meshType == REARWHEEL)
+			|| (drawables[i]->meshType == FRONTWHEEL))
+		{
+			drawables[i]->buildShadowVolume(lightDir);
+		}
+	}
 	
-
+	
+	device->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, NULL, 1.0f, 0);
+	
 	device->SetTransform(D3DTS_PROJECTION, &projectionMatrix);
 	device->SetTransform(D3DTS_VIEW, &viewMatrix);
 	device->SetTransform(D3DTS_WORLD, &worldMatrix);
@@ -254,11 +291,11 @@ void Renderer::render()
 	device->SetRenderState(D3DRS_LIGHTING, FALSE);
 	
 	device->BeginScene();
-	skybox->render(device);
-	device->EndScene();
-	
-	device->SetRenderState(D3DRS_LIGHTING, TRUE);
 
+	skybox->render(device);
+
+	device->SetRenderState(D3DRS_LIGHTING, TRUE);
+	device->SetRenderState(D3DRS_ZENABLE, TRUE);
 
 
 	// Now draw rest of the scene
@@ -271,22 +308,15 @@ void Renderer::render()
 	camera->getViewMatrix(viewMatrix);
 
 	device->SetTransform(D3DTS_VIEW, &viewMatrix);
-
-	device->SetRenderState(D3DRS_ZENABLE, TRUE);
-
-	device->BeginScene();
-
+	
 	for (int i = 0; i < currentDrawable; i++)
 	{
 		drawables[i]->render(device);
 	}
-	
 
-	// Draw shadows
+	// Draw stencil shadows
 	drawShadows();
-
-
-
+	
 
 	// Draw dynamic objects that will be removed after this frame (like rockets, lasers, landmines)
 	if (!(dynamicDrawables->empty()))
@@ -299,6 +329,8 @@ void Renderer::render()
 
 		dynamicDrawables->clear();
 	}
+
+	
 	
 
 	// Render SmokeSystem particles
@@ -319,14 +351,11 @@ void Renderer::render()
 		writeText(sentences[i], i);
 	}
 	
-
 	device->EndScene();
 
 
 	// Now draw HUD
 	hud->render();
-
-
 
 	device->Present(NULL, NULL, NULL, NULL);
 
@@ -413,16 +442,94 @@ void Renderer::addDynamicDrawable(Drawable* drawable)
 
 void Renderer::drawShadows()
 {
+	device->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+	
 	// Disable lighting
+	device->SetRenderState(D3DRS_LIGHTING, FALSE);
+	device->SetRenderState(D3DRS_ZENABLE, TRUE);
 
 	// Disable writing to depth-buffer
+	device->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
+    device->SetRenderState(D3DRS_STENCILENABLE, TRUE);
+	
+	// Got most of this (and the addEdge() function) from some
+	// sample source code online, which said it got most of
+	// the code in turn from the DirectX SDK
+	device->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_FLAT);
 
-	// DepthFun = LEQUAL
+	device->SetRenderState(D3DRS_STENCILFUNC,  D3DCMP_ALWAYS);
+    device->SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
+    device->SetRenderState(D3DRS_STENCILFAIL,  D3DSTENCILOP_KEEP);
 
-	// Enable stencil test
+    // If z-test passes, inc/decrement stencil buffer value
+    device->SetRenderState(D3DRS_STENCILMASK, 0xffffffff);
+    device->SetRenderState(D3DRS_STENCILWRITEMASK, 0xffffffff);
+    device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCR);
 
-	// Don't draw to color buffer
+    // Make sure that no pixels get drawn to the frame buffer
+	device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+    device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
+    device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
-	// StencilFunc = always
+	// Draw front-side of shadow volume in stencil/z only
+	for (int i = 0; i < currentDrawable; i++)
+	{
+		if ((drawables[i]->meshType == RACER) || (drawables[i]->meshType == REARWHEEL)
+			|| (drawables[i]->meshType == FRONTWHEEL))
+		{
+			drawables[i]->renderShadowVolume(device);
+		}
+	}
 
+    // Now reverse cull order so back sides of shadow volume are written.
+    device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+
+    // Decrement stencil buffer value
+    device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_DECR);
+
+
+    // Draw back-side of shadow volume in stencil/z only
+    for (int i = 0; i < currentDrawable; i++)
+	{
+		if ((drawables[i]->meshType == RACER) || (drawables[i]->meshType == REARWHEEL)
+			|| (drawables[i]->meshType == FRONTWHEEL))
+		{
+			drawables[i]->renderShadowVolume(device);
+		}
+	}
+
+	device->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
+	device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+	device->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
+
+
+
+    device->SetRenderState(D3DRS_ZENABLE, FALSE);
+
+	device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	device->SetRenderState(D3DRS_SRCBLEND,  D3DBLEND_SRCALPHA);
+    device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+    device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+	device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+	device->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+    device->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+	device->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+
+
+	// Only write where stencil value >= 1 (count indicates # of shadows that
+    // overlap that pixel)
+    device->SetRenderState(D3DRS_STENCILREF, 1);
+	device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_LESSEQUAL);
+    device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP);
+
+	// Draw big dark square
+	device->SetStreamSource(0, shadowQuadVertexBuffer, 0, sizeof(ShadowPoint));
+	device->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
+
+	device->SetRenderState(D3DRS_ZENABLE, TRUE);
+	device->SetRenderState(D3DRS_LIGHTING, TRUE);
+	device->SetRenderState(D3DRS_STENCILENABLE, FALSE);
 }

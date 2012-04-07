@@ -107,7 +107,7 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 
 	//Initialize physics
 	physics = new Physics();
-	physics->initialize(5);
+	physics->initialize(NUMRACERS + 1);
 	
 	// Initialize sound
 	s->initialize();
@@ -118,7 +118,7 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 	//Initialize player
 	player = new Racer(r->getDevice(), RACER1);
 	player->engineVoice->SetVolume(0.3f);
-	player->setPosAndRot(-20.0f, -14.0f, -190.0f, 0.0f, 0.0f, 0.0f);
+	player->setPosAndRot(-80.0f, 20.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	playerMind = new AIMind(player, PLAYER);
 	racers[0] = player;
 	racerMinds[0] = playerMind;
@@ -154,19 +154,19 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 void AI::initializeAIRacers()
 {
 	ai1 = new Racer(renderer->getDevice(), RACER2);
-	ai1->setPosAndRot(-10.0f, -14.0f, -190.0f, 0.0f, 0.0f, 0.0f);
+	ai1->setPosAndRot(-60.0f, 20.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	aiMind1 = new AIMind(ai1, COMPUTER);
 	
 	ai2 = new Racer(renderer->getDevice(), RACER3);
-	ai2->setPosAndRot(-25.0f, -14.0f, -190.0f, 0.0f, 0.0f, 0.0f);
+	ai2->setPosAndRot(-65.0f, 20.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	aiMind2 = new AIMind(ai2, COMPUTER);
 
 	ai3 = new Racer(renderer->getDevice(), RACER4);
-	ai3->setPosAndRot(-15.0f, -14.0f, -190.0f, 0.0f, 0.0f, 0.0f);
+	ai3->setPosAndRot(-75.0f, 20.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	aiMind3 = new AIMind(ai3, COMPUTER);
 
 	ai4 = new Racer(renderer->getDevice(), RACER5);
-	ai4->setPosAndRot(-5.0f, -14.0f, -190.0f, 0.0f, 0.0f, 0.0f);
+	ai4->setPosAndRot(-85.0f, 20.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	aiMind4 = new AIMind(ai4, COMPUTER);
 
 	racers[1] = ai1;
@@ -587,14 +587,14 @@ void AI::simulate(float seconds)
 	//checkPointTimer->update(checkpoints);
 	
 
-	for(int i = 0; i < 5; i++){
+	for(int i = 0; i < NUMRACERS; i++){
 		racerMinds[i]->update(hud, intention, seconds, waypoints, checkpoints, prevCheckpoints, racers);
 	}
 	
-	updateRacerPlacement(0, 4);
+	updateRacerPlacement(0, NUMRACERS - 1);
 
-	for(int i = 0; i < 5; i++){
-		racerPlacement[i]->setPlacement(5-i);
+	for(int i = 0; i < NUMRACERS; i++){
+		racerPlacement[i]->setPlacement(NUMRACERS-i);
 	}
 
 	if(input->placingWaypoint()){
@@ -643,7 +643,7 @@ void AI::simulate(float seconds)
 
 	physics->step(seconds);
 
-	for(int i = 0; i < 5; i++){
+	for(int i = 0; i < NUMRACERS; i++){
 		racers[i]->update();
 	}
 

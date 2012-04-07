@@ -16,8 +16,8 @@ struct Vertex
 class Mesh
 {
 public:
-	Mesh(void);
-	~Mesh(void);
+	Mesh();
+	~Mesh();
 	virtual void render(IDirect3DDevice9* device) = 0;
 	
 protected:

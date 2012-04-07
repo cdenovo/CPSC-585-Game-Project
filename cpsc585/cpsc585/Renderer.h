@@ -15,6 +15,12 @@
 #include "HUD.h"
 #include "Skybox.h"
 
+struct ShadowPoint
+{
+	D3DXVECTOR4 position;
+	D3DCOLOR color;
+};
+
 
 class Renderer
 {
@@ -34,6 +40,7 @@ public:
 	
 	static Renderer* renderer;
 	static IDirect3DDevice9* device;
+	static D3DXVECTOR3 lightDir;
 
 private:
 	void writeText(std::string text, int line);
@@ -63,4 +70,6 @@ private:
 	Camera* camera;
 
 	Skybox* skybox;
+
+	IDirect3DVertexBuffer9* shadowQuadVertexBuffer;
 };

@@ -17,6 +17,17 @@
 
 #include <string>
 
+struct Edge
+{
+	D3DXVECTOR3 p0;
+	D3DXVECTOR3 p1;
+
+	bool operator==(const Edge &e)
+	{
+		return ((p0 == (e.p0) && p1 == (e.p1)) || (p0 == (e.p1) && p1 == (e.p0)));
+	}
+};
+
 
 enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, LASERMODEL, ROCKETMESH, LANDMINEMESH };
 
@@ -44,16 +55,25 @@ public:
 	void setTexture(IDirect3DTexture9* tex);
 	IDirect3DTexture9* getTextureFromFile(IDirect3DDevice9* device, std::string textureName);
 
+	void buildShadowVolume(D3DXVECTOR3 light);
+	void renderShadowVolume(IDirect3DDevice9* device);
+
 private:
-	virtual void initialize(MeshType type, std::string textureName, IDirect3DDevice9* device);
+	void initialize(MeshType type, std::string textureName, IDirect3DDevice9* device);
+	void addEdge(unsigned long* edges, int &numEdges, unsigned long v0, unsigned long v1);
 
 
 public:
 	Mesh* mesh;
+	MeshType meshType;
+	
 
 protected:
 	D3DXMATRIX transform;
 
 private:
 	IDirect3DTexture9* texture;
+
+	IDirect3DVertexBuffer9* shadowVertexBuffer;
+	int shadowVertCount;
 };
