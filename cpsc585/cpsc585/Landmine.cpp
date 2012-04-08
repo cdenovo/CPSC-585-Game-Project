@@ -6,12 +6,12 @@ Landmine::Landmine(IDirect3DDevice9* device)
 	drawable = new Drawable(LANDMINEMESH, "textures/landmine.dds", device);
 
 	hkVector4 startAxis;
-	startAxis.set(0, -0.075f, 0);
+	startAxis.set(0, -0.05f, 0);
 
 	hkVector4 endAxis;
-	endAxis.set(0, 0.075f, 0);
+	endAxis.set(0, 0.05f, 0);
 
-	hkReal radius = 1.0f;
+	hkReal radius = 0.6f;
 
 	hkpRigidBodyCinfo info;
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);

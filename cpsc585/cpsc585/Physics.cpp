@@ -99,4 +99,5 @@ static void HK_CALL errorReport(const char* msg, void* userContext)
 void Physics::step(float seconds)
 {
 	world->stepDeltaTime(seconds);
+	return;
 }

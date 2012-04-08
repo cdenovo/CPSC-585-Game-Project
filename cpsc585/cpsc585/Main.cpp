@@ -305,8 +305,8 @@ bool mainLoop()
 	
 	float deltaTime = (currentTime - prevTime) / 1000.0f;
 	
-	if (deltaTime > 0.5f)
-		deltaTime = 0.5f;
+	if (deltaTime > 0.05f)
+		deltaTime = 0.05f;
 
 
 	quit = input->update();

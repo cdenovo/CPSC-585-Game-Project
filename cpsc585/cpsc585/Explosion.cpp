@@ -48,7 +48,7 @@ void Explosion::doDamage()
 	hkArrayBase<hkpRootCdBodyPair>::iterator iter = hits.begin();
 
 	hkVector4 pos, racerPos;
-	pos.set(0, 0, 0);
+	pos.set(0, -3.0, 0);
 	pos.setTransformedPos(*transform, pos);
 	double distance;
 	int damage;
@@ -72,9 +72,44 @@ void Explosion::doDamage()
 
 			racer->applyDamage(owner, damage);
 
-			racerPos.normalize3();
-			racerPos.mul((const hkReal) (5.0 * racer->chassisMass * BLAST_RADIUS / distance));
-			body->applyLinearImpulse(racerPos);
+			hkpWorldRayCastInput input = hkpWorldRayCastInput();
+			hkpWorldRayCastOutput output = hkpWorldRayCastOutput();
+			hkVector4 to;
+			hkVector4 from;
+
+			input.m_from.setXYZ(pos);
+			input.m_to.setXYZ(body->getPosition());
+
+			Physics::world->castRay(input, output);
+
+			if (output.hasHit())
+			{
+				
+				hkVector4 raycastDir;
+				raycastDir.setXYZ(input.m_to);
+
+				raycastDir.sub(from);
+				raycastDir.normalize3();
+
+				hkVector4 force;
+				force.setXYZ(raycastDir);
+
+				force.mul((const hkReal) (4.0f * racer->chassisMass));
+				
+				if (distance < 0.0f)
+				{
+					force.mul(BLAST_RADIUS);
+					body->applyLinearImpulse(force);
+				}
+				else
+				{
+					input.m_to.sub(from);
+					input.m_to.mul(output.m_hitFraction);
+					input.m_to.add(from);
+			
+					body->applyPointImpulse(force, input.m_to);
+				}
+			}
 		}
 		else if (((hkpRigidBody*) iter->m_rootCollidableB->getOwner())->getProperty(1).getPtr())
 		{

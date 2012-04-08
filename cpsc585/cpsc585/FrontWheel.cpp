@@ -13,7 +13,7 @@ FrontWheel::FrontWheel(IDirect3DDevice9* device, int filter)
 	hkVector4 endAxis;
 	endAxis.set(0.1f, 0, 0);
 
-	hkReal radius = 0.3f;
+	hkReal radius = 0.35f;
 
 	hkpRigidBodyCinfo info;
 	info.m_gravityFactor = 0.0f;

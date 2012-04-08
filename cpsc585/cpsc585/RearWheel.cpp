@@ -8,12 +8,12 @@ RearWheel::RearWheel(IDirect3DDevice9* device, int filter)
 	drawable = new Drawable(REARWHEEL, "textures/tire.dds", device);
 
 	hkVector4 startAxis;
-	startAxis.set(-0.1f, 0, 0);
+	startAxis.set(-0.15f, 0, 0);
 
 	hkVector4 endAxis;
-	endAxis.set(0.1f, 0, 0);
+	endAxis.set(0.15f, 0, 0);
 
-	hkReal radius = 0.37f;
+	hkReal radius = 0.4f;
 
 	hkpRigidBodyCinfo info;
 	info.m_gravityFactor = 0.0f;

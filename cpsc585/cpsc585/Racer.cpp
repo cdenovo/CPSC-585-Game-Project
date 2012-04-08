@@ -11,10 +11,10 @@ ConfigReader Racer::config = ConfigReader();
 hkVector4 Racer::xAxis = hkVector4(1.0f, 0.0f, 0.0f);
 hkVector4 Racer::yAxis = hkVector4(0.0f, 1.0f, 0.0f);
 hkVector4 Racer::zAxis = hkVector4(0.0f, 0.0f, 1.0f);
-hkVector4 Racer::attachFL = hkVector4(-0.8f, -0.77f, 1.5f);
-hkVector4 Racer::attachFR = hkVector4(0.8f, -0.77f, 1.5f);
-hkVector4 Racer::attachRL = hkVector4(-0.8f, -0.7f, -1.2f);
-hkVector4 Racer::attachRR = hkVector4(0.8f, -0.7f, -1.2f);
+hkVector4 Racer::attachFL = hkVector4(-0.7f, -0.65f, 1.6f);
+hkVector4 Racer::attachFR = hkVector4(0.7f, -0.65f, 1.6f);
+hkVector4 Racer::attachRL = hkVector4(-0.7f, -0.6f, -1.25f);
+hkVector4 Racer::attachRR = hkVector4(0.7f, -0.6f, -1.25f);
 hkVector4 Racer::attachCannon = hkVector4(0.0f, 0.6f, 2.1f);
 
 hkReal Racer::chassisMass = config.chassisMass;
@@ -76,12 +76,12 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	int collisionGroupFilter = Physics::physics->getFilter();
 	
 	hkpRigidBodyCinfo info;
-	hkVector4 halfExtent(0.9f, 0.6f, 2.2f);		//Half extent for racer rigid body box
+	hkVector4 halfExtent(0.8f, 0.55f, 2.2f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL;
-	info.m_centerOfMass.set(0.0f, -0.5f, 0.0f);	// lower CM a bit
+	info.m_centerOfMass.set(0.0f, 0.0f, 0.0f);
 	info.m_restitution = 0.0f;
-	info.m_maxAngularVelocity = 180.0f;
+	info.m_maxAngularVelocity = 20.0f;
 	info.m_maxLinearVelocity = 170.0f;
 	info.m_angularDamping = 0.3f;
 	hkpMassProperties massProperties;
@@ -238,7 +238,7 @@ void Racer::update()
 			zDir.setXYZ(drawable->getZhkVector());
 
 			dist = currentPos.dot3(zDir);
-			dist /= (0.42);
+			dist /= (0.4);
 			dist *= D3DX_PI;
 			
 			dist += wheelRL->rotation;
@@ -282,7 +282,7 @@ void Racer::update()
 			zDir.setXYZ(drawable->getZhkVector());
 
 			dist = currentPos.dot3(zDir);
-			dist /= (0.42);
+			dist /= (0.4);
 			dist *= D3DX_PI;
 			
 			dist += wheelRR->rotation;
@@ -488,7 +488,6 @@ void Racer::buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* c
 
 	constraint->setSolvingMethod(hkpConstraintAtom::METHOD_STABILIZED);
 }
-
 
 
 void Racer::brake(float seconds)
@@ -912,6 +911,11 @@ void Racer::applyForces(float seconds)
 // Raycasts tires and adjusts their positions
 void Racer::applyTireRaycast()
 {
+	hkVector4 vel;
+	vel.setXYZ(body->getLinearVelocity());
+	hkVector4 aVel;
+	aVel.setXYZ(body->getAngularVelocity());
+
 	hkpWorldRayCastInput input;
 	hkpWorldRayCastOutput output;
 	hkVector4 from;
@@ -933,13 +937,13 @@ void Racer::applyTireRaycast()
 	to.add(from);
 
 	from.setXYZ(raycastDir);
-	from.mul(-frontExtents * 2.0f - 0.35f);
+	from.mul(-frontExtents * 4.0f);
 	from.add(to);
 	
 	input.m_from.setXYZ(from);
 	input.m_to.setXYZ(to);
 	input.m_filterInfo = collisionFilterInfo;
-
+	
 	Physics::world->castRay(input, output);
 	
 	if (output.hasHit())
@@ -980,7 +984,7 @@ void Racer::applyTireRaycast()
 	to.add(from);
 
 	from.setXYZ(raycastDir);
-	from.mul(-frontExtents * 2.0f - 0.35f);
+	from.mul(-frontExtents * 4.0f);
 	from.add(to);
 
 	input.m_from.setXYZ(from);
@@ -1023,11 +1027,11 @@ void Racer::applyTireRaycast()
 	// REAR LEFT TIRE
 	from.setTransformedPos(transform, attachRL);
 	to.setXYZ(raycastDir);
-	to.mul(rearExtents + 0.42f);
+	to.mul(rearExtents + 0.4f);
 	to.add(from);
 
 	from.setXYZ(raycastDir);
-	from.mul(-rearExtents * 2.0f - 0.42f);
+	from.mul(-rearExtents * 4.0f);
 	from.add(to);
 
 	input.m_from.setXYZ(from);
@@ -1041,7 +1045,7 @@ void Racer::applyTireRaycast()
 		wheelRL->touchingGround = true;
 		to.sub(from);
 		to.mul(output.m_hitFraction);
-		raycastDir.mul(-0.42f);
+		raycastDir.mul(-0.4f);
 
 		to.add(from);
 		to.add(raycastDir);
@@ -1053,7 +1057,7 @@ void Racer::applyTireRaycast()
 	{
 		wheelRL->touchingGround = false;
 		to.sub(from);
-		raycastDir.mul(-0.42f);
+		raycastDir.mul(-0.4f);
 
 		to.add(from);
 		to.add(raycastDir);
@@ -1070,11 +1074,11 @@ void Racer::applyTireRaycast()
 	// REAR RIGHT TIRE
 	from.setTransformedPos(transform, attachRR);
 	to.setXYZ(raycastDir);
-	to.mul(rearExtents + 0.42f);
+	to.mul(rearExtents + 0.4f);
 	to.add(from);
 
 	from.setXYZ(raycastDir);
-	from.mul(-rearExtents * 2.0f - 0.42f);
+	from.mul(-rearExtents * 4.0f);
 	from.add(to);
 
 	input.m_from.setXYZ(from);
@@ -1088,7 +1092,7 @@ void Racer::applyTireRaycast()
 		wheelRR->touchingGround = true;
 		to.sub(from);
 		to.mul(output.m_hitFraction);
-		raycastDir.mul(-0.42f);
+		raycastDir.mul(-0.4f);
 
 		to.add(from);
 		to.add(raycastDir);
@@ -1100,7 +1104,7 @@ void Racer::applyTireRaycast()
 	{
 		wheelRR->touchingGround = false;
 		to.sub(from);
-		raycastDir.mul(-0.42f);
+		raycastDir.mul(-0.4f);
 
 		to.add(from);
 		to.add(raycastDir);
@@ -1337,7 +1341,7 @@ void Racer::dropMine()
 	hkTransform bodyTransform = body->getTransform();
 
 	hkVector4 dropPoint;
-	dropPoint.set(0, -0.7f, 2.3f);
+	dropPoint.set(0, -0.6f, 2.5f);
 
 	minePos.setTransformedPos(bodyTransform, dropPoint);
 	currentMine->body->setTransform(bodyTransform);
@@ -1367,7 +1371,7 @@ void Racer::applyDamage(Racer* attacker, int damage)
 	if (health <= 0)
 	{
 		health = 100;
-		respawn();
+		//respawn();
 
 		if (attacker)
 		{
