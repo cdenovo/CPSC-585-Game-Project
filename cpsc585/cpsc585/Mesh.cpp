@@ -39,6 +39,11 @@ void Mesh::loadMesh(std::string filename)
 	for (int i = 0; i < indexCount; i++)
 	{
 		filestream.read((char*)&indices[i], 4);
+
+		if (indices[i] > vertexCount)
+		{
+			int l = 0;
+		}
 	}
 
 	filestream.close();

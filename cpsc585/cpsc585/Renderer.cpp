@@ -2,7 +2,7 @@
 
 Renderer* Renderer::renderer = NULL;
 IDirect3DDevice9* Renderer::device = NULL;
-D3DXVECTOR3 Renderer::lightDir = D3DXVECTOR3(0,-0.5f,1);
+D3DXVECTOR3 Renderer::lightDir = D3DXVECTOR3(0,-0.4f,1);
 
 Renderer::Renderer()
 {

@@ -49,7 +49,6 @@ public:
 
 private:
 	void initialize(MeshType type, std::string textureName, IDirect3DDevice9* device);
-	void addEdge(unsigned long* edges, int &numEdges, unsigned long v0, unsigned long v1);
 
 
 public:
@@ -65,6 +64,8 @@ private:
 
 	IDirect3DVertexBuffer9* shadowVertexBuffer;
 	int shadowVertCount;
-
-	unsigned long* edges;
+	
+	static unsigned long** racerConnectivityTable; // Array, access with Table[triangleIndex][edge#], returns new triangle index
+	static unsigned long** frontWheelConnectivityTable;
+	static unsigned long** rearWheelConnectivityTable;
 };
