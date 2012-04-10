@@ -76,7 +76,7 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	int collisionGroupFilter = Physics::physics->getFilter();
 	
 	hkpRigidBodyCinfo info;
-	hkVector4 halfExtent(0.8f, 0.55f, 2.2f);		//Half extent for racer rigid body box
+	hkVector4 halfExtent(0.9f, 0.6f, 2.3f);		//Half extent for racer rigid body box
 	info.m_shape = new hkpBoxShape(halfExtent);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL;
 	info.m_centerOfMass.set(0.0f, 0.0f, 0.0f);

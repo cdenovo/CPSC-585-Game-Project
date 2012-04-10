@@ -648,7 +648,7 @@ void Drawable::buildShadowVolume(D3DXVECTOR3 light)
 		norm /= 3.0f;
 
 		// The current face is lit. Must check neighbours now
-		if (D3DXVec3Dot(&norm, &light) >= 0.0f)
+		if (D3DXVec3Dot(&norm, &light) > 0.0f)
 		{
 			v0 = vertices[index0].position;
 			v1 = vertices[index1].position;
