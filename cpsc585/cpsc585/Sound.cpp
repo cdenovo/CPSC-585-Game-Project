@@ -5,6 +5,7 @@ Sound* Sound::sound = NULL;
 Sound::Sound(void)
 {
 	initialized = false;
+	playerEmitter = NULL;
 
 	audio = NULL;
 	mVoice = NULL;
@@ -49,6 +50,24 @@ Sound::Sound(void)
 	rocketlaunchBufferDetails = NULL;
 	pickupBuffer = NULL;
 	pickupBufferDetails = NULL;
+	selectBuffer = NULL;
+	selectBufferDetails = NULL;
+
+	laserWMABuffer = NULL;
+	crashWMABuffer = NULL;
+	engineWMABuffer = NULL;
+	boostWMABuffer = NULL;
+	rocketWMABuffer = NULL;
+	dropmineWMABuffer = NULL;
+	scream1WMABuffer = NULL;
+	scream2WMABuffer = NULL;
+	scream3WMABuffer = NULL;
+	explosionWMABuffer = NULL;
+	carexplodeWMABuffer = NULL;
+	beepWMABuffer = NULL;
+	rocketlaunchWMABuffer = NULL;
+	pickupWMABuffer = NULL;
+	selectWMABuffer = NULL;
 
 	ingameMusicXMABuffer = NULL;
 	menuMusicXMABuffer = NULL;
@@ -139,6 +158,7 @@ void Sound::initialize()
 	loadSound(BEEPSFX, "sounds/beep.xwm", beepBuffer);
 	loadSound(ROCKETLAUNCHSFX, "sounds/rocketlaunch.xwm", rocketlaunchBuffer);
 	loadSound(PICKUPSFX, "sounds/pickup.xwm", pickupBuffer);
+	loadSound(SELECTSFX, "sounds/select.xwm", selectBuffer);
 	
 
 	// Now set up 3D audio
@@ -359,6 +379,12 @@ void Sound::shutdown()
 		pickupBuffer = NULL;
 	}
 
+	if (selectBuffer)
+	{
+		delete [] selectBuffer;
+		selectBuffer = NULL;
+	}
+
 
 
 
@@ -446,6 +472,13 @@ void Sound::shutdown()
 		delete pickupBufferDetails;
 		pickupBufferDetails = NULL;
 	}
+
+	if (selectBufferDetails)
+	{
+		delete selectBufferDetails;
+		selectBufferDetails = NULL;
+	}
+
 
 
 	// Now free up WMA buffers
@@ -547,6 +580,15 @@ void Sound::shutdown()
 		pickupWMABuffer = NULL;
 	}
 
+	if (selectWMABuffer)
+	{
+		delete [] selectWMABuffer->pDecodedPacketCumulativeBytes;
+		delete selectWMABuffer;
+		selectWMABuffer = NULL;
+	}
+
+
+
 
 
 	if (emitters)
@@ -617,202 +659,236 @@ void Sound::loadSound(SoundEffect type, std::string filename, char* &soundBuffer
 	
 	FindChunk(fileHandle, 'sdpd', chunkSize, chunkPos);
 
-	if (type == LASERSFX)
-	{
-		laserBufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+	switch (type) {
+	case LASERSFX:
+		{
+			laserBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
 
-		laserWMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(laserWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+			laserWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(laserWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
 
-		// Divide chunk size by sizeof(DWORD) and assign
-		laserWMABuffer->PacketCount = chunkSize / 4;
+			// Divide chunk size by sizeof(DWORD) and assign
+			laserWMABuffer->PacketCount = chunkSize / 4;
 
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		laserWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			laserWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case CRASHSFX:
+		{
+			crashBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			crashWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(crashWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			crashWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			crashWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case ENGINESFX:
+		{
+			engineBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			engineWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(engineWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			engineWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			engineWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case BOOSTSFX:
+		{
+			boostBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			boostWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(boostWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			boostWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			boostWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case ROCKETSFX:
+		{
+			rocketBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			rocketWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(rocketWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			rocketWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			rocketWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case DROPMINESFX:
+		{
+			dropmineBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			dropmineWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(dropmineWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			dropmineWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			dropmineWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case SCREAM1SFX:
+		{
+			scream1BufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			scream1WMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(scream1WMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			scream1WMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			scream1WMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case SCREAM2SFX:
+		{
+			scream2BufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			scream2WMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(scream2WMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			scream2WMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			scream2WMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case SCREAM3SFX:
+		{
+			scream3BufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			scream3WMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(scream3WMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			scream3WMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			scream3WMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case CAREXPLODESFX:
+		{
+			carexplodeBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			carexplodeWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(carexplodeWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			carexplodeWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			carexplodeWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case EXPLOSIONSFX:
+		{
+			explosionBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			explosionWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(explosionWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			explosionWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			explosionWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case BEEPSFX:
+		{
+			beepBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			beepWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(beepWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			beepWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			beepWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case ROCKETLAUNCHSFX:
+		{
+			rocketlaunchBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			rocketlaunchWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(rocketlaunchWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			rocketlaunchWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			rocketlaunchWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case PICKUPSFX:
+		{
+			pickupBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			pickupWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(pickupWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			pickupWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			pickupWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case SELECTSFX:
+		{
+			selectBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			selectWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(selectWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			selectWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			selectWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	default:
+		break;
 	}
-	else if (type == CRASHSFX)
-	{
-		crashBufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
-
-		crashWMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(crashWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
-
-		// Divide chunk size by sizeof(DWORD) and assign
-		crashWMABuffer->PacketCount = chunkSize / 4;
-
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		crashWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
-	}
-	else if (type == ENGINESFX)
-	{
-		engineBufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
-
-		engineWMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(engineWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
-
-		// Divide chunk size by sizeof(DWORD) and assign
-		engineWMABuffer->PacketCount = chunkSize / 4;
-
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		engineWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
-	}
-	else if (type == BOOSTSFX)
-	{
-		boostBufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
-
-		boostWMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(boostWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
-
-		// Divide chunk size by sizeof(DWORD) and assign
-		boostWMABuffer->PacketCount = chunkSize / 4;
-
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		boostWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
-	}
-	else if (type == ROCKETSFX)
-	{
-		rocketBufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
-
-		rocketWMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(rocketWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
-
-		// Divide chunk size by sizeof(DWORD) and assign
-		rocketWMABuffer->PacketCount = chunkSize / 4;
-
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		rocketWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
-	}
-	else if (type == DROPMINESFX)
-	{
-		dropmineBufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
-
-		dropmineWMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(dropmineWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
-
-		// Divide chunk size by sizeof(DWORD) and assign
-		dropmineWMABuffer->PacketCount = chunkSize / 4;
-
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		dropmineWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
-	}
-	else if (type == SCREAM1SFX)
-	{
-		scream1BufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
-
-		scream1WMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(scream1WMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
-
-		// Divide chunk size by sizeof(DWORD) and assign
-		scream1WMABuffer->PacketCount = chunkSize / 4;
-
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		scream1WMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
-	}
-	else if (type == SCREAM2SFX)
-	{
-		scream2BufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
-
-		scream2WMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(scream2WMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
-
-		// Divide chunk size by sizeof(DWORD) and assign
-		scream2WMABuffer->PacketCount = chunkSize / 4;
-
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		scream2WMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
-	}
-	else if (type == SCREAM3SFX)
-	{
-		scream3BufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
-
-		scream3WMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(scream3WMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
-
-		// Divide chunk size by sizeof(DWORD) and assign
-		scream3WMABuffer->PacketCount = chunkSize / 4;
-
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		scream3WMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
-	}
-	else if (type == CAREXPLODESFX)
-	{
-		carexplodeBufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
-
-		carexplodeWMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(carexplodeWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
-
-		// Divide chunk size by sizeof(DWORD) and assign
-		carexplodeWMABuffer->PacketCount = chunkSize / 4;
-
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		carexplodeWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
-	}
-	else if (type == EXPLOSIONSFX)
-	{
-		explosionBufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
-
-		explosionWMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(explosionWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
-
-		// Divide chunk size by sizeof(DWORD) and assign
-		explosionWMABuffer->PacketCount = chunkSize / 4;
-
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		explosionWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
-	}
-	else if (type == BEEPSFX)
-	{
-		beepBufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
-
-		beepWMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(beepWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
-
-		// Divide chunk size by sizeof(DWORD) and assign
-		beepWMABuffer->PacketCount = chunkSize / 4;
-
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		beepWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
-	}
-	else if (type == ROCKETLAUNCHSFX)
-	{
-		rocketlaunchBufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
-
-		rocketlaunchWMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(rocketlaunchWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
-
-		// Divide chunk size by sizeof(DWORD) and assign
-		rocketlaunchWMABuffer->PacketCount = chunkSize / 4;
-
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		rocketlaunchWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
-	}
-	else if (type == PICKUPSFX)
-	{
-		pickupBufferDetails = new XAUDIO2_BUFFER(buffer);
-		UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
-
-		pickupWMABuffer = new XAUDIO2_BUFFER_WMA();
-		ZeroMemory(pickupWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
-
-		// Divide chunk size by sizeof(DWORD) and assign
-		pickupWMABuffer->PacketCount = chunkSize / 4;
-
-		ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
-		pickupWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
-	}
+	
 
 
 	CloseHandle(fileHandle);
@@ -1108,6 +1184,27 @@ void Sound::playPickup(X3DAUDIO_EMITTER* emit)
 	voice->FlushSourceBuffers();
 
 	voice->SubmitSourceBuffer(pickupBufferDetails, pickupWMABuffer);
+
+	X3DAudioCalculate(audio3DHandle, &listener, emit,
+		X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT,
+		&dspSettings);
+	
+	voice->SetOutputMatrix(smSFX, 1, details.OutputFormat.Format.nChannels, dspSettings.pMatrixCoefficients);
+	voice->SetFrequencyRatio(dspSettings.DopplerFactor);
+
+	XAUDIO2_FILTER_PARAMETERS filterParameters = { LowPassFilter, 2.0f * sinf(X3DAUDIO_PI/6.0f * dspSettings.LPFDirectCoefficient), 1.0f };
+	voice->SetFilterParameters(&filterParameters);
+	
+	voice->Start();
+}
+
+void Sound::playSelect(X3DAUDIO_EMITTER* emit)
+{
+	IXAudio2SourceVoice* voice = getSFXVoice();
+
+	voice->FlushSourceBuffers();
+
+	voice->SubmitSourceBuffer(selectBufferDetails, selectWMABuffer);
 
 	X3DAudioCalculate(audio3DHandle, &listener, emit,
 		X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT,

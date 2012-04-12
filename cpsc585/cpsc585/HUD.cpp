@@ -22,24 +22,24 @@ HUD::HUD(int width, int height)
 	speedRect = new RECT();
 
 	laserRect->top = 0;
-	laserRect->bottom = 300;
-	laserRect->right = 300;
+	laserRect->bottom = 256;
+	laserRect->right = 256;
 	laserRect->left = 0;
 
 	mineRect->top = 0;
-	mineRect->bottom = 300;
-	mineRect->right = 600;
-	mineRect->left = 300;
+	mineRect->bottom = 256;
+	mineRect->right = 512;
+	mineRect->left = 256;
 
-	rocketRect->top = 300;
-	rocketRect->bottom = 600;
-	rocketRect->right = 300;
+	rocketRect->top = 256;
+	rocketRect->bottom = 512;
+	rocketRect->right = 256;
 	rocketRect->left = 0;
 
-	speedRect->top = 300;
-	speedRect->bottom = 600;
-	speedRect->right = 600;
-	speedRect->left = 300;
+	speedRect->top = 256;
+	speedRect->bottom = 512;
+	speedRect->right = 512;
+	speedRect->left = 256;
 
 	currentRect = laserRect;
 
@@ -75,6 +75,8 @@ void HUD::initialize(IDirect3DDevice9* device)
 	D3DXCreateTextureFromFile(device, "textures/speedometer.dds", &speedoTexture);
 	D3DXCreateTextureFromFile(device, "textures/needle.dds", &needleTexture);
 	D3DXCreateTextureFromFile(device, "textures/LCD.dds", &numbersTexture);
+	D3DXCreateTextureFromFile(device, "textures/healthBar.dds", &healthBarTexture);
+	D3DXCreateTextureFromFile(device, "textures/healthBarBorder.dds", &healthBarBorderTexture);
 	D3DXCreateSprite(device, &sprite);
 }
 
@@ -169,6 +171,11 @@ void HUD::showRadial(bool enabled)
 
 void HUD::setSelectedAbility(AbilityType ability)
 {
+	if (ability == selectedAbility)
+		return;
+
+	Sound::sound->playSelect(Sound::sound->playerEmitter);
+
 	selectedAbility = ability;
 
 	switch (ability)
@@ -242,6 +249,10 @@ void HUD::render()
 	{
 		sprite->Draw(radialMenuTexture, currentRect, NULL, radialPos, 0xFFFFFFFF);
 	}
+	else
+	{
+		sprite->Draw(radialMenuTexture, currentRect, NULL, radialPos, D3DCOLOR_ARGB(120, 255, 255, 255));
+	}
 
 
 	// Draw checkpoint timer
@@ -294,55 +305,29 @@ void HUD::drawHealth()
 	_itoa_s(currentHealth, healthString, 4, 10);
 
 	D3DXVECTOR3 drawPos;
-	drawPos.x = 96.0f;
-	drawPos.y = screenHeight - 64.0f;
+	drawPos.x = 64.0f;
+	drawPos.y = screenHeight - 300.0f;
 	drawPos.z = 0.0f;
 
-	D3DXVECTOR3 currCenter;
-	currCenter.x = 8.0f;
-	currCenter.y = 14.0f;
-	currCenter.z = 0.0f;
+	D3DXVECTOR3 actualCenter, currCenter;
+	actualCenter.x = 16.0f;
+	actualCenter.y = 256.0f;
+	actualCenter.z = 0.0f;
 
 	RECT current;
-
-	current.top = 0;
-	current.bottom = 28;
-	current.left = 0;
-	current.right = 16;
-
-	for (int i = 0; i < 3; i++)
-	{
-		if (healthString[i] == '0')
-		{
-			current.left = 16 * 9;
-			current.right = 16 * 10;
-
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos, D3DCOLOR_XRGB(255, 50, 50));
-
-			drawPos.x += 16.0f;
-		}
-		else if (healthString[i] == ':')
-		{
-			current.left = 16 * 10;
-			current.right = 16 * 11;
-
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos, D3DCOLOR_XRGB(255, 50, 50));
-
-			drawPos.x += 16.0f;
-		}
-		else if ((healthString[i] > '0') && (healthString[i] <= '9'))
-		{
-			int num = (int) healthString[i] - '0';
-
-			current.left = 16 * (num - 1);
-			current.right = 16 * num;
-
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  D3DCOLOR_XRGB(255, 50, 50));
-
-			drawPos.x += 16.0f;
-		}
-	}
 	
+	current.top = (LONG) hkMath::ceil(((100 - currentHealth) / 100.0f) * 512.0f);
+	current.bottom = 512;
+	current.left = 0;
+	current.right = 32;
+
+	currCenter.x = 16.0f;
+	currCenter.y = 256.0f - current.top;
+	currCenter.z = 0.0f;
+
+
+	sprite->Draw(healthBarTexture, &current, &currCenter, &drawPos, 0xFFFFFFFF);
+	sprite->Draw(healthBarBorderTexture, NULL, &actualCenter, &drawPos, 0xFFFFFFFF);
 }
 
 void HUD::drawCheckpointTime()

@@ -9,7 +9,7 @@
 
 enum SoundEffect { LASERSFX, CRASHSFX, ENGINESFX, BOOSTSFX, ROCKETSFX, DROPMINESFX,
 	SCREAM1SFX, SCREAM2SFX, SCREAM3SFX, CAREXPLODESFX, EXPLOSIONSFX, BEEPSFX,
-	ROCKETLAUNCHSFX, PICKUPSFX };
+	ROCKETLAUNCHSFX, PICKUPSFX, SELECTSFX };
 
 #define NUM_EMITTERS 500
 
@@ -31,6 +31,7 @@ public:
 	void playBeep(X3DAUDIO_EMITTER* emit);
 	void playRocketLaunch(X3DAUDIO_EMITTER* emit);
 	void playPickup(X3DAUDIO_EMITTER* emit);
+	void playSelect(X3DAUDIO_EMITTER* emit);
 	void returnEmitter();
 	void playRocket(X3DAUDIO_EMITTER* emit, IXAudio2SourceVoice* rocket);
 	void playInGameMusic();
@@ -45,6 +46,8 @@ public:
 	X3DAUDIO_LISTENER listener;
 
 	static Sound* sound;
+
+	X3DAUDIO_EMITTER* playerEmitter;
 
 private:
 	// Some methods from MSDN
@@ -96,6 +99,7 @@ private:
 	XAUDIO2_BUFFER* beepBufferDetails;
 	XAUDIO2_BUFFER* rocketlaunchBufferDetails;
 	XAUDIO2_BUFFER* pickupBufferDetails;
+	XAUDIO2_BUFFER* selectBufferDetails;
 
 	XAUDIO2_BUFFER_WMA* laserWMABuffer;
 	XAUDIO2_BUFFER_WMA* crashWMABuffer;
@@ -111,6 +115,7 @@ private:
 	XAUDIO2_BUFFER_WMA* beepWMABuffer;
 	XAUDIO2_BUFFER_WMA* rocketlaunchWMABuffer;
 	XAUDIO2_BUFFER_WMA* pickupWMABuffer;
+	XAUDIO2_BUFFER_WMA* selectWMABuffer;
 
 	char* ingamemusicBuffer;
 	char* menumusicBuffer;
@@ -128,6 +133,7 @@ private:
 	char* beepBuffer;
 	char* rocketlaunchBuffer;
 	char* pickupBuffer;
+	char* selectBuffer;
 
 
 	int currentVoice;

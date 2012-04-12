@@ -1,6 +1,7 @@
 #pragma once
 #include "Intention.h"
 #include "Drawable.h"
+#include "Sound.h"
 
 enum AbilityType { LASER, SPEED, LANDMINE, ROCKET };
 
@@ -33,6 +34,8 @@ private:
 	IDirect3DTexture9* speedoTexture;
 	IDirect3DTexture9* needleTexture;
 	IDirect3DTexture9* numbersTexture;
+	IDirect3DTexture9* healthBarTexture;
+	IDirect3DTexture9* healthBarBorderTexture;
 
 	RECT* laserRect;
 	RECT* speedRect;
