@@ -23,6 +23,8 @@ public:
 	void playBoost(X3DAUDIO_EMITTER* emit);
 	void returnEmitter();
 	void playRocket(X3DAUDIO_EMITTER* emit, IXAudio2SourceVoice* rocket);
+	void playInGameMusic();
+	void playMenuMusic();
 
 	IXAudio2SourceVoice* getSFXVoice();
 	IXAudio2SourceVoice* reserveSFXVoice();
@@ -35,8 +37,12 @@ public:
 	static Sound* sound;
 
 private:
+	// Some methods from MSDN
+	HRESULT FindChunk(HANDLE hFile, DWORD fourcc, DWORD & dwChunkSize, DWORD & dwChunkDataPosition);
+	HRESULT ReadChunkData(HANDLE hFile, void * buffer, DWORD buffersize, DWORD bufferoffset);
+
 	void loadSound(SoundEffect type, std::string filename, char* &soundBuffer);
-	void loadMusic(IXAudio2SourceVoice* &voice, std::string filename, char* &soundBuffer);
+	void loadMusic(IXAudio2SourceVoice* &voice, std::string filename, char* &soundBuffer, UINT32* &xwmaBuffer);
 
 	IXAudio2* audio;
 	IXAudio2MasteringVoice* mVoice;
@@ -62,7 +68,8 @@ private:
 	XAUDIO2_DEVICE_DETAILS details;
 
 
-	IXAudio2SourceVoice* music;
+	IXAudio2SourceVoice* ingamemusic;
+	IXAudio2SourceVoice* menumusic;
 	IXAudio2SourceVoice* laser;
 	IXAudio2SourceVoice* crash;
 	IXAudio2SourceVoice* boost;
@@ -74,7 +81,8 @@ private:
 	XAUDIO2_BUFFER* boostBufferDetails;
 	XAUDIO2_BUFFER* rocketBufferDetails;
 
-	char* musicBuffer;
+	char* ingamemusicBuffer;
+	char* menumusicBuffer;
 	char* laserBuffer;
 	char* crashBuffer;
 	char* engineBuffer;
@@ -92,4 +100,7 @@ private:
 	IXAudio2SourceVoice** voiceBufferReserved;
 
 	WAVEFORMATEX wfm;
+
+	UINT32* ingameMusicXMABuffer;
+	UINT32* menuMusicXMABuffer;
 };

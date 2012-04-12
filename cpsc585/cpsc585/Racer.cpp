@@ -11,10 +11,10 @@ ConfigReader Racer::config = ConfigReader();
 hkVector4 Racer::xAxis = hkVector4(1.0f, 0.0f, 0.0f);
 hkVector4 Racer::yAxis = hkVector4(0.0f, 1.0f, 0.0f);
 hkVector4 Racer::zAxis = hkVector4(0.0f, 0.0f, 1.0f);
-hkVector4 Racer::attachFL = hkVector4(-0.7f, -0.65f, 1.6f);
-hkVector4 Racer::attachFR = hkVector4(0.7f, -0.65f, 1.6f);
-hkVector4 Racer::attachRL = hkVector4(-0.7f, -0.6f, -1.25f);
-hkVector4 Racer::attachRR = hkVector4(0.7f, -0.6f, -1.25f);
+hkVector4 Racer::attachFL = hkVector4(-0.8f, -0.67f, 1.65f);
+hkVector4 Racer::attachFR = hkVector4(0.8f, -0.67f, 1.65f);
+hkVector4 Racer::attachRL = hkVector4(-0.8f, -0.6f, -1.3f);
+hkVector4 Racer::attachRR = hkVector4(0.8f, -0.6f, -1.3f);
 hkVector4 Racer::attachCannon = hkVector4(0.0f, 0.6f, 2.1f);
 
 hkReal Racer::chassisMass = config.chassisMass;
@@ -43,6 +43,7 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	Renderer::renderer->addDrawable(laserDraw);
 
 	engineVoice = Sound::sound->reserveSFXVoice();
+	engineVoice->SetVolume(0.4f);
 
 	health = 100;
 	kills = 0;
@@ -1411,10 +1412,13 @@ void Racer::computeRPM()
 	int gear;
 	float rpm;
 
-	float gearRatios[6] = {2.97f, 2.97f, 1.8f, 1.43f, 1.0f, 0.84f};
+	float gearRatios[] = {2.97f, 2.97f, 1.8f, 1.43f, 1.0f, 0.84f};
 
-	hkVector4 forward = drawable->getZhkVector();
-	hkVector4 vel = body->getLinearVelocity();
+	hkVector4 forward;
+	forward.setXYZ(drawable->getZhkVector());
+	hkVector4 vel;
+	vel.setXYZ(body->getLinearVelocity());
+
 	float forwardSpeed = vel.dot3(forward);
 
 	if (forwardSpeed < 0.0f)
@@ -1427,14 +1431,14 @@ void Racer::computeRPM()
 	
 	if(gear < 0)
 		gear = 0;
-	else if (gear > 6)
-		gear = 6;
+	else if (gear > 5)
+		gear = 5;
 
 	rpm = gearRatios[gear]*3.14f*wheelRPM;
 	rpm /= 2.0f;
 
-	if (rpm == 0)
-		rpm = 1.0f;
+	if (rpm < 500.0f)
+		rpm = 500.0f;
 
 	Sound::sound->playEngine(emitter, rpm/ 1024.0f, engineVoice);
 }

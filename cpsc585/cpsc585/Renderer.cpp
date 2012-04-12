@@ -137,7 +137,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	float fieldOfView, screenAspect;
 
 	// Setup the projection matrix.
-	fieldOfView = (float)D3DX_PI / 3.0f;
+	fieldOfView = (float)D3DX_PI / 2.5f;
 	screenAspect = (float)width / (float)height;
 
 	// Create the projection matrix for 3D rendering.

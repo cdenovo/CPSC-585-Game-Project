@@ -16,8 +16,10 @@ Sound::Sound(void)
 
 	dspSettings.pMatrixCoefficients = NULL;
 
-	music = NULL;
-	musicBuffer = NULL;
+	ingamemusic = NULL;
+	ingamemusicBuffer = NULL;
+	menumusic = NULL;
+	menumusicBuffer = NULL;
 	laser = NULL;
 	laserBuffer = NULL;
 	laserBufferDetails = NULL;
@@ -31,6 +33,9 @@ Sound::Sound(void)
 	boostBufferDetails = NULL;
 	rocketBuffer = NULL;
 	rocketBufferDetails = NULL;
+
+	ingameMusicXMABuffer = NULL;
+	menuMusicXMABuffer = NULL;
 
 	sound = this;
 
@@ -59,7 +64,7 @@ void Sound::initialize()
 		
 		return;
 	}
-	
+
 	audio->GetDeviceDetails(NULL, &details);
 
 	if (FAILED(res = audio->CreateMasteringVoice(&mVoice, details.OutputFormat.Format.nChannels, XAUDIO2_DEFAULT_SAMPLERATE)))
@@ -78,10 +83,10 @@ void Sound::initialize()
 	audio->CreateSubmixVoice(&smSFX, details.OutputFormat.Format.nChannels, 44100);
 	
 	// Create Music submix voice (ALL music passes through here)
-	// Music must have exactly TWO channels, sample rate of 44100 Hz
-	audio->CreateSubmixVoice(&smMusic, details.OutputFormat.Format.nChannels, 44100);
+	// Music must have exactly TWO channels, sample rate of 48000 Hz
+	audio->CreateSubmixVoice(&smMusic, 2, 48000);
 	
-	SFXSend.Flags = 0;
+	SFXSend.Flags = XAUDIO2_SEND_USEFILTER;
 	SFXSend.pOutputVoice = smSFX;
 	SFXSendList.SendCount = 1;
 	SFXSendList.pSends = &SFXSend;
@@ -95,10 +100,12 @@ void Sound::initialize()
 	smMusic->SetVolume(0.2f);
 
 	// Set sound effect volume HERE
-	smSFX->SetVolume(2.0f);
+	smSFX->SetVolume(1.0f);
 
 	ZeroMemory(&wfm, sizeof(WAVEFORMATEX));
 
+
+	// wfm for sound effects
 	wfm.wFormatTag = WAVE_FORMAT_PCM;
 	wfm.nChannels = 1;
 	wfm.nSamplesPerSec = 44100;
@@ -109,31 +116,17 @@ void Sound::initialize()
 
 
 	
-	loadMusic(music, "sounds/music.wav", musicBuffer);
+	loadMusic(ingamemusic, "sounds/ingamemusic.xwm", ingamemusicBuffer, ingameMusicXMABuffer);
+	loadMusic(menumusic, "sounds/menumusic.xwm", menumusicBuffer, menuMusicXMABuffer);
 	loadSound(ROCKETSFX, "sounds/rocket.wav", rocketBuffer);
 	loadSound(CRASHSFX, "sounds/crash.wav", crashBuffer);
 	loadSound(ENGINESFX, "sounds/engine.wav", engineBuffer);
 	loadSound(BOOSTSFX, "sounds/boost.wav", boostBuffer);
 	loadSound(LASERSFX, "sounds/laser.wav", laserBuffer);
-
-
-
-	float* matrix = new float[details.OutputFormat.Format.nChannels];
-	for (int i = 0; i < details.OutputFormat.Format.nChannels; i++)
-	{
-		matrix[i] = 1.0f;
-	}
-
-	music->SetOutputMatrix(smMusic, 1,  details.OutputFormat.Format.nChannels, matrix);
 	
 
-	delete [] matrix;
-
-	music->Start(0);
-
-
 	// Now set up 3D audio
-	X3DAudioInitialize(SPEAKER_STEREO, X3DAUDIO_SPEED_OF_SOUND, audio3DHandle);
+	X3DAudioInitialize(details.OutputFormat.dwChannelMask, X3DAUDIO_SPEED_OF_SOUND, audio3DHandle);
 
 	listener.pCone = NULL;
 	X3DAUDIO_VECTOR vec;
@@ -168,8 +161,8 @@ void Sound::initialize()
 		emitters[i].InnerRadius = 5.0f;
 		emitters[i].InnerRadiusAngle = X3DAUDIO_PI * 2.0f;
 
-		emitters[i].CurveDistanceScaler = 10.0f;
-		emitters[i].DopplerScaler = 1.0f;
+		emitters[i].CurveDistanceScaler = 6.0f;
+		emitters[i].DopplerScaler = 1.5f;
 	}
 	
 	ZeroMemory(&dspSettings, sizeof(X3DAUDIO_DSP_SETTINGS));
@@ -198,17 +191,24 @@ void Sound::initialize()
 	}
 
 	initialized = true;
-
+	
 	return;
 }
 
 void Sound::shutdown()
 {
-	if (music)
+	if (ingamemusic)
 	{
-		music->Stop(0);
-		music->DestroyVoice();
-		music = NULL;
+		ingamemusic->Stop(0);
+		ingamemusic->DestroyVoice();
+		ingamemusic = NULL;
+	}
+
+	if (menumusic)
+	{
+		menumusic->Stop(0);
+		menumusic->DestroyVoice();
+		menumusic = NULL;
 	}
 
 	if (voiceBuffer)
@@ -233,10 +233,26 @@ void Sound::shutdown()
 		delete [] voiceBufferReserved;
 	}
 
-	if (musicBuffer)
+	if (ingamemusicBuffer)
 	{
-		delete [] musicBuffer;
-		musicBuffer = NULL;
+		delete [] ingamemusicBuffer;
+		ingamemusicBuffer = NULL;
+	}
+
+	if (menumusicBuffer)
+	{
+		delete [] menumusicBuffer;
+		menumusicBuffer = NULL;
+	}
+
+	if (ingameMusicXMABuffer) {
+		delete [] ingameMusicXMABuffer;
+		ingameMusicXMABuffer = NULL;
+	}
+
+	if (menuMusicXMABuffer) {
+		delete [] menuMusicXMABuffer;
+		menuMusicXMABuffer = NULL;
 	}
 
 	if (laserBuffer)
@@ -386,49 +402,53 @@ void Sound::loadSound(SoundEffect type, std::string filename, char* &soundBuffer
 	filestream.close();
 }
 
-void Sound::loadMusic(IXAudio2SourceVoice* &voice, std::string filename, char* &soundBuffer)
+void Sound::loadMusic(IXAudio2SourceVoice* &voice, std::string filename, char* &soundBuffer, UINT32* &xwmaBuffer)
 {
-	std::ifstream filestream(filename, std::ifstream::binary);
+	WAVEFORMATEXTENSIBLE wfx;
+	ZeroMemory(&wfx, sizeof(WAVEFORMATEXTENSIBLE));
 	
-	_WIN32_FILE_ATTRIBUTE_DATA attrib;
-
-	GetFileAttributesEx((const char*) filename.c_str(), GetFileExInfoStandard, &attrib);
-
-	soundBuffer = new char[attrib.nFileSizeLow];
+	HANDLE fileHandle = CreateFile((const char*) filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 	
-	int i = 0;
-	while (!filestream.eof())
-	{
-		filestream.read(soundBuffer + i, 1024);
-		i += 1024;
-	}
+	DWORD chunkSize = 0;
+	DWORD chunkPos = 0;
+	DWORD fileType = 0;
+
+	FindChunk(fileHandle, 'FFIR', chunkSize, chunkPos);
+	ReadChunkData(fileHandle, &fileType, sizeof(DWORD), chunkPos);
+
+	FindChunk(fileHandle, ' tmf', chunkSize, chunkPos);
+	ReadChunkData(fileHandle, &wfx, chunkSize, chunkPos);
+
+	// Read in audio data
+	FindChunk(fileHandle, 'atad', chunkSize, chunkPos);
+	soundBuffer = (char*) new BYTE[chunkSize];
+	ReadChunkData(fileHandle, soundBuffer, chunkSize, chunkPos);
+
 	
-
-	WAVEFORMATEX wfm;
-	ZeroMemory(&wfm, sizeof(WAVEFORMATEX));
-
-	wfm.wFormatTag = WAVE_FORMAT_PCM;
-	wfm.nChannels = 1;
-	wfm.nSamplesPerSec = 22050;
-	wfm.wBitsPerSample = 16;
-	wfm.nBlockAlign = wfm.nChannels * wfm.wBitsPerSample / 8;
-	wfm.nAvgBytesPerSec = wfm.nSamplesPerSec * wfm.nBlockAlign;
-	wfm.cbSize = 0;
-
-	audio->CreateSourceVoice(&voice, &wfm, XAUDIO2_VOICE_USEFILTER, 2.0f, NULL, &musicSendList, NULL);
-
 	XAUDIO2_BUFFER buffer;
 	ZeroMemory(&buffer, sizeof(XAUDIO2_BUFFER));
+
+	buffer.AudioBytes = chunkSize;
 	buffer.pAudioData = (BYTE*) soundBuffer;
-	buffer.AudioBytes = attrib.nFileSizeLow;
+	buffer.Flags = XAUDIO2_END_OF_STREAM;
+	buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
 	
-	buffer.LoopCount = -1;
+	XAUDIO2_BUFFER_WMA wmaBuffer;
+	ZeroMemory(&wmaBuffer, sizeof(XAUDIO2_BUFFER_WMA));
 	
-	voice->SubmitSourceBuffer(&buffer);
+	FindChunk(fileHandle, 'sdpd', chunkSize, chunkPos);
+	// Divide chunk size by sizeof(DWORD) and assign
+	wmaBuffer.PacketCount = chunkSize / 4;
+	
+	xwmaBuffer = (UINT32*) new BYTE[chunkSize];
+	ReadChunkData(fileHandle, xwmaBuffer, chunkSize, chunkPos);
+	wmaBuffer.pDecodedPacketCumulativeBytes = xwmaBuffer;
+	
+	audio->CreateSourceVoice(&voice, (WAVEFORMATEX*) &wfx, XAUDIO2_VOICE_USEFILTER, 2.0f, NULL, &musicSendList, NULL);
+	voice->SubmitSourceBuffer(&buffer, &wmaBuffer);
 
-	filestream.close();
+	CloseHandle(fileHandle);
 }
-
 
 void Sound::playLaser(X3DAUDIO_EMITTER* emit)
 {
@@ -448,14 +468,14 @@ void Sound::playLaser(X3DAUDIO_EMITTER* emit)
 	laser->SetFilterParameters(&filterParameters);
 	
 
-	laser->Start(0);
+	laser->Start();
 }
 
 void Sound::playCrash(X3DAUDIO_EMITTER* emit)
 {
 	crash = getSFXVoice();
 
-	crash->SetVolume(1.5f);
+	crash->SetVolume(1.0f);
 
 	crash->FlushSourceBuffers();
 	crash->SubmitSourceBuffer(crashBufferDetails);
@@ -465,13 +485,18 @@ void Sound::playCrash(X3DAUDIO_EMITTER* emit)
 	crash->SetOutputMatrix(smSFX, 1, details.OutputFormat.Format.nChannels, dspSettings.pMatrixCoefficients);
 	
 
-	crash->Start(0);
+	crash->Start();
 }
 
 void Sound::playEngine(X3DAUDIO_EMITTER* emit, float freq, IXAudio2SourceVoice* engine)
 {
-	engine->FlushSourceBuffers();
-	engine->SubmitSourceBuffer(engineBufferDetails);
+	XAUDIO2_VOICE_STATE state;
+	engine->GetState(&state);
+	if (state.BuffersQueued == 0)
+	{
+		engine->FlushSourceBuffers();
+		engine->SubmitSourceBuffer(engineBufferDetails);
+	}
 
 	X3DAudioCalculate(audio3DHandle, &listener, emit,
 		X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_LPF_DIRECT,
@@ -484,7 +509,8 @@ void Sound::playEngine(X3DAUDIO_EMITTER* emit, float freq, IXAudio2SourceVoice* 
 	engine->SetFilterParameters(&filterParameters);
 	
 
-	engine->Start(0);
+	engine->Start();
+	
 }
 
 void Sound::playRocket(X3DAUDIO_EMITTER* emit, IXAudio2SourceVoice* rocket)
@@ -503,7 +529,7 @@ void Sound::playRocket(X3DAUDIO_EMITTER* emit, IXAudio2SourceVoice* rocket)
 	rocket->SetFilterParameters(&filterParameters);
 	
 
-	rocket->Start(0);
+	rocket->Start();
 }
 
 void Sound::playBoost(X3DAUDIO_EMITTER* emit)
@@ -523,10 +549,8 @@ void Sound::playBoost(X3DAUDIO_EMITTER* emit)
 	XAUDIO2_FILTER_PARAMETERS filterParameters = { LowPassFilter, 2.0f * sinf(X3DAUDIO_PI/6.0f * dspSettings.LPFDirectCoefficient), 1.0f };
 	boost->SetFilterParameters(&filterParameters);
 	
-	boost->Start(0);
+	boost->Start();
 }
-
-
 
 X3DAUDIO_EMITTER* Sound::getEmitter()
 {
@@ -544,7 +568,6 @@ X3DAUDIO_EMITTER* Sound::getEmitter()
 	return emitter;
 }
 
-
 void Sound::returnEmitter()
 {
 	if (numClaimedEmitters > 0)
@@ -552,7 +575,6 @@ void Sound::returnEmitter()
 		numClaimedEmitters--;
 	}
 }
-
 
 IXAudio2SourceVoice* Sound::getSFXVoice()
 {
@@ -604,4 +626,90 @@ IXAudio2SourceVoice* Sound::reserveSFXVoice()
 		XAUDIO2_VOICE_USEFILTER, XAUDIO2_MAX_FREQ_RATIO, NULL, &SFXSendList, NULL);
 
 	return voiceBufferReserved[currentReservedVoice - 1];
+}
+
+void Sound::playInGameMusic()
+{
+	if (menumusic)
+		menumusic->Stop();
+
+	ingamemusic->Start(0);
+}
+
+void Sound::playMenuMusic()
+{
+	if (ingamemusic)
+		ingamemusic->Stop();
+
+	menumusic->Start(0);
+}
+
+
+
+// Below methods are taken from MSDN XAudio2 reference
+
+HRESULT Sound::FindChunk(HANDLE hFile, DWORD fourcc, DWORD & dwChunkSize, DWORD & dwChunkDataPosition)
+{
+    HRESULT hr = S_OK;
+    if( INVALID_SET_FILE_POINTER == SetFilePointer( hFile, 0, NULL, FILE_BEGIN ) )
+        return HRESULT_FROM_WIN32( GetLastError() );
+
+    DWORD dwChunkType;
+    DWORD dwChunkDataSize;
+    DWORD dwRIFFDataSize = 0;
+    DWORD dwFileType;
+    DWORD bytesRead = 0;
+    DWORD dwOffset = 0;
+
+    while (hr == S_OK)
+    {
+        DWORD dwRead;
+        if( 0 == ReadFile( hFile, &dwChunkType, sizeof(DWORD), &dwRead, NULL ) )
+            hr = HRESULT_FROM_WIN32( GetLastError() );
+
+        if( 0 == ReadFile( hFile, &dwChunkDataSize, sizeof(DWORD), &dwRead, NULL ) )
+            hr = HRESULT_FROM_WIN32( GetLastError() );
+
+        switch (dwChunkType)
+        {
+		case 'FFIR':
+            dwRIFFDataSize = dwChunkDataSize;
+            dwChunkDataSize = 4;
+            if( 0 == ReadFile( hFile, &dwFileType, sizeof(DWORD), &dwRead, NULL ) )
+                hr = HRESULT_FROM_WIN32( GetLastError() );
+            break;
+
+        default:
+            if( INVALID_SET_FILE_POINTER == SetFilePointer( hFile, dwChunkDataSize, NULL, FILE_CURRENT ) )
+            return HRESULT_FROM_WIN32( GetLastError() );            
+        }
+
+        dwOffset += sizeof(DWORD) * 2;
+		
+        if (dwChunkType == fourcc)
+        {
+            dwChunkSize = dwChunkDataSize;
+            dwChunkDataPosition = dwOffset;
+            return S_OK;
+        }
+
+        dwOffset += dwChunkDataSize;
+        
+        if (bytesRead >= dwRIFFDataSize) return S_FALSE;
+
+    }
+
+    return S_OK;
+    
+}
+
+HRESULT Sound::ReadChunkData(HANDLE hFile, void * buffer, DWORD buffersize, DWORD bufferoffset)
+{
+    HRESULT hr = S_OK;
+    if( INVALID_SET_FILE_POINTER == SetFilePointer( hFile, bufferoffset, NULL, FILE_BEGIN ) )
+        return HRESULT_FROM_WIN32( GetLastError() );
+    DWORD dwRead;
+    if( 0 == ReadFile( hFile, buffer, buffersize, &dwRead, NULL ) )
+        hr = HRESULT_FROM_WIN32( GetLastError() );
+    return hr;
 }
