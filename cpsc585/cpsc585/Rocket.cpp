@@ -36,7 +36,6 @@ Rocket::Rocket(IDirect3DDevice9* device)
 
 	emitter = Sound::sound->getEmitter();
 
-
 	if (!rocketVoice)
 		rocketVoice = Sound::sound->reserveSFXVoice();
 
@@ -140,8 +139,7 @@ void Rocket::explode()
 	destroyed = true;
 	rocketVoice->Stop();
 
-	Sound::sound->playBoost(emitter);
-
+	Sound::sound->playExplosion(emitter);
 	Explosion* explosion = new Explosion(Renderer::device, &(body->getTransform()), owner);
 
 	explosion->doDamage();

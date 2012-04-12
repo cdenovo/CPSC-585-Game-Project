@@ -5,8 +5,11 @@
 #include <X3DAudio.h>
 #include <iostream>
 #include <fstream>
+#include <time.h>
 
-enum SoundEffect { LASERSFX, CRASHSFX, ENGINESFX, BOOSTSFX, ROCKETSFX };
+enum SoundEffect { LASERSFX, CRASHSFX, ENGINESFX, BOOSTSFX, ROCKETSFX, DROPMINESFX,
+	SCREAM1SFX, SCREAM2SFX, SCREAM3SFX, CAREXPLODESFX, EXPLOSIONSFX, BEEPSFX,
+	ROCKETLAUNCHSFX, PICKUPSFX };
 
 #define NUM_EMITTERS 500
 
@@ -21,6 +24,13 @@ public:
 	void playCrash(X3DAUDIO_EMITTER* emit);
 	void playEngine(X3DAUDIO_EMITTER* emit, float freq, IXAudio2SourceVoice* engine);
 	void playBoost(X3DAUDIO_EMITTER* emit);
+	void playDropMine(X3DAUDIO_EMITTER* emit);
+	void playScream(X3DAUDIO_EMITTER* emit);
+	void playExplosion(X3DAUDIO_EMITTER* emit);
+	void playCarExplode(X3DAUDIO_EMITTER* emit);
+	void playBeep(X3DAUDIO_EMITTER* emit);
+	void playRocketLaunch(X3DAUDIO_EMITTER* emit);
+	void playPickup(X3DAUDIO_EMITTER* emit);
 	void returnEmitter();
 	void playRocket(X3DAUDIO_EMITTER* emit, IXAudio2SourceVoice* rocket);
 	void playInGameMusic();
@@ -70,9 +80,6 @@ private:
 
 	IXAudio2SourceVoice* ingamemusic;
 	IXAudio2SourceVoice* menumusic;
-	IXAudio2SourceVoice* laser;
-	IXAudio2SourceVoice* crash;
-	IXAudio2SourceVoice* boost;
 
 
 	XAUDIO2_BUFFER* laserBufferDetails;
@@ -80,6 +87,30 @@ private:
 	XAUDIO2_BUFFER* engineBufferDetails;
 	XAUDIO2_BUFFER* boostBufferDetails;
 	XAUDIO2_BUFFER* rocketBufferDetails;
+	XAUDIO2_BUFFER* dropmineBufferDetails;
+	XAUDIO2_BUFFER* scream1BufferDetails;
+	XAUDIO2_BUFFER* scream2BufferDetails;
+	XAUDIO2_BUFFER* scream3BufferDetails;
+	XAUDIO2_BUFFER* explosionBufferDetails;
+	XAUDIO2_BUFFER* carexplodeBufferDetails;
+	XAUDIO2_BUFFER* beepBufferDetails;
+	XAUDIO2_BUFFER* rocketlaunchBufferDetails;
+	XAUDIO2_BUFFER* pickupBufferDetails;
+
+	XAUDIO2_BUFFER_WMA* laserWMABuffer;
+	XAUDIO2_BUFFER_WMA* crashWMABuffer;
+	XAUDIO2_BUFFER_WMA* engineWMABuffer;
+	XAUDIO2_BUFFER_WMA* boostWMABuffer;
+	XAUDIO2_BUFFER_WMA* rocketWMABuffer;
+	XAUDIO2_BUFFER_WMA* dropmineWMABuffer;
+	XAUDIO2_BUFFER_WMA* scream1WMABuffer;
+	XAUDIO2_BUFFER_WMA* scream2WMABuffer;
+	XAUDIO2_BUFFER_WMA* scream3WMABuffer;
+	XAUDIO2_BUFFER_WMA* explosionWMABuffer;
+	XAUDIO2_BUFFER_WMA* carexplodeWMABuffer;
+	XAUDIO2_BUFFER_WMA* beepWMABuffer;
+	XAUDIO2_BUFFER_WMA* rocketlaunchWMABuffer;
+	XAUDIO2_BUFFER_WMA* pickupWMABuffer;
 
 	char* ingamemusicBuffer;
 	char* menumusicBuffer;
@@ -88,6 +119,15 @@ private:
 	char* engineBuffer;
 	char* boostBuffer;
 	char* rocketBuffer;
+	char* dropmineBuffer;
+	char* scream1Buffer;
+	char* scream2Buffer;
+	char* scream3Buffer;
+	char* carexplodeBuffer;
+	char* explosionBuffer;
+	char* beepBuffer;
+	char* rocketlaunchBuffer;
+	char* pickupBuffer;
 
 
 	int currentVoice;
@@ -99,7 +139,7 @@ private:
 	IXAudio2SourceVoice** voiceBuffer;
 	IXAudio2SourceVoice** voiceBufferReserved;
 
-	WAVEFORMATEX wfm;
+	WAVEFORMATEXTENSIBLE* wfm;
 
 	UINT32* ingameMusicXMABuffer;
 	UINT32* menuMusicXMABuffer;

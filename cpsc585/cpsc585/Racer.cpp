@@ -43,7 +43,6 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	Renderer::renderer->addDrawable(laserDraw);
 
 	engineVoice = Sound::sound->reserveSFXVoice();
-	engineVoice->SetVolume(0.4f);
 
 	health = 100;
 	kills = 0;
@@ -1305,7 +1304,7 @@ hkpWorldRayCastInput Racer::fireWeapon()
 
 void Racer::fireRocket()
 {
-	Sound::sound->playLaser(emitter);
+	Sound::sound->playRocketLaunch(emitter);
 
 	hkpWorldRayCastInput input;
 	hkpWorldRayCastOutput output = hkpWorldRayCastOutput();
@@ -1323,7 +1322,7 @@ void Racer::fireRocket()
 	to.normalize3();
 	// Change this so rocket is facing rocketDir when launched
 					
-					
+	
 	Rocket* currentRocket = new Rocket(Renderer::device);
 					
 	currentRocket->owner = this;
@@ -1350,7 +1349,7 @@ void Racer::fireRocket()
 
 void Racer::dropMine()
 {
-	Sound::sound->playLaser(emitter);
+	Sound::sound->playDropMine(emitter);
 
 	Landmine* currentMine = new Landmine(Renderer::device);
 					
@@ -1389,6 +1388,9 @@ void Racer::applyDamage(Racer* attacker, int damage)
 
 	if (health <= 0)
 	{
+		Sound::sound->playScream(emitter);
+		Sound::sound->playCarExplode(emitter);
+
 		health = 100;
 		//respawn();
 

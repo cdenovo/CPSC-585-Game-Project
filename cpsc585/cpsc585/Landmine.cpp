@@ -119,8 +119,7 @@ void Landmine::update(float seconds)
 			if (activationTime <= 0.0f)
 			{
 				activated = true;
-				IXAudio2SourceVoice* voice = Sound::sound->getSFXVoice();
-				Sound::sound->playRocket(emitter, voice);
+				Sound::sound->playBeep(emitter);
 			}
 		}
 		else if (triggered)
@@ -139,8 +138,7 @@ void Landmine::explode()
 {
 	destroyed = true;
 
-	Sound::sound->playBoost(emitter);
-
+	Sound::sound->playExplosion(emitter);
 	Explosion* explosion = new Explosion(Renderer::device, &(body->getTransform()), owner);
 
 	explosion->doDamage();
@@ -155,7 +153,7 @@ void Landmine::trigger()
 	if (!triggered && activated)
 	{
 		triggered = true;
-		Sound::sound->playLaser(emitter);
+		Sound::sound->playBeep(emitter);
 	}
 }
 
@@ -166,6 +164,7 @@ LandmineListener::LandmineListener(Landmine* l)
 
 void LandmineListener::collisionAddedCallback(const hkpCollisionEvent& ev)
 {
-	if (!(landmine->triggered) && (landmine->activated) && !(landmine->destroyed))
+	if (!(landmine->triggered) && (landmine->activated) && !(landmine->destroyed)) {
 		landmine->trigger();
+	}
 }
