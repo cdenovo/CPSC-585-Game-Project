@@ -62,13 +62,31 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	switch (racerType)
 	{
 	case RACER1:
-		drawable = new Drawable(RACER, "textures/racer1.dds", device);
+		drawable = new Drawable(RACER, "textures/racerred.dds", device);
 		break;
 	case RACER2:
-		drawable = new Drawable(RACER, "textures/racer2.dds", device);
+		drawable = new Drawable(RACER, "textures/racerblue.dds", device);
+		break;
+	case RACER3:
+		drawable = new Drawable(RACER, "textures/racerorange.dds", device);
+		break;
+	case RACER4:
+		drawable = new Drawable(RACER, "textures/racergreen.dds", device);
+		break;
+	case RACER5:
+		drawable = new Drawable(RACER, "textures/racerteal.dds", device);
+		break;
+	case RACER6:
+		drawable = new Drawable(RACER, "textures/raceryellow.dds", device);
+		break;
+	case RACER7:
+		drawable = new Drawable(RACER, "textures/racerpurple.dds", device);
+		break;
+	case RACER8:
+		drawable = new Drawable(RACER, "textures/racerpink.dds", device);
 		break;
 	default:
-		drawable = new Drawable(RACER, "textures/racer2.dds", device);
+		drawable = new Drawable(RACER, "textures/racerred.dds", device);
 	}
 
 
