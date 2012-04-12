@@ -892,7 +892,7 @@ void Sound::playCrash(X3DAUDIO_EMITTER* emit)
 {
 	IXAudio2SourceVoice* crash = getSFXVoice();
 
-	crash->SetVolume(1.0f);
+	crash->SetVolume(0.5f);
 
 	crash->FlushSourceBuffers();
 	crash->SubmitSourceBuffer(crashBufferDetails, crashWMABuffer);
