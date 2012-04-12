@@ -97,7 +97,7 @@ void Sound::initialize()
 	musicSendList.pSends = &musicSend;
 
 	// Set music volume HERE
-	smMusic->SetVolume(0.2f);
+	smMusic->SetVolume(0.1f);
 
 	// Set sound effect volume HERE
 	smSFX->SetVolume(1.0f);
@@ -158,11 +158,11 @@ void Sound::initialize()
 	{
 		ZeroMemory(&(emitters[i]), sizeof(emitters[i]));
 		emitters[i].ChannelCount = 1;
-		emitters[i].InnerRadius = 5.0f;
+		emitters[i].InnerRadius = 6.0f;
 		emitters[i].InnerRadiusAngle = X3DAUDIO_PI * 2.0f;
 
-		emitters[i].CurveDistanceScaler = 6.0f;
-		emitters[i].DopplerScaler = 1.5f;
+		emitters[i].CurveDistanceScaler = 8.0f;
+		emitters[i].DopplerScaler = 1.2f;
 	}
 	
 	ZeroMemory(&dspSettings, sizeof(X3DAUDIO_DSP_SETTINGS));
