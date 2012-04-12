@@ -3,10 +3,11 @@
 IXAudio2SourceVoice* Rocket::rocketVoice = NULL;
 
 
-Rocket::Rocket(IDirect3DDevice9* device)
+Rocket::Rocket(IDirect3DDevice9* device, Racer* o)
 {
 	drawable = new Drawable(ROCKETMESH, "textures/rocket.dds", device);
 
+	owner = o;
 	hkVector4 startAxis;
 	startAxis.set(0, 0, -0.5f);
 
@@ -20,6 +21,7 @@ Rocket::Rocket(IDirect3DDevice9* device)
 	info.m_friction = 0.0f;
 	info.m_shape = new hkpCylinderShape(startAxis, endAxis, radius);
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL;
+	info.m_collisionFilterInfo = owner->body->getCollisionFilterInfo();
 	
 	body = new hkpRigidBody(info);		//Create rigid body
 	body->setLinearVelocity(hkVector4(0, 0, 0));

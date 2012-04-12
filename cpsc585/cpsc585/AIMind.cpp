@@ -268,7 +268,7 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 					_itoa_s(speedBoost->getCooldownTime(), buf1, 10);
 				}
 
-				//racer->accelerate(seconds, baseSpeed + speedBoost->getBoostValue());
+				racer->accelerate(seconds, baseSpeed + speedBoost->getBoostValue());
 
 				/************* STEERING CALCULATIONS *************/
 
@@ -384,8 +384,7 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 		not change for a particular amount of time, it will reset its location
 		to its current waypoints location.
 	*/
-	// Disabled for now, for testing
-	/*
+	
 	hkVector4 currentPosition = racer->body->getPosition();
 	int distanceTo = (int)currentPosition.distanceTo(lastPosition);
 	newTime = time(NULL);
@@ -427,8 +426,7 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 		oldTime = newTime;
 	}
 
-	overallPosition = currentWaypoint + (currentLap-1)*80; // 80 represent the number of waypoints
-	*/
+	overallPosition = currentWaypoint + (currentLap-1)*80; // 80 represents the number of waypoints
 }
 
 float AIMind::calculateAngleToPosition(hkVector4* position)

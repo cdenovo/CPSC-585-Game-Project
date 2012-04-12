@@ -12,7 +12,7 @@ class Rocket :
 	public DynamicObj
 {
 public:
-	Rocket(IDirect3DDevice9* device);
+	Rocket(IDirect3DDevice9* device, Racer* owner);
 	~Rocket(void);
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians

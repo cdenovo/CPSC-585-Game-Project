@@ -1323,7 +1323,7 @@ void Racer::fireRocket()
 	// Change this so rocket is facing rocketDir when launched
 					
 	
-	Rocket* currentRocket = new Rocket(Renderer::device);
+	Rocket* currentRocket = new Rocket(Renderer::device, this);
 					
 	currentRocket->owner = this;
 
