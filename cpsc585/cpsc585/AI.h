@@ -91,6 +91,8 @@ private:
 	// Waypoints
 	Waypoint* waypoints[NUMWAYPOINTS];
 
+	Waypoint* buildingWaypoint;
+
 	// Checkpoints
 	Waypoint* checkpoints[NUMCHECKPOINTS];
 	Waypoint* prevCheckpoints[NUMCHECKPOINTS];

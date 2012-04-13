@@ -65,7 +65,7 @@ AIMind::~AIMind(void)
 	}
 }
 
-void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* waypoints[], Waypoint* checkpoints[], Waypoint* prevCheckpoints[], Racer* racers[], AIMind* racerPlacement[]){
+void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* waypoints[], Racer* racers[], AIMind* racerPlacement[], Waypoint* buildingWaypoint){
 	// Once the race is completed, the player is turned into an AI at which point an end of game hud would display.
 	if(currentLap == numberOfLapsToWin+1){ 
 		finishedRace = true;
@@ -75,9 +75,9 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 		}
 	}
 
-	checkPointTime = checkPointTimer->update(checkpoints, prevCheckpoints);
+	//checkPointTime = checkPointTimer->update(checkpoints, prevCheckpoints);
 
-	updateWaypointsAndLap(seconds, waypoints);
+	updateWaypointsAndLap(seconds, waypoints, buildingWaypoint);
 
 	/*
 	if(checkPointTimer->downgradeAbility()){
@@ -613,7 +613,7 @@ int AIMind::getCheckpointTime()
 }
 
 // When an AI reaches its waypoint, it will update its goal to the next waypoint
-void AIMind::updateWaypointsAndLap(float seconds, Waypoint* waypoints[])
+void AIMind::updateWaypointsAndLap(float seconds, Waypoint* waypoints[], Waypoint* buildingWaypoint)
 {
 	int prevWaypoint;
 	if(currentWaypoint - 1 == -1){
@@ -642,6 +642,11 @@ void AIMind::updateWaypointsAndLap(float seconds, Waypoint* waypoints[])
 		else{
 			currentWaypoint += 1;
 		}
+	}
+
+	hkSimdReal distanceToBuilding = buildingWaypoint->wpPosition.distanceTo(getRacerPosition());
+	if(distanceToBuilding.isLess(30)){
+		currentWaypoint = 25;
 	}
 }
 

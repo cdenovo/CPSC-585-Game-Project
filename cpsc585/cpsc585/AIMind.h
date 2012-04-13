@@ -18,7 +18,7 @@ class AIMind
 public:
 	AIMind(Racer* racer, TypeOfRacer _racerType, int NumberOfRacers, std::string _racerName);
 	~AIMind(void);
-	void update(HUD* hud, Intention intention, float seconds, Waypoint* waypoints[], Waypoint* checkpoints[], Waypoint* prevCheckpoints[], Racer* racers[], AIMind* racerPlacement[]);
+	void update(HUD* hud, Intention intention, float seconds, Waypoint* waypoints[], Racer* racers[], AIMind* racerPlacement[], Waypoint* buildingWaypoint);
 	void togglePlayerComputerAI();
 	void setPlacement(int place);
 	int getPlacement();
@@ -47,7 +47,7 @@ public:
 	std::string getRacerName();
 
 private:
-	void updateWaypointsAndLap(float seconds, Waypoint* waypoints[]);
+	void updateWaypointsAndLap(float seconds, Waypoint* waypoints[], Waypoint* buildingWaypoint);
 	void acquireAmmo();
 	void upgrade();
 	void downgrade();

@@ -158,6 +158,9 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 
 	//Initialize Waypoints
 	wpEditor->loadWaypoints(waypoints, "RaceTrack.txt"); 
+	buildingWaypoint = new Waypoint(renderer->getDevice(), WAY_POINT);
+	buildingWaypoint->setPosAndRot(258.0f, 31.0f, 85.0f, 0.0f, 0.0f, 0.0f);
+
 	
 	// Initializing racer's look direction at game start.
 	D3DXVECTOR3 target = waypoints[0]->drawable->getPosition();
@@ -174,7 +177,7 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 
 	//Initialize HUD
 	hud = renderer->getHUD();
-	checkPointTimer = new CheckpointTimer(player);
+	//checkPointTimer = new CheckpointTimer(player);
 
 	// This is how you set an object for the camera to focus on!
 	renderer->setFocus(racers[racerIndex]->getIndex());
@@ -319,7 +322,7 @@ void AI::simulate(float seconds)
 	
 
 	for(int i = 0; i < NUMRACERS; i++){
-		racerMinds[i]->update(hud, intention, seconds, waypoints, checkpoints, prevCheckpoints, racers, racerPlacement);
+		racerMinds[i]->update(hud, intention, seconds, waypoints, racers, racerPlacement, buildingWaypoint);
 	}
 	
 	updateRacerPlacement(0, NUMRACERS - 1);
