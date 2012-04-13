@@ -8,7 +8,8 @@ AIMind::AIMind(Racer* _racer, TypeOfRacer _racerType, int NumberOfRacers, std::s
 	numberOfLapsToWin = 3;
 	racer = _racer;
 	racerType = _racerType;
-	newTime = NULL;
+	newTime = 0;
+	spawnTime = 0.0f;
 	oldTime = time(NULL);
 	lastPosition = racer->body->getPosition();
 	currentWaypoint = 0;
@@ -289,16 +290,16 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 					if(placement < playerPlacement) // Slow the racers down the further ahead they are than the player
 					{
 						int distance = overallPosition - racerPlacement[indexOfPlayer]->getOverallPosition();
-						if(distance > 20){
+						if(distance > 8){
 							baseSpeed = 0.0f;
 						}
-						else if(distance > 15){
+						else if(distance > 6){
 							baseSpeed = 0.2f;
 						}
-						else if(distance > 10){
+						else if(distance > 4){
 							baseSpeed = 0.4f;
 						}
-						else if(distance > 5){
+						else if(distance > 2){
 							baseSpeed = 0.6f;
 						}
 						else{
@@ -543,7 +544,49 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 		not change for a particular amount of time, it will reset its location
 		to its current waypoints location.
 	*/
-	
+	hkVector4 upVec = racer->drawable->getYhkVector();
+	hkVector4 actualUp = hkVector4(0,1,0);
+	actualUp.normalize3();
+	upVec.normalize3();
+	spawnTime += seconds;
+	//int timeDiff = (int)difftime(newTime, oldTime);
+	if(upVec.dot3(actualUp).isLess(0)){
+		if(spawnTime > 2.0f){
+		D3DXVECTOR3 cwPosition = waypoints[currentWaypoint]->drawable->getPosition();
+			D3DXVECTOR3 nextPosition = waypoints[currentWaypoint+1]->drawable->getPosition();
+			hkVector4 wayptVec;
+			wayptVec.set(nextPosition.x, nextPosition.y, nextPosition.z);
+
+			wayptVec.sub(hkVector4(cwPosition.x, cwPosition.y, cwPosition.z));
+
+			hkVector4 resetPosition;
+			resetPosition.set(cwPosition.x, cwPosition.y, cwPosition.z);
+
+			
+			racer->reset(&resetPosition, 0);
+			wayptVec(1) = 0.0f;
+			wayptVec.normalize3();
+ 
+			hkVector4 z = racer->drawable->getZhkVector();
+			hkVector4 x = racer->drawable->getXhkVector();
+ 
+			float angle = hkMath::acos(z.dot3(wayptVec)); // angle is between 0 and 183
+			
+			// if the vector is on the LEFT side of the car...
+			if (x.dot3(wayptVec) < 0.0f)
+				angle *= -1.0f;
+ 
+			rotationAngle = angle;
+ 
+			racer->reset(&resetPosition, angle);
+			calculateAngleToPosition(&(hkVector4(nextPosition.x, nextPosition.y, nextPosition.z)));
+			spawnTime = 0.0f;
+		}
+	}
+	else{
+		spawnTime = 0.0f;
+	}
+	/*
 	hkVector4 currentPosition = racer->body->getPosition();
 	int distanceTo = (int)currentPosition.distanceTo(lastPosition);
 	newTime = time(NULL);
@@ -584,7 +627,7 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 		}
 		oldTime = newTime;
 	}
-	
+	*/
 	overallPosition = currentWaypoint + (currentLap-1)*83; // 83 represent the number of waypoints
 	
 }

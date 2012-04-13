@@ -64,6 +64,7 @@ private:
 
 	time_t oldTime;
 	time_t newTime;
+	float spawnTime;
 
 	hkVector4 lastPosition;
 
