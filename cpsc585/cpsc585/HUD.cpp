@@ -64,8 +64,9 @@ HUD::HUD(int width, int height)
 
 	currentSpeed = 0;
 	currentHealth = 100;
-	currentCheckpointTime = 0;
+	position = 0;
 	currentLap = 0;
+	numLapsToWin = 0;
 }
 
 void HUD::initialize(IDirect3DDevice9* device)
@@ -74,9 +75,10 @@ void HUD::initialize(IDirect3DDevice9* device)
 	D3DXCreateTextureFromFile(device, "textures/reticule.dds", &reticuleTexture);
 	D3DXCreateTextureFromFile(device, "textures/speedometer.dds", &speedoTexture);
 	D3DXCreateTextureFromFile(device, "textures/needle.dds", &needleTexture);
-	D3DXCreateTextureFromFile(device, "textures/LCD.dds", &numbersTexture);
+	D3DXCreateTextureFromFile(device, "textures/numbers.dds", &numbersTexture);
 	D3DXCreateTextureFromFile(device, "textures/healthBar.dds", &healthBarTexture);
 	D3DXCreateTextureFromFile(device, "textures/healthBarBorder.dds", &healthBarBorderTexture);
+	D3DXCreateTextureFromFile(device, "textures/lapPositions.dds", &lapPositionsTexture);
 	D3DXCreateSprite(device, &sprite);
 }
 
@@ -255,8 +257,8 @@ void HUD::render()
 	}
 
 
-	// Draw checkpoint timer
-	drawCheckpointTime();
+	// Draw position
+	drawPosition();
 
 	// Draw health
 	drawHealth();
@@ -330,131 +332,153 @@ void HUD::drawHealth()
 	sprite->Draw(healthBarBorderTexture, NULL, &actualCenter, &drawPos, 0xFFFFFFFF);
 }
 
-void HUD::drawCheckpointTime()
+void HUD::drawPosition()
 {
-	char timeString[6];
-	_itoa_s(currentCheckpointTime, timeString, 6, 10);
-
 	D3DXVECTOR3 drawPos;
-	drawPos.x = screenWidth / 2.0f - 32.0f;
-	drawPos.y = 64.0f;
+	drawPos.x = screenWidth - 80.0f;
+	drawPos.y = 128.0f;
 	drawPos.z = 0.0f;
 
 	D3DXVECTOR3 currCenter;
-	currCenter.x = 8.0f;
-	currCenter.y = 14.0f;
+	currCenter.x = 32.0f;
+	currCenter.y = 32.0f;
 	currCenter.z = 0.0f;
 
 	RECT current;
 
 	current.top = 0;
-	current.bottom = 28;
+	current.bottom = 64;
 	current.left = 0;
-	current.right = 16;
+	current.right = 64;
 
-	for (int i = 0; i < 5; i++)
-	{
-		if (timeString[i] == '0')
+	switch (position) {
+	case 1:
 		{
-			current.left = 16 * 9;
-			current.right = 16 * 10;
-
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  D3DCOLOR_XRGB(0, 255, 255));
-
-			drawPos.x += 16.0f;
-		}
-		else if (timeString[i] == ':')
-		{
-			current.left = 16 * 10;
-			current.right = 16 * 11;
-
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  D3DCOLOR_XRGB(0, 255, 255));
-
-			drawPos.x += 16.0f;
-		}
-		else if ((timeString[i] > '0') && (timeString[i] <= '9'))
-		{
-			int num = (int) timeString[i] - '0';
-
-			current.left = 16 * (num - 1);
-			current.right = 16 * num;
-
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  D3DCOLOR_XRGB(0, 255, 255));
-
-			drawPos.x += 16.0f;
-		}
-		else
-		{
+			current.left += 64;
+			current.right += 64;
 			break;
 		}
+	case 2:
+		{
+			current.left += 128;
+			current.right += 128;
+			break;
+		}
+	case 3:
+		{
+			current.left += 192;
+			current.right += 192;
+			break;
+		}
+	case 4:
+		{
+			current.top += 64;
+			current.bottom += 64;
+			break;
+		}
+	case 5:
+		{
+			current.top += 64;
+			current.bottom += 64;
+			current.left += 64;
+			current.right += 64;
+			break;
+		}
+	case 6:
+		{
+			current.top += 64;
+			current.bottom += 64;
+			current.left += 128;
+			current.right += 128;
+			break;
+		}
+	case 7:
+		{
+			current.top += 64;
+			current.bottom += 64;
+			current.left += 192;
+			current.right += 192;
+			break;
+		}
+	case 8:
+		{
+			current.top += 128;
+			current.bottom += 128;
+			break;
+		}
+	default:
+		break;
 	}
 	
+	sprite->Draw(lapPositionsTexture, &current, &currCenter, &drawPos, 0xFFFFFFFF);
 }
 
 
-void HUD::setCheckpointTime(int time)
+void HUD::setPosition(int pos)
 {
-	currentCheckpointTime = time;
+	position = pos;
 }
 
-void HUD::setLap(int lap)
+void HUD::setLap(int lap, int numToWin)
 {
 	currentLap = lap;
+	numLapsToWin = numToWin;
 }
 
 
 void HUD::drawLap()
 {
-	char lapString[6];
-	_itoa_s(currentLap, lapString, 6, 10);
+	char lapString[3];
+	
+	// This assumes that we will never be doing more than 9 laps
+	lapString[0] = (char) currentLap + '0';
+	lapString[1] = '/';
+	lapString[2] = (char) numLapsToWin + '0';
 
 	D3DXVECTOR3 drawPos;
-	drawPos.x = screenWidth - 64.0f;
-	drawPos.y = 64.0f;
+	drawPos.x = screenWidth - 192.0f;
+	drawPos.y = 45.0f;
 	drawPos.z = 0.0f;
 
 	D3DXVECTOR3 currCenter;
-	currCenter.x = 8.0f;
-	currCenter.y = 14.0f;
+	currCenter.x = 16.0f;
+	currCenter.y = 32.0f;
 	currCenter.z = 0.0f;
 
 	RECT current;
 
 	current.top = 0;
-	current.bottom = 28;
+	current.bottom = 64;
 	current.left = 0;
-	current.right = 16;
+	current.right = 64;
+
+	sprite->Draw(lapPositionsTexture, &current, &currCenter, &drawPos, 0xFFFFFFFF);
+	drawPos.x += 80.0f;
+
+	current.right = 32;
+
 
 	for (int i = 0; i < 5; i++)
 	{
-		if (lapString[i] == '0')
+		if (lapString[i] == '/')
 		{
-			current.left = 16 * 9;
-			current.right = 16 * 10;
+			current.left = 32 * 11;
+			current.right = 32 * 12;
 
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos, D3DCOLOR_XRGB(0, 0, 255));
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos, 0xFFFFFFFF);
 
-			drawPos.x += 16.0f;
+			drawPos.x += 32.0f;
 		}
-		else if (lapString[i] == ':')
-		{
-			current.left = 16 * 10;
-			current.right = 16 * 11;
-
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  D3DCOLOR_XRGB(0, 0, 255));
-
-			drawPos.x += 16.0f;
-		}
-		else if ((lapString[i] > '0') && (lapString[i] <= '9'))
+		else if ((lapString[i] >= '0') && (lapString[i] <= ':'))
 		{
 			int num = (int) lapString[i] - '0';
 
-			current.left = 16 * (num - 1);
-			current.right = 16 * num;
+			current.left = 32 * num;
+			current.right = 32 * (num + 1);
 
-			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos,  D3DCOLOR_XRGB(0, 0, 255));
+			sprite->Draw(numbersTexture, &current, &currCenter, &drawPos, 0xFFFFFFFF);
 
-			drawPos.x += 16.0f;
+			drawPos.x += 32.0f;
 		}
 		else
 		{

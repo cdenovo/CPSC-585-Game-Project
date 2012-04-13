@@ -142,8 +142,8 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 
 				hud->setSpeed(velocity);
 				hud->setHealth(racer->health);
-				hud->setCheckpointTime(checkPointTime);
-				hud->setLap(placement);
+				hud->setPosition(placement);
+				hud->setLap(currentLap, numberOfLapsToWin);
 
 				racer->computeRPM();
 
