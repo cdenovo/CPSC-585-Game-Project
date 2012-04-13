@@ -47,6 +47,9 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	health = 100;
 	kills = 0;
 	suicides = 0;
+	deaths = 0;
+	givenDamage = 0;
+	takenDamage = 0;
 	laserReady = true;
 	laserTime = 0.0f;
 
@@ -1399,6 +1402,7 @@ void Racer::applyDamage(Racer* attacker, int damage)
 			if (attacker != this)
 			{
 				attacker->kills += 1;
+				deaths += 1;
 			}
 			else
 			{
@@ -1406,6 +1410,10 @@ void Racer::applyDamage(Racer* attacker, int damage)
 				suicides += 1;
 			}
 		}
+	}
+	if(attacker != this){
+		attacker->givenDamage += damage;
+		takenDamage += damage;
 	}
 }
 

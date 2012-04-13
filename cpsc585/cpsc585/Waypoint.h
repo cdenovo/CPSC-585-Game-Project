@@ -2,7 +2,7 @@
 
 #include "Drawable.h"
 #include "Physics.h"
-
+ 
 enum WPType { WAY_POINT, CHECK_POINT, LAP_POINT, TURN_POINT, SHARP_POINT };
 
 class Waypoint

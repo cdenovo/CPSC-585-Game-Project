@@ -16,9 +16,9 @@ enum TypeOfRacer { PLAYER, COMPUTER };
 class AIMind
 {
 public:
-	AIMind(Racer* racer, TypeOfRacer _racerType);
+	AIMind(Racer* racer, TypeOfRacer _racerType, int NumberOfRacers, std::string _racerName);
 	~AIMind(void);
-	void update(HUD* hud, Intention intention, float seconds, Waypoint* waypoints[], Waypoint* checkpoints[], Waypoint* prevCheckpoints[], Racer* racers[]);
+	void update(HUD* hud, Intention intention, float seconds, Waypoint* waypoints[], Waypoint* checkpoints[], Waypoint* prevCheckpoints[], Racer* racers[], AIMind* racerPlacement[]);
 	void togglePlayerComputerAI();
 	void setPlacement(int place);
 	int getPlacement();
@@ -30,11 +30,25 @@ public:
 	int getSpeedLevel();
 	int getOverallPosition();
 	int getCurrentCheckpoint();
+	int getRocketAmmo();
+	int getSpeedAmmo();
+	int getLandmineAmmo();
+
+	int getKills();
+	int getDeaths();
+	int getSuicides();
+	int getDamageDone();
+	int getDamageTaken();
+
 	float getRotationAngle();
 	hkVector4 getRacerPosition();
+	TypeOfRacer getTypeOfRacer();
+	bool isfinishedRace();
+	std::string getRacerName();
 
 private:
 	void updateWaypointsAndLap(float seconds, Waypoint* waypoints[]);
+	void acquireAmmo();
 	void upgrade();
 	void downgrade();
 	float calculateAngleToPosition(hkVector4* position);
@@ -55,13 +69,23 @@ private:
 
 	TypeOfRacer racerType;
 
+	std::string racerName;
+
 	int currentWaypoint;
 	int checkPointTime;
 	int overallPosition;
 	int currentLap;
 	int placement;
-	int knownNumberOfKills;
 	int numberOfLapsToWin;
+	int numberOfRacers;
+
+	int knownNumberOfKills;
+	int knownNumberOfDeaths;
+	int knownNumberOfSuicides;
+	int knownDamageDone;
+	int knownDamageTaken;
+
+	bool finishedRace;
 
 	float rotationAngle;
 };

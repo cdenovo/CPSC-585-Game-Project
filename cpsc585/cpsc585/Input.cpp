@@ -52,8 +52,18 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam, LPARAM lparam)
 				quit = true;
 			else if ((umessage == WM_KEYDOWN) && (wparam == 'B'))
 				debug = !debug;
-			else if ((umessage == WM_KEYUP) && (wparam == 'X'))
+			else if ((umessage == WM_KEYUP) && (wparam == 'Z')){
+				wpType = WAY_POINT;
 				placeWaypoint = true;
+			}
+			else if ((umessage == WM_KEYUP) && (wparam == 'X')){
+				wpType = TURN_POINT;
+				placeWaypoint = true;
+			}
+			else if ((umessage == WM_KEYUP) && (wparam == 'C')){
+				wpType = SHARP_POINT;
+				placeWaypoint = true;
+			}
 			else if (umessage == WM_KEYDOWN)
 			{
 				switch (wparam)

@@ -14,6 +14,9 @@ public:
 	void updateCooldown(float seconds);
 	float getBoostValue();
 	void update(int levelOfAbility);
+	void decreaseAmmoCount();
+	void increaseAmmoCount();
+	int getAmmoCount();
 	int getAbilityLevel();
 
 private:
@@ -23,5 +26,6 @@ private:
 	float boostDuration;
 	AbilityType abilityType;
 	int abilityLevel;
+	int ammoCount;
 };
 

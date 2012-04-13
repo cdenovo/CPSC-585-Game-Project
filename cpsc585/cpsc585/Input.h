@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <XInput.h>
 #include "Intention.h"
+#include "Waypoint.h"
 
 #define THUMBSTICK_MAX 32767
 
@@ -25,4 +26,7 @@ private:
 	Intention intention;
 	bool controllerAvailable;
 	bool placeWaypoint;
+
+public:
+	WPType wpType;
 };

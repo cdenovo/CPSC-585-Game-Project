@@ -15,7 +15,7 @@ enum RacerType { RACER1, RACER2, RACER3, RACER4, RACER5, RACER6, RACER7, RACER8 
 enum WheelType { FRONT, REAR };
 
 
-#define LASER_DAMAGE 10
+#define LASER_DAMAGE 50
 
 
 class Racer
@@ -59,6 +59,9 @@ public:
 	int health;
 	int kills;
 	int suicides;
+	int deaths;
+	int takenDamage;
+	int givenDamage;
 	float laserTime;
 	bool laserReady;
 
