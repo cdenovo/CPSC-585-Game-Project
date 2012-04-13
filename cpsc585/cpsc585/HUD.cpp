@@ -158,6 +158,24 @@ void HUD::shutdown()
 		numbersTexture = NULL;
 	}
 
+	if (healthBarTexture)
+	{
+		healthBarTexture->Release();
+		healthBarTexture = NULL;
+	}
+
+	if (healthBarBorderTexture)
+	{
+		healthBarBorderTexture->Release();
+		healthBarBorderTexture = NULL;
+	}
+
+	if (lapPositionsTexture)
+	{
+		lapPositionsTexture->Release();
+		lapPositionsTexture = NULL;
+	}
+
 	if (sprite)
 	{
 		sprite->Release();
