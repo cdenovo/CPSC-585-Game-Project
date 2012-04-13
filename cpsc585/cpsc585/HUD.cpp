@@ -346,8 +346,8 @@ void HUD::drawHealth()
 	currCenter.z = 0.0f;
 
 
-	sprite->Draw(healthBarTexture, &current, &currCenter, &drawPos, 0xFFFFFFFF);
-	sprite->Draw(healthBarBorderTexture, NULL, &actualCenter, &drawPos, 0xFFFFFFFF);
+	sprite->Draw(healthBarTexture, &current, &currCenter, &drawPos, 0x8FFFFFFF);
+	sprite->Draw(healthBarBorderTexture, NULL, &actualCenter, &drawPos, 0x8FFFFFFF);
 }
 
 void HUD::drawPosition()

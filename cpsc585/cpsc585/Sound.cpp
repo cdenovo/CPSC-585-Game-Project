@@ -85,7 +85,6 @@ Sound::Sound(void)
 	std::srand((unsigned int) time(NULL));
 }
 
-
 Sound::~Sound(void)
 {
 }

@@ -2,7 +2,7 @@
 
 Renderer* Renderer::renderer = NULL;
 IDirect3DDevice9* Renderer::device = NULL;
-D3DXVECTOR3 Renderer::lightDir = D3DXVECTOR3(0,-0.8f,1);
+D3DXVECTOR3 Renderer::lightDir = D3DXVECTOR3(0,-0.7f,-1);
 
 Renderer::Renderer()
 {
@@ -158,7 +158,8 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	
 	ZeroMemory(&light, sizeof(light));    // clear out the light struct for use
 	light.Type = D3DLIGHT_DIRECTIONAL;    // make the light type 'directional light'
-	light.Diffuse = D3DXCOLOR(0.8f, 0.5f, 0.5f, 1.0f);    // set the light's color
+	light.Diffuse = D3DXCOLOR(0.6f, 0.6f, 0.7f, 1.0f);    // set the light's color
+	light.Ambient = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
 
 	D3DXVec3Normalize(&lightDir, &lightDir);
 	light.Direction = lightDir;
@@ -168,7 +169,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 
 	ZeroMemory(&material, sizeof(D3DMATERIAL9));
 	material.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-	material.Ambient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	material.Ambient = D3DXCOLOR(0.7f, 0.7f, 0.7f, 1.0f);
 
 	device->SetMaterial(&material);    // set the globably-used material to &material
 
@@ -207,10 +208,10 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	points[1].position = D3DXVECTOR4(0, 0, 0, 1);
 	points[2].position = D3DXVECTOR4((FLOAT) width, (FLOAT) height, 0, 1);
 	points[3].position = D3DXVECTOR4((FLOAT) width, 0, 0, 1);
-	points[0].color = D3DCOLOR_ARGB(150,0,0,0);
-	points[1].color = D3DCOLOR_ARGB(150,0,0,0);
-	points[2].color = D3DCOLOR_ARGB(150,0,0,0);
-	points[3].color = D3DCOLOR_ARGB(150,0,0,0);
+	points[0].color = D3DCOLOR_ARGB(180,0,0,0);
+	points[1].color = D3DCOLOR_ARGB(180,0,0,0);
+	points[2].color = D3DCOLOR_ARGB(180,0,0,0);
+	points[3].color = D3DCOLOR_ARGB(180,0,0,0);
 
 	shadowQuadVertexBuffer->Unlock();
 
