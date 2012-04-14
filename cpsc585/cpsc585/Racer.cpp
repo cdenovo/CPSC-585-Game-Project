@@ -104,7 +104,7 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	info.m_restitution = 0.0f;
 	info.m_maxAngularVelocity = 10.0f;
 	info.m_maxLinearVelocity = 170.0f;
-	info.m_angularDamping = 0.3f;
+	info.m_angularDamping = 0.4f;
 	hkpMassProperties massProperties;
 	hkpInertiaTensorComputer::computeBoxVolumeMassProperties(halfExtent, chassisMass, massProperties);
 	info.setMassProperties(massProperties);

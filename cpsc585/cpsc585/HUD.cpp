@@ -61,8 +61,8 @@ HUD::HUD(int width, int height)
 
 
 	speedoPos = new D3DXVECTOR3();
-	speedoPos->x = width - 150.0f;
-	speedoPos->y = height - 150.0f;
+	speedoPos->x = width - 180.0f;
+	speedoPos->y = height - 180.0f;
 	speedoPos->z = 0.0f;
 
 	D3DXMatrixIdentity(&needleTrans);
@@ -273,13 +273,15 @@ void HUD::render()
 		sprite->Draw(reticuleTexture, NULL, &(D3DXVECTOR3(16,16,0)), centre, D3DXCOLOR(1.0f, 0.0f, 0.0f, 0.4f));
 
 	// Draw speedometer
+	IDirect3DDevice9* device;
+	sprite->GetDevice(&device);
+	device->SetRenderState(D3DRS_ZENABLE, FALSE);
 	
+	sprite->Draw(speedoTexture, NULL, &(D3DXVECTOR3(256,256,0)), speedoPos,  0xCFFFFFFF);
 	sprite->SetTransform(&needleTrans);
-	sprite->Draw(needleTexture, NULL, &(D3DXVECTOR3(120,8,0)), speedoPos,  0xFFFFFFFF);
+	sprite->Draw(needleTexture, NULL, &(D3DXVECTOR3(155,64,0)), speedoPos,  0xCFFFFFFF);
 	sprite->SetTransform(&origTrans);
 
-	sprite->Draw(speedoTexture, NULL, &(D3DXVECTOR3(128,124,0)), speedoPos,  0xFFFFFFFF);
-	
 
 	// Draw radial menu
 	if (radialEnabled)
@@ -355,10 +357,12 @@ void HUD::setSpeed(float speed)
 {
 	if (speed < 0.0f)
 		speed *= -1;
+	
+	// Convert to km/hr and divide by 2 (because it doesn't feel like you're
+	// going as fast as you actually are)
+	currentSpeed = (speed * 60.0f * 60.0f / 1000.0f) / 2.0f;
 
-	currentSpeed = speed;
-
-	float angle = speed * 0.038f - 0.78f;
+	float angle = currentSpeed * 0.0175f - 0.7f;
 
 	// Code for updating the speedometer
 	D3DXMATRIX transToCentre, transToPos, rotate;
