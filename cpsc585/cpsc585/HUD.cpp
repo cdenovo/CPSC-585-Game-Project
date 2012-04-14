@@ -210,7 +210,7 @@ void HUD::setSelectedAbility(AbilityType ability)
 	if (ability == selectedAbility)
 		return;
 
-	Sound::sound->playSelect(Sound::sound->playerEmitter);
+	Sound::sound->playSoundEffect(SFX_SELECT, Sound::sound->playerEmitter);
 
 	selectedAbility = ability;
 

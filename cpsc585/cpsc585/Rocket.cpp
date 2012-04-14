@@ -139,7 +139,7 @@ void Rocket::explode()
 	destroyed = true;
 	rocketVoice->Stop();
 
-	Sound::sound->playExplosion(emitter);
+	Sound::sound->playSoundEffect(SFX_EXPLOSION, emitter);
 	Explosion* explosion = new Explosion(Renderer::device, &(body->getTransform()), owner);
 
 	explosion->doDamage();

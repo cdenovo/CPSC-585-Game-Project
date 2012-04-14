@@ -1182,7 +1182,7 @@ void Racer::fireLaser()
 {
 	laserTime = 1.0f;
 
-	Sound::sound->playLaser(emitter);
+	Sound::sound->playSoundEffect(SFX_LASER, emitter);
 
 	hkpWorldRayCastInput input;
 	hkpWorldRayCastOutput output = hkpWorldRayCastOutput();
@@ -1307,7 +1307,7 @@ hkpWorldRayCastInput Racer::fireWeapon()
 
 void Racer::fireRocket()
 {
-	Sound::sound->playRocketLaunch(emitter);
+	Sound::sound->playSoundEffect(SFX_ROCKETLAUNCH, emitter);
 
 	hkpWorldRayCastInput input;
 	hkpWorldRayCastOutput output = hkpWorldRayCastOutput();
@@ -1352,7 +1352,7 @@ void Racer::fireRocket()
 
 void Racer::dropMine()
 {
-	Sound::sound->playDropMine(emitter);
+	Sound::sound->playSoundEffect(SFX_DROPMINE, emitter);
 
 	Landmine* currentMine = new Landmine(Renderer::device);
 					
@@ -1387,12 +1387,12 @@ void Racer::respawn()
 void Racer::applyDamage(Racer* attacker, int damage)
 {
 	health -= damage;
-	Sound::sound->playCrash(emitter);
+	Sound::sound->playSoundEffect(SFX_CRASH, emitter);
 
 	if (health <= 0)
 	{
-		Sound::sound->playScream(emitter);
-		Sound::sound->playCarExplode(emitter);
+		Sound::sound->playSoundEffect(SFX_SCREAM, emitter);
+		Sound::sound->playSoundEffect(SFX_CAREXPLODE, emitter);
 
 		health = 100;
 		//respawn();

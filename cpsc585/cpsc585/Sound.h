@@ -7,10 +7,10 @@
 #include <fstream>
 #include <time.h>
 
-enum SoundEffect { LASERSFX, CRASHSFX, ENGINESFX, BOOSTSFX, ROCKETSFX, DROPMINESFX,
-	SCREAM1SFX, SCREAM2SFX, SCREAM3SFX, CAREXPLODESFX, EXPLOSIONSFX, BEEPSFX,
-	ROCKETLAUNCHSFX, PICKUPSFX, SELECTSFX, SHOTGUNSFX, TAKENLEADSFX, LOSTLEADSFX,
-	NOAMMOSFX, ONESFX, TWOSFX, THREESFX };
+enum SoundEffect { SFX_LASER, SFX_CRASH, SFX_ENGINE, SFX_BOOST, SFX_ROCKET, SFX_DROPMINE,
+	SFX_SCREAM1, SFX_SCREAM2, SFX_SCREAM3, SFX_SCREAM, SFX_CAREXPLODE, SFX_EXPLOSION, SFX_BEEP,
+	SFX_ROCKETLAUNCH, SFX_PICKUP, SFX_SELECT, SFX_SHOTGUN, SFX_TAKENLEAD, SFX_LOSTLEAD,
+	SFX_NOAMMO, SFX_ONE, SFX_TWO, SFX_THREE };
 
 #define NUM_EMITTERS 500
 
@@ -21,33 +21,17 @@ public:
 	~Sound(void);
 	void initialize();
 	void shutdown();
-	void playLaser(X3DAUDIO_EMITTER* emit);
-	void playCrash(X3DAUDIO_EMITTER* emit);
-	void playEngine(X3DAUDIO_EMITTER* emit, float freq, IXAudio2SourceVoice* engine);
-	void playBoost(X3DAUDIO_EMITTER* emit);
-	void playDropMine(X3DAUDIO_EMITTER* emit);
-	void playScream(X3DAUDIO_EMITTER* emit);
-	void playExplosion(X3DAUDIO_EMITTER* emit);
-	void playCarExplode(X3DAUDIO_EMITTER* emit);
-	void playBeep(X3DAUDIO_EMITTER* emit);
-	void playRocketLaunch(X3DAUDIO_EMITTER* emit);
-	void playPickup(X3DAUDIO_EMITTER* emit);
-	void playSelect(X3DAUDIO_EMITTER* emit);
-	void playShotgun(X3DAUDIO_EMITTER* emit);
-	void playTakenLead(X3DAUDIO_EMITTER* emit);
-	void playLostLead(X3DAUDIO_EMITTER* emit);
-	void playNoAmmo(X3DAUDIO_EMITTER* emit);
-	void playOne(X3DAUDIO_EMITTER* emit);
-	void playTwo(X3DAUDIO_EMITTER* emit);
-	void playThree(X3DAUDIO_EMITTER* emit);
-
 	void returnEmitter();
+	IXAudio2SourceVoice* getSFXVoice();
+	IXAudio2SourceVoice* reserveSFXVoice();
+
+	void playSoundEffect(SoundEffect effect, X3DAUDIO_EMITTER* emit);
+	void playEngine(X3DAUDIO_EMITTER* emit, float freq, IXAudio2SourceVoice* engine);
 	void playRocket(X3DAUDIO_EMITTER* emit, IXAudio2SourceVoice* rocket);
 	void playInGameMusic();
 	void playMenuMusic();
 
-	IXAudio2SourceVoice* getSFXVoice();
-	IXAudio2SourceVoice* reserveSFXVoice();
+	
 
 	bool initialized;
 
@@ -63,8 +47,8 @@ private:
 	HRESULT FindChunk(HANDLE hFile, DWORD fourcc, DWORD & dwChunkSize, DWORD & dwChunkDataPosition);
 	HRESULT ReadChunkData(HANDLE hFile, void * buffer, DWORD buffersize, DWORD bufferoffset);
 
-	void loadSound(SoundEffect type, std::string filename, char* &soundBuffer);
-	void loadMusic(IXAudio2SourceVoice* &voice, std::string filename, char* &soundBuffer, UINT32* &xwmaBuffer);
+	void loadSound(SoundEffect type, std::string filename);
+	void loadMusic(IXAudio2SourceVoice* &voice, std::string filename, BYTE* &soundBuffer, UINT32* &xwmaBuffer);
 
 	IXAudio2* audio;
 	IXAudio2MasteringVoice* mVoice;
@@ -92,6 +76,9 @@ private:
 
 	IXAudio2SourceVoice* ingamemusic;
 	IXAudio2SourceVoice* menumusic;
+
+	BYTE* ingamemusicBuffer;
+	BYTE* menumusicBuffer;
 
 
 	XAUDIO2_BUFFER* laserBufferDetails;
@@ -139,31 +126,6 @@ private:
 	XAUDIO2_BUFFER_WMA* oneWMABuffer;
 	XAUDIO2_BUFFER_WMA* twoWMABuffer;
 	XAUDIO2_BUFFER_WMA* threeWMABuffer;
-
-	char* ingamemusicBuffer;
-	char* menumusicBuffer;
-	char* laserBuffer;
-	char* crashBuffer;
-	char* engineBuffer;
-	char* boostBuffer;
-	char* rocketBuffer;
-	char* dropmineBuffer;
-	char* scream1Buffer;
-	char* scream2Buffer;
-	char* scream3Buffer;
-	char* carexplodeBuffer;
-	char* explosionBuffer;
-	char* beepBuffer;
-	char* rocketlaunchBuffer;
-	char* pickupBuffer;
-	char* selectBuffer;
-	char* shotgunBuffer;
-	char* takenleadBuffer;
-	char* lostleadBuffer;
-	char* noammoBuffer;
-	char* oneBuffer;
-	char* twoBuffer;
-	char* threeBuffer;
 
 
 	int currentVoice;

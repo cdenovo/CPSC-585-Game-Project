@@ -89,6 +89,8 @@ private:
 
 	bool finishedRace;
 
+	bool playedNoAmmoSound;
+
 	float rotationAngle;
 };
 
