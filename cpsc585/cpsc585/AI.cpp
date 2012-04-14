@@ -16,6 +16,9 @@ AI::AI(void)
 	ai2 = NULL;
 	ai3 = NULL;
 	ai4 = NULL;
+	ai5 = NULL;
+	ai6 = NULL;
+	ai7 = NULL;
 	world = NULL;
 
 	dynManager = NULL;
@@ -111,6 +114,13 @@ void AI::shutdown()
 
 void AI::initialize(Renderer* r, Input* i, Sound* s)
 {
+	raceStartTimer = 4.0f;
+	raceStarted = false;
+	raceEnded = false;
+	playedOne = false;
+	playedTwo = false;
+	playedThree = false;
+
 	renderer = r;
 	input = i;
 	sound = s;
@@ -136,7 +146,6 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 	
 	//Initialize player
 	player = new Racer(r->getDevice(), RACER1);
-	player->engineVoice->SetVolume(0.5f);
 	player->setPosAndRot(35.0f, 15.0f, -298.0f, 0.0f, 1.4f, 0.0f);
 	playerMind = new AIMind(player, PLAYER, NUMRACERS, "Herald");
 	racers[0] = player;
@@ -181,9 +190,6 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 
 	// This is how you set an object for the camera to focus on!
 	renderer->setFocus(racers[racerIndex]->getIndex());
-
-	// Start playing music
-	Sound::sound->playInGameMusic();
 }
 
 void AI::initializeAIRacers()
@@ -232,8 +238,6 @@ void AI::initializeAIRacers()
 	racerMinds[7] = aiMind7;
 }
 
-
-
 void AI::initializeCheckpoints()
 {
 	prevCheckpoints[0] = new Waypoint(renderer->getDevice(), TURN_POINT);
@@ -269,6 +273,7 @@ void AI::initializeCheckpoints()
 void AI::simulate(float seconds)
 {
 	_ASSERT(seconds > 0.0f);
+
 	Intention intention = input->getIntention();
 
 	// Debugging Information ---------------------------------------
@@ -281,6 +286,9 @@ void AI::simulate(float seconds)
 	}
 	// ---------------------------------------------------------------
 	
+
+
+
 	if(playerMind->isfinishedRace())
 	{
 		displayPostGameStatistics();
@@ -315,6 +323,154 @@ void AI::simulate(float seconds)
 
 	// -------------------------------------------------------------------------------- //
 
+
+	if (!raceStarted)
+	{
+		raceStartTimer -= seconds;
+
+		updateRacerPlacement(0, NUMRACERS - 1);
+
+		for (int i = 0; i < NUMRACERS; i++)
+		{
+			racerPlacement[i]->setPlacement(NUMRACERS-i);
+		}
+
+		// Let player move camera before race starts
+		hkReal angle;
+		float height;
+
+		angle = intention.cameraX * 0.05f;
+
+		if (racers[racerIndex]->config.inverse)
+			height = intention.cameraY * -0.02f + racers[racerIndex]->lookHeight;
+		else
+			height = intention.cameraY * 0.02f + racers[racerIndex]->lookHeight;
+
+		if (height > 0.5f)
+			height = 0.5f;
+		else if (height < -0.5f)
+			height = -0.5f;
+
+		racers[racerIndex]->lookHeight = height;
+
+		if (angle > M_PI)
+			angle = (hkReal) M_PI;
+		else if (angle < -M_PI)
+			angle = (hkReal) -M_PI;
+
+
+		hkQuaternion rotation;
+
+		if (angle < 0.0f)
+		{
+			angle *= -1;
+			rotation.setAxisAngle(hkVector4(0,-1,0), angle);
+		}
+		else
+		{
+			rotation.setAxisAngle(hkVector4(0,1,0), angle);
+		}
+
+		hkTransform transRot;
+		transRot.setIdentity();
+		transRot.setRotation(rotation);
+
+		hkVector4 finalLookDir(0,0,1);
+		finalLookDir.setTransformedPos(transRot, racers[racerIndex]->lookDir);
+
+		finalLookDir(1) = height;
+
+		racers[racerIndex]->lookDir.setXYZ(finalLookDir);
+
+		// Update Heads Up Display
+		hud->update(intention);
+
+		hud->setSpeed(0.0f);
+		hud->setHealth(100);
+		hud->setPosition(racerPlacement[racerIndex]->getPlacement());
+		hud->setLap(1, racerMinds[racerIndex]->numberOfLapsToWin);
+
+
+
+		hkVector4 look = racers[racerIndex]->lookDir;
+		(renderer->getCamera())->setLookDir(look(0), look(1), look(2));
+
+		for (int i = 0; i < NUMRACERS; i++)
+		{
+			racers[i]->applyForces(seconds);
+			racers[i]->computeRPM();
+		}
+
+		physics->step(seconds);
+
+		for (int i = 0; i < NUMRACERS; i++)
+		{
+			racers[i]->update();
+		}
+		
+
+		if (raceStartTimer <= 0.0f)
+		{
+			// Show "GO" on screen, play sound
+			Sound::sound->playShotgun(Sound::sound->playerEmitter);
+
+			raceStartTimer = -0.1f;
+			raceStarted = true;
+			hud->showOne = false;
+		}
+		else if (raceStartTimer <= 1.0f)
+		{
+			if (!playedOne)
+			{
+				// Play "One" sound
+				Sound::sound->playOne(Sound::sound->playerEmitter);
+				playedOne = true;
+
+				// Start playing music
+				Sound::sound->playInGameMusic();
+			}
+
+			// Show "1" on screen
+			hud->showTwo = false;
+			hud->showOne = true;
+
+			return;
+		}
+		else if (raceStartTimer <= 2.0f)
+		{
+			if (!playedTwo)
+			{
+				// Play "Two" sound
+				Sound::sound->playTwo(Sound::sound->playerEmitter);
+				playedTwo = true;
+			}
+
+			// Show "2" on screen
+			hud->showThree = false;
+			hud->showTwo = true;
+
+			return;
+		}
+		else if (raceStartTimer <= 3.0f)
+		{
+			if (!playedThree)
+			{
+				// Play "Three" sound
+				Sound::sound->playThree(Sound::sound->playerEmitter);
+				playedThree = true;
+			}
+
+			// Show "3" on screen
+			hud->showThree = true;
+
+			return;
+		}
+		else
+		{
+
+			return;
+		}
+	}
 
 
 	// Update Checkpoint Timer

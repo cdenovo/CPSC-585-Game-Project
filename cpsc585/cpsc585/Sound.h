@@ -9,7 +9,8 @@
 
 enum SoundEffect { LASERSFX, CRASHSFX, ENGINESFX, BOOSTSFX, ROCKETSFX, DROPMINESFX,
 	SCREAM1SFX, SCREAM2SFX, SCREAM3SFX, CAREXPLODESFX, EXPLOSIONSFX, BEEPSFX,
-	ROCKETLAUNCHSFX, PICKUPSFX, SELECTSFX };
+	ROCKETLAUNCHSFX, PICKUPSFX, SELECTSFX, SHOTGUNSFX, TAKENLEADSFX, LOSTLEADSFX,
+	NOAMMOSFX, ONESFX, TWOSFX, THREESFX };
 
 #define NUM_EMITTERS 500
 
@@ -32,6 +33,14 @@ public:
 	void playRocketLaunch(X3DAUDIO_EMITTER* emit);
 	void playPickup(X3DAUDIO_EMITTER* emit);
 	void playSelect(X3DAUDIO_EMITTER* emit);
+	void playShotgun(X3DAUDIO_EMITTER* emit);
+	void playTakenLead(X3DAUDIO_EMITTER* emit);
+	void playLostLead(X3DAUDIO_EMITTER* emit);
+	void playNoAmmo(X3DAUDIO_EMITTER* emit);
+	void playOne(X3DAUDIO_EMITTER* emit);
+	void playTwo(X3DAUDIO_EMITTER* emit);
+	void playThree(X3DAUDIO_EMITTER* emit);
+
 	void returnEmitter();
 	void playRocket(X3DAUDIO_EMITTER* emit, IXAudio2SourceVoice* rocket);
 	void playInGameMusic();
@@ -100,6 +109,13 @@ private:
 	XAUDIO2_BUFFER* rocketlaunchBufferDetails;
 	XAUDIO2_BUFFER* pickupBufferDetails;
 	XAUDIO2_BUFFER* selectBufferDetails;
+	XAUDIO2_BUFFER* shotgunBufferDetails;
+	XAUDIO2_BUFFER* takenleadBufferDetails;
+	XAUDIO2_BUFFER* lostleadBufferDetails;
+	XAUDIO2_BUFFER* noammoBufferDetails;
+	XAUDIO2_BUFFER* oneBufferDetails;
+	XAUDIO2_BUFFER* twoBufferDetails;
+	XAUDIO2_BUFFER* threeBufferDetails;
 
 	XAUDIO2_BUFFER_WMA* laserWMABuffer;
 	XAUDIO2_BUFFER_WMA* crashWMABuffer;
@@ -116,6 +132,13 @@ private:
 	XAUDIO2_BUFFER_WMA* rocketlaunchWMABuffer;
 	XAUDIO2_BUFFER_WMA* pickupWMABuffer;
 	XAUDIO2_BUFFER_WMA* selectWMABuffer;
+	XAUDIO2_BUFFER_WMA* shotgunWMABuffer;
+	XAUDIO2_BUFFER_WMA* takenleadWMABuffer;
+	XAUDIO2_BUFFER_WMA* lostleadWMABuffer;
+	XAUDIO2_BUFFER_WMA* noammoWMABuffer;
+	XAUDIO2_BUFFER_WMA* oneWMABuffer;
+	XAUDIO2_BUFFER_WMA* twoWMABuffer;
+	XAUDIO2_BUFFER_WMA* threeWMABuffer;
 
 	char* ingamemusicBuffer;
 	char* menumusicBuffer;
@@ -134,6 +157,13 @@ private:
 	char* rocketlaunchBuffer;
 	char* pickupBuffer;
 	char* selectBuffer;
+	char* shotgunBuffer;
+	char* takenleadBuffer;
+	char* lostleadBuffer;
+	char* noammoBuffer;
+	char* oneBuffer;
+	char* twoBuffer;
+	char* threeBuffer;
 
 
 	int currentVoice;

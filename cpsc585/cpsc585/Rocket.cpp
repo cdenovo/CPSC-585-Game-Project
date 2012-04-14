@@ -41,8 +41,6 @@ Rocket::Rocket(IDirect3DDevice9* device, Racer* o)
 	if (!rocketVoice)
 		rocketVoice = Sound::sound->reserveSFXVoice();
 
-	rocketVoice->SetVolume(0.6f);
-
 	owner = NULL;
 
 	lifetime = 6.0f;

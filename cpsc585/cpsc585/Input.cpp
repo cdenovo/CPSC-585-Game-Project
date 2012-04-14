@@ -15,12 +15,10 @@ Input::Input(void)
 	}
 	else
 	{
-		XINPUT_STATE state;
-		HRESULT res = XInputGetState(0, &state);
-		intention.reset();
-
 		controllerAvailable = false;
 	}
+
+	intention.reset();
 }
 
 
@@ -125,12 +123,12 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam, LPARAM lparam)
 					}
 				case 'S':
 					{
-						intention.leftStickY = -25000;
+						intention.leftStickY = -THUMBSTICK_MAX;
 						break;
 					}
 				case 'W':
 					{
-						intention.leftStickY = 25000;
+						intention.leftStickY = THUMBSTICK_MAX;
 						break;
 					}
 				case VK_RETURN:

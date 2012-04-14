@@ -15,6 +15,11 @@ HUD::HUD(int width, int height)
 	sprite = NULL;
 	radialMenuTexture = NULL;
 	reticuleTexture = NULL;
+	numbersTexture = NULL;
+	healthBarBorderTexture = NULL;
+	healthBarTexture = NULL;
+	lapPositionsTexture = NULL;
+	countdownTexture = NULL;
 
 	laserRect = new RECT();
 	mineRect = new RECT();
@@ -67,6 +72,10 @@ HUD::HUD(int width, int height)
 	position = 0;
 	currentLap = 0;
 	numLapsToWin = 0;
+
+	showOne = false;
+	showTwo = false;
+	showThree = false;
 }
 
 void HUD::initialize(IDirect3DDevice9* device)
@@ -79,6 +88,7 @@ void HUD::initialize(IDirect3DDevice9* device)
 	D3DXCreateTextureFromFile(device, "textures/healthBar.dds", &healthBarTexture);
 	D3DXCreateTextureFromFile(device, "textures/healthBarBorder.dds", &healthBarBorderTexture);
 	D3DXCreateTextureFromFile(device, "textures/lapPositions.dds", &lapPositionsTexture);
+	D3DXCreateTextureFromFile(device, "textures/countdown.dds", &countdownTexture);
 	D3DXCreateSprite(device, &sprite);
 }
 
@@ -176,6 +186,12 @@ void HUD::shutdown()
 		lapPositionsTexture = NULL;
 	}
 
+	if (countdownTexture)
+	{
+		countdownTexture->Release();
+		countdownTexture = NULL;
+	}
+
 	if (sprite)
 	{
 		sprite->Release();
@@ -253,7 +269,8 @@ void HUD::render()
 	sprite->Begin(D3DXSPRITE_ALPHABLEND);
 
 	// Draw reticule
-	sprite->Draw(reticuleTexture, NULL, &(D3DXVECTOR3(16,16,0)), centre, D3DXCOLOR(1.0f, 0.0f, 0.0f, 0.4f));
+	if (!showOne && !showTwo && !showThree)
+		sprite->Draw(reticuleTexture, NULL, &(D3DXVECTOR3(16,16,0)), centre, D3DXCOLOR(1.0f, 0.0f, 0.0f, 0.4f));
 
 	// Draw speedometer
 	
@@ -283,6 +300,46 @@ void HUD::render()
 
 	// Draw lap
 	drawLap();
+
+
+
+	// Draw countdown numbers
+	if (showOne)
+	{
+		RECT rect;
+		rect.top = 0;
+		rect.bottom = 512;
+		rect.left = 256;
+		rect.right = 512;
+
+
+		sprite->Draw(countdownTexture, &rect, &(D3DXVECTOR3(128.0f, 256.0f, 0)),
+			&(D3DXVECTOR3(screenWidth / 2.0f, screenHeight / 2.0f + 10.0f, 0)), 0xFFFFFFFF);
+	}
+	else if (showTwo)
+	{
+		RECT rect;
+		rect.top = 0;
+		rect.bottom = 256;
+		rect.left = 0;
+		rect.right = 256;
+
+
+		sprite->Draw(countdownTexture, &rect, &(D3DXVECTOR3(128.0f, 128.0f, 0)),
+			&(D3DXVECTOR3(screenWidth / 2.0f, screenHeight / 2.0f - 20.0f, 0)), 0xFFFFFFFF);
+	}
+	else if (showThree)
+	{
+		RECT rect;
+		rect.top = 256;
+		rect.bottom = 512;
+		rect.left = 0;
+		rect.right = 256;
+
+
+		sprite->Draw(countdownTexture, &rect, &(D3DXVECTOR3(128.0f, 128.0f, 0)),
+			&(D3DXVECTOR3(screenWidth / 2.0f, screenHeight / 2.0f, 0)), 0xFFFFFFFF);
+	}
 
 
 	sprite->End();

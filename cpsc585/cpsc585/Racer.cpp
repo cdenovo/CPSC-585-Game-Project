@@ -102,7 +102,7 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	info.m_qualityType = HK_COLLIDABLE_QUALITY_CRITICAL;
 	info.m_centerOfMass.set(0.0f, 0.0f, 0.0f);
 	info.m_restitution = 0.0f;
-	info.m_maxAngularVelocity = 20.0f;
+	info.m_maxAngularVelocity = 10.0f;
 	info.m_maxLinearVelocity = 170.0f;
 	info.m_angularDamping = 0.3f;
 	hkpMassProperties massProperties;
@@ -1216,7 +1216,7 @@ void Racer::fireLaser()
 			hkVector4 force;
 			force.setXYZ(raycastDir);
 
-			force.mul(chassisMass * 40.0f);
+			//force.mul(chassisMass * 10.0f); // Probably don't need this anymore
 			
 			input.m_to.sub(from);
 			input.m_to.mul(output.m_hitFraction);

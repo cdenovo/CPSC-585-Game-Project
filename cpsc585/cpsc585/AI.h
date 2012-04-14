@@ -54,6 +54,12 @@ private:
 	int fps;
 	int currentWaypoint;
 
+	// Race start/end stuff
+	float raceStartTimer;
+	bool raceStarted;
+	bool raceEnded;
+	bool playedOne, playedTwo, playedThree;
+
 	int numberOfWaypoints;
 
 	int racerIndex;

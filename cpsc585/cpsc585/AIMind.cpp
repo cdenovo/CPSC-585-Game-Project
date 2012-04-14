@@ -385,7 +385,6 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 					speedBoost->updateCooldown(seconds);
 				}
 
-				racer->accelerate(seconds, baseSpeed + speedBoost->getBoostValue());
 				if(!landmine->onCooldown() && landmine->getAmmoCount() > 0)
 					{
 						landmine->startCooldownTimer();
@@ -546,11 +545,11 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 	*/
 	hkVector4 upVec = racer->drawable->getYhkVector();
 	hkVector4 actualUp = hkVector4(0,1,0);
-	actualUp.normalize3();
-	upVec.normalize3();
+	//actualUp.normalize3();	// Don't need to normalize, as (0,1,0) is already normalized
+	//upVec.normalize3();	// Already normalized
 	spawnTime += seconds;
 	//int timeDiff = (int)difftime(newTime, oldTime);
-	if(upVec.dot3(actualUp).isLess(0)){
+	if(upVec.dot3(actualUp).isLess(0.1f) || (racer->body->getPosition()(1) < 5.0f)){
 		if(spawnTime > 2.0f){
 		D3DXVECTOR3 cwPosition = waypoints[currentWaypoint]->drawable->getPosition();
 			D3DXVECTOR3 nextPosition = waypoints[currentWaypoint+1]->drawable->getPosition();
@@ -710,12 +709,32 @@ void AIMind::acquireAmmo()
 	int random_integer = rand()%100;
 	if(random_integer > 66){
 		landmine->increaseAmmoCount();
+
+		if (racerType == PLAYER)
+		{
+			// Show LANDMINE icon on screen
+		}
 	}
 	else if(random_integer > 33){
 		speedBoost->increaseAmmoCount();
+
+		if (racerType == PLAYER)
+		{
+			// Show SPEED icon on screen
+		}
 	}
-	else if(random_integer > 0){
+	else if(random_integer >= 0){
 		rocket->increaseAmmoCount();
+
+		if (racerType == PLAYER)
+		{
+			// Show ROCKET icon on screen
+		}
+	}
+
+	if (racerType == PLAYER)
+	{
+		Sound::sound->playPickup(racer->emitter);
 	}
 }
 
@@ -834,6 +853,18 @@ int AIMind::getOverallPosition()
 // Sets the number representation of what place a racer is in (like 1st place, 2nd place, etc)
 void AIMind::setPlacement(int place)
 {
+	if (racerType == PLAYER)
+	{
+		if ((placement >= 2) && (place == 1))
+		{
+			Sound::sound->playTakenLead(Sound::sound->playerEmitter);
+		}
+		else if ((placement == 1) && (place >= 2))
+		{
+			Sound::sound->playLostLead(Sound::sound->playerEmitter);
+		}
+	}
+
 	placement = place;
 }
 

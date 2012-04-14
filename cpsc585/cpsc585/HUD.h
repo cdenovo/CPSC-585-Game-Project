@@ -21,6 +21,10 @@ public:
 	void setPosition(int placement);
 	void setLap(int lap, int numToWin);
 
+	bool showOne;
+	bool showTwo;
+	bool showThree;
+
 private:
 	void showRadial(bool enabled);
 	void drawHealth();
@@ -37,6 +41,7 @@ private:
 	IDirect3DTexture9* healthBarTexture;
 	IDirect3DTexture9* healthBarBorderTexture;
 	IDirect3DTexture9* lapPositionsTexture;
+	IDirect3DTexture9* countdownTexture;
 
 	RECT* laserRect;
 	RECT* speedRect;

@@ -52,6 +52,20 @@ Sound::Sound(void)
 	pickupBufferDetails = NULL;
 	selectBuffer = NULL;
 	selectBufferDetails = NULL;
+	shotgunBuffer = NULL;
+	shotgunBufferDetails = NULL;
+	takenleadBuffer = NULL;
+	takenleadBufferDetails = NULL;
+	lostleadBuffer = NULL;
+	lostleadBufferDetails = NULL;
+	noammoBuffer = NULL;
+	noammoBufferDetails = NULL;
+	oneBuffer = NULL;
+	oneBufferDetails = NULL;
+	twoBuffer = NULL;
+	twoBufferDetails = NULL;
+	threeBuffer = NULL;
+	threeBufferDetails = NULL;
 
 	laserWMABuffer = NULL;
 	crashWMABuffer = NULL;
@@ -68,6 +82,13 @@ Sound::Sound(void)
 	rocketlaunchWMABuffer = NULL;
 	pickupWMABuffer = NULL;
 	selectWMABuffer = NULL;
+	shotgunWMABuffer = NULL;
+	takenleadWMABuffer = NULL;
+	lostleadWMABuffer = NULL;
+	noammoWMABuffer = NULL;
+	oneWMABuffer = NULL;
+	twoWMABuffer = NULL;
+	threeWMABuffer = NULL;
 
 	ingameMusicXMABuffer = NULL;
 	menuMusicXMABuffer = NULL;
@@ -133,7 +154,7 @@ void Sound::initialize()
 	musicSendList.pSends = &musicSend;
 
 	// Set music volume HERE
-	smMusic->SetVolume(0.1f);
+	smMusic->SetVolume(0.4f);
 
 	// Set sound effect volume HERE
 	smSFX->SetVolume(1.0f);
@@ -158,6 +179,13 @@ void Sound::initialize()
 	loadSound(ROCKETLAUNCHSFX, "sounds/rocketlaunch.xwm", rocketlaunchBuffer);
 	loadSound(PICKUPSFX, "sounds/pickup.xwm", pickupBuffer);
 	loadSound(SELECTSFX, "sounds/select.xwm", selectBuffer);
+	loadSound(SHOTGUNSFX, "sounds/shotgun.xwm", shotgunBuffer);
+	loadSound(TAKENLEADSFX, "sounds/takenlead.xwm", takenleadBuffer);
+	loadSound(LOSTLEADSFX, "sounds/lostlead.xwm", lostleadBuffer);
+	loadSound(NOAMMOSFX, "sounds/noammo.xwm", noammoBuffer);
+	loadSound(ONESFX, "sounds/one.xwm", oneBuffer);
+	loadSound(TWOSFX, "sounds/two.xwm", twoBuffer);
+	loadSound(THREESFX, "sounds/three.xwm", threeBuffer);
 	
 
 	// Now set up 3D audio
@@ -384,6 +412,48 @@ void Sound::shutdown()
 		selectBuffer = NULL;
 	}
 
+	if (shotgunBuffer)
+	{
+		delete [] shotgunBuffer;
+		shotgunBuffer = NULL;
+	}
+
+	if (takenleadBuffer)
+	{
+		delete [] takenleadBuffer;
+		takenleadBuffer = NULL;
+	}
+
+	if (lostleadBuffer)
+	{
+		delete [] lostleadBuffer;
+		lostleadBuffer = NULL;
+	}
+
+	if (noammoBuffer)
+	{
+		delete [] noammoBuffer;
+		noammoBuffer = NULL;
+	}
+
+	if (oneBuffer)
+	{
+		delete [] oneBuffer;
+		oneBuffer = NULL;
+	}
+
+	if (twoBuffer)
+	{
+		delete [] twoBuffer;
+		twoBuffer = NULL;
+	}
+
+	if (threeBuffer)
+	{
+		delete [] threeBuffer;
+		threeBuffer = NULL;
+	}
+
 
 
 
@@ -476,6 +546,48 @@ void Sound::shutdown()
 	{
 		delete selectBufferDetails;
 		selectBufferDetails = NULL;
+	}
+
+	if (shotgunBufferDetails)
+	{
+		delete shotgunBufferDetails;
+		shotgunBufferDetails = NULL;
+	}
+
+	if (takenleadBufferDetails)
+	{
+		delete takenleadBufferDetails;
+		takenleadBufferDetails = NULL;
+	}
+
+	if (lostleadBufferDetails)
+	{
+		delete lostleadBufferDetails;
+		lostleadBufferDetails = NULL;
+	}
+
+	if (noammoBufferDetails)
+	{
+		delete noammoBufferDetails;
+		noammoBufferDetails = NULL;
+	}
+
+	if (oneBufferDetails)
+	{
+		delete oneBufferDetails;
+		oneBufferDetails = NULL;
+	}
+
+	if (twoBufferDetails)
+	{
+		delete twoBufferDetails;
+		twoBufferDetails = NULL;
+	}
+
+	if (threeBufferDetails)
+	{
+		delete threeBufferDetails;
+		threeBufferDetails = NULL;
 	}
 
 
@@ -584,6 +696,55 @@ void Sound::shutdown()
 		delete [] selectWMABuffer->pDecodedPacketCumulativeBytes;
 		delete selectWMABuffer;
 		selectWMABuffer = NULL;
+	}
+
+	if (shotgunWMABuffer)
+	{
+		delete [] shotgunWMABuffer->pDecodedPacketCumulativeBytes;
+		delete shotgunWMABuffer;
+		shotgunWMABuffer = NULL;
+	}
+
+	if (takenleadWMABuffer)
+	{
+		delete [] takenleadWMABuffer->pDecodedPacketCumulativeBytes;
+		delete takenleadWMABuffer;
+		takenleadWMABuffer = NULL;
+	}
+
+	if (lostleadWMABuffer)
+	{
+		delete [] lostleadWMABuffer->pDecodedPacketCumulativeBytes;
+		delete lostleadWMABuffer;
+		lostleadWMABuffer = NULL;
+	}
+
+	if (noammoWMABuffer)
+	{
+		delete [] noammoWMABuffer->pDecodedPacketCumulativeBytes;
+		delete noammoWMABuffer;
+		noammoWMABuffer = NULL;
+	}
+
+	if (oneWMABuffer)
+	{
+		delete [] oneWMABuffer->pDecodedPacketCumulativeBytes;
+		delete oneWMABuffer;
+		oneWMABuffer = NULL;
+	}
+
+	if (twoWMABuffer)
+	{
+		delete [] twoWMABuffer->pDecodedPacketCumulativeBytes;
+		delete twoWMABuffer;
+		twoWMABuffer = NULL;
+	}
+
+	if (threeWMABuffer)
+	{
+		delete [] threeWMABuffer->pDecodedPacketCumulativeBytes;
+		delete threeWMABuffer;
+		threeWMABuffer = NULL;
 	}
 
 
@@ -884,6 +1045,111 @@ void Sound::loadSound(SoundEffect type, std::string filename, char* &soundBuffer
 			selectWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
 			break;
 		}
+	case SHOTGUNSFX:
+		{
+			shotgunBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			shotgunWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(shotgunWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			shotgunWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			shotgunWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case TAKENLEADSFX:
+		{
+			takenleadBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			takenleadWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(takenleadWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			takenleadWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			takenleadWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case LOSTLEADSFX:
+		{
+			lostleadBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			lostleadWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(lostleadWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			lostleadWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			lostleadWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case NOAMMOSFX:
+		{
+			noammoBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			noammoWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(noammoWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			noammoWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			noammoWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case ONESFX:
+		{
+			oneBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			oneWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(oneWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			oneWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			oneWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case TWOSFX:
+		{
+			twoBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			twoWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(twoWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			twoWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			twoWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
+	case THREESFX:
+		{
+			threeBufferDetails = new XAUDIO2_BUFFER(buffer);
+			UINT32* xmaBuffer = (UINT32*) new BYTE[chunkSize];
+
+			threeWMABuffer = new XAUDIO2_BUFFER_WMA();
+			ZeroMemory(threeWMABuffer, sizeof(XAUDIO2_BUFFER_WMA));
+
+			// Divide chunk size by sizeof(DWORD) and assign
+			threeWMABuffer->PacketCount = chunkSize / 4;
+
+			ReadChunkData(fileHandle, xmaBuffer, chunkSize, chunkPos);
+			threeWMABuffer->pDecodedPacketCumulativeBytes = xmaBuffer;
+			break;
+		}
 	default:
 		break;
 	}
@@ -966,8 +1232,6 @@ void Sound::playLaser(X3DAUDIO_EMITTER* emit)
 void Sound::playCrash(X3DAUDIO_EMITTER* emit)
 {
 	IXAudio2SourceVoice* crash = getSFXVoice();
-
-	crash->SetVolume(0.5f);
 
 	crash->FlushSourceBuffers();
 	crash->SubmitSourceBuffer(crashBufferDetails, crashWMABuffer);
@@ -1180,6 +1444,7 @@ void Sound::playPickup(X3DAUDIO_EMITTER* emit)
 {
 	IXAudio2SourceVoice* voice = getSFXVoice();
 
+	voice->SetVolume(2.0f);
 	voice->FlushSourceBuffers();
 
 	voice->SubmitSourceBuffer(pickupBufferDetails, pickupWMABuffer);
@@ -1204,6 +1469,154 @@ void Sound::playSelect(X3DAUDIO_EMITTER* emit)
 	voice->FlushSourceBuffers();
 
 	voice->SubmitSourceBuffer(selectBufferDetails, selectWMABuffer);
+
+	X3DAudioCalculate(audio3DHandle, &listener, emit,
+		X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT,
+		&dspSettings);
+	
+	voice->SetOutputMatrix(smSFX, 1, details.OutputFormat.Format.nChannels, dspSettings.pMatrixCoefficients);
+	voice->SetFrequencyRatio(dspSettings.DopplerFactor);
+
+	XAUDIO2_FILTER_PARAMETERS filterParameters = { LowPassFilter, 2.0f * sinf(X3DAUDIO_PI/6.0f * dspSettings.LPFDirectCoefficient), 1.0f };
+	voice->SetFilterParameters(&filterParameters);
+	
+	voice->Start();
+}
+
+void Sound::playShotgun(X3DAUDIO_EMITTER* emit)
+{
+	IXAudio2SourceVoice* voice = getSFXVoice();
+
+	voice->SetVolume(2.5f);
+	voice->FlushSourceBuffers();
+
+	voice->SubmitSourceBuffer(shotgunBufferDetails, shotgunWMABuffer);
+
+	X3DAudioCalculate(audio3DHandle, &listener, emit,
+		X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT,
+		&dspSettings);
+	
+	voice->SetOutputMatrix(smSFX, 1, details.OutputFormat.Format.nChannels, dspSettings.pMatrixCoefficients);
+	voice->SetFrequencyRatio(dspSettings.DopplerFactor);
+
+	XAUDIO2_FILTER_PARAMETERS filterParameters = { LowPassFilter, 2.0f * sinf(X3DAUDIO_PI/6.0f * dspSettings.LPFDirectCoefficient), 1.0f };
+	voice->SetFilterParameters(&filterParameters);
+	
+	voice->Start();
+}
+
+void Sound::playTakenLead(X3DAUDIO_EMITTER* emit)
+{
+	IXAudio2SourceVoice* voice = getSFXVoice();
+
+	voice->FlushSourceBuffers();
+
+	voice->SubmitSourceBuffer(takenleadBufferDetails, takenleadWMABuffer);
+
+	X3DAudioCalculate(audio3DHandle, &listener, emit,
+		X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT,
+		&dspSettings);
+	
+	voice->SetOutputMatrix(smSFX, 1, details.OutputFormat.Format.nChannels, dspSettings.pMatrixCoefficients);
+	voice->SetFrequencyRatio(dspSettings.DopplerFactor);
+
+	XAUDIO2_FILTER_PARAMETERS filterParameters = { LowPassFilter, 2.0f * sinf(X3DAUDIO_PI/6.0f * dspSettings.LPFDirectCoefficient), 1.0f };
+	voice->SetFilterParameters(&filterParameters);
+	
+	voice->Start();
+}
+
+void Sound::playLostLead(X3DAUDIO_EMITTER* emit)
+{
+	IXAudio2SourceVoice* voice = getSFXVoice();
+
+	voice->FlushSourceBuffers();
+
+	voice->SubmitSourceBuffer(lostleadBufferDetails, lostleadWMABuffer);
+
+	X3DAudioCalculate(audio3DHandle, &listener, emit,
+		X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT,
+		&dspSettings);
+	
+	voice->SetOutputMatrix(smSFX, 1, details.OutputFormat.Format.nChannels, dspSettings.pMatrixCoefficients);
+	voice->SetFrequencyRatio(dspSettings.DopplerFactor);
+
+	XAUDIO2_FILTER_PARAMETERS filterParameters = { LowPassFilter, 2.0f * sinf(X3DAUDIO_PI/6.0f * dspSettings.LPFDirectCoefficient), 1.0f };
+	voice->SetFilterParameters(&filterParameters);
+	
+	voice->Start();
+}
+
+void Sound::playNoAmmo(X3DAUDIO_EMITTER* emit)
+{
+	IXAudio2SourceVoice* voice = getSFXVoice();
+
+	voice->FlushSourceBuffers();
+
+	voice->SubmitSourceBuffer(noammoBufferDetails, noammoWMABuffer);
+
+	X3DAudioCalculate(audio3DHandle, &listener, emit,
+		X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT,
+		&dspSettings);
+	
+	voice->SetOutputMatrix(smSFX, 1, details.OutputFormat.Format.nChannels, dspSettings.pMatrixCoefficients);
+	voice->SetFrequencyRatio(dspSettings.DopplerFactor);
+
+	XAUDIO2_FILTER_PARAMETERS filterParameters = { LowPassFilter, 2.0f * sinf(X3DAUDIO_PI/6.0f * dspSettings.LPFDirectCoefficient), 1.0f };
+	voice->SetFilterParameters(&filterParameters);
+	
+	voice->Start();
+}
+
+void Sound::playOne(X3DAUDIO_EMITTER* emit)
+{
+	IXAudio2SourceVoice* voice = getSFXVoice();
+
+	voice->FlushSourceBuffers();
+
+	voice->SubmitSourceBuffer(oneBufferDetails, oneWMABuffer);
+
+	X3DAudioCalculate(audio3DHandle, &listener, emit,
+		X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT,
+		&dspSettings);
+	
+	voice->SetOutputMatrix(smSFX, 1, details.OutputFormat.Format.nChannels, dspSettings.pMatrixCoefficients);
+	voice->SetFrequencyRatio(dspSettings.DopplerFactor);
+
+	XAUDIO2_FILTER_PARAMETERS filterParameters = { LowPassFilter, 2.0f * sinf(X3DAUDIO_PI/6.0f * dspSettings.LPFDirectCoefficient), 1.0f };
+	voice->SetFilterParameters(&filterParameters);
+	
+	voice->Start();
+}
+
+void Sound::playTwo(X3DAUDIO_EMITTER* emit)
+{
+	IXAudio2SourceVoice* voice = getSFXVoice();
+
+	voice->FlushSourceBuffers();
+
+	voice->SubmitSourceBuffer(twoBufferDetails, twoWMABuffer);
+
+	X3DAudioCalculate(audio3DHandle, &listener, emit,
+		X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT,
+		&dspSettings);
+	
+	voice->SetOutputMatrix(smSFX, 1, details.OutputFormat.Format.nChannels, dspSettings.pMatrixCoefficients);
+	voice->SetFrequencyRatio(dspSettings.DopplerFactor);
+
+	XAUDIO2_FILTER_PARAMETERS filterParameters = { LowPassFilter, 2.0f * sinf(X3DAUDIO_PI/6.0f * dspSettings.LPFDirectCoefficient), 1.0f };
+	voice->SetFilterParameters(&filterParameters);
+	
+	voice->Start();
+}
+
+void Sound::playThree(X3DAUDIO_EMITTER* emit)
+{
+	IXAudio2SourceVoice* voice = getSFXVoice();
+
+	voice->FlushSourceBuffers();
+
+	voice->SubmitSourceBuffer(threeBufferDetails, threeWMABuffer);
 
 	X3DAudioCalculate(audio3DHandle, &listener, emit,
 		X3DAUDIO_CALCULATE_MATRIX | X3DAUDIO_CALCULATE_DOPPLER | X3DAUDIO_CALCULATE_LPF_DIRECT,

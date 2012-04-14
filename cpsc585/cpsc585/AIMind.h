@@ -46,6 +46,8 @@ public:
 	bool isfinishedRace();
 	std::string getRacerName();
 
+	int numberOfLapsToWin;
+
 private:
 	void updateWaypointsAndLap(float seconds, Waypoint* waypoints[], Waypoint* buildingWaypoint);
 	void acquireAmmo();
@@ -77,7 +79,6 @@ private:
 	int overallPosition;
 	int currentLap;
 	int placement;
-	int numberOfLapsToWin;
 	int numberOfRacers;
 
 	int knownNumberOfKills;
