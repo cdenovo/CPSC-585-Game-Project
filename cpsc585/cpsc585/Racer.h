@@ -9,16 +9,36 @@
 #include "RearWheel.h"
 #include "ConfigReader.h"
 #include "LaserModel.h"
+#include "DynamicObjManager.h"
 
 enum RacerType { RACER1, RACER2, RACER3, RACER4, RACER5, RACER6, RACER7, RACER8 };
 enum WheelType { FRONT, REAR };
 
-const int RACERSIZE = sizeof(hkVector4)*8 + sizeof(hkQuaternion) + sizeof(float) + sizeof(bool);
+
+#define LASER_DAMAGE 50
+
+ struct RacerData
+ {
+	 hkVector4 position;
+	 hkQuaternion rotation;
+	 hkVector4 linearVelocity;
+	 hkVector4 angularVelocity;
+	 hkVector4 wheelFL;
+	 hkVector4 wheelFR;
+	 hkVector4 wheelRL;
+	 hkVector4 wheelRR;
+	 hkVector4 lookDir;
+	 float lookHeight;
+	 bool laserCoolDown;
+	 bool rocketCoolDown;
+	 bool mineCoolDown;
+	 bool speedCoolDown;
+ };
 
 class Racer
 {
 public:
-	Racer(IDirect3DDevice9* device, Renderer* r, Physics* p, Sound* s, RacerType racerType);
+	Racer(IDirect3DDevice9* device, RacerType racerType);
 	~Racer(void);
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians
@@ -29,43 +49,59 @@ public:
 	void steer(float seconds, float value);			// between -1.0 and 1.0 (left is negative)
 
 	int getIndex();
-	void reset(hkVector4* resetPos);	// Reset position and set velocity/momentum to 0
-
+	void reset(hkVector4* resetPos, float rotation);	// Reset position and set velocity/momentum to 0
 	void applyForces(float seconds);	// Call this every frame BEFORE stepping physics!
-
 	void fireLaser();
-	void giveDamage(Racer* attacker, int damage);
-
-	void serialize(char buff[]);
-	void unserialize(char buff[]);
-
+	void fireRocket();
+	void dropMine();
+	void applyDamage(Racer* attacker, int damage);
 	void computeRPM();
+
+	void serialize(char buff[], bool laserOnCooldown, bool rocketOnCooldown, bool mineOnCooldown, bool speedOnCooldown);
+	void unserialize(RacerData *data);
 
 private:
 	void buildConstraint(hkVector4* attachmentPt, hkpGenericConstraintData* constraint, WheelType type);
 	hkVector4 getForce(hkVector4* up, hkpRigidBody* wheel, hkVector4* attach, WheelType type);
 	void applySprings(float seconds);
 	void applyFriction(float seconds);
-	void applyFrictionToTire(hkVector4* attachPoint, hkpRigidBody* wheelBody,
-		float xFrictionForce, float zFrictionForce, float seconds, WheelType type);
-	void applyTireRaycast();
 	void applyDrag(float seconds);
+	void applyTireRaycast();
 	void respawn();
+	hkpWorldRayCastInput fireWeapon();
 
 public:
 	Drawable* drawable;
 	hkpRigidBody* body;
 	static float accelerationScale;
-	bool laserReady;
 
 	int health;
 	int kills;
+	int suicides;
+	int deaths;
+	int takenDamage;
+	int givenDamage;
 	float laserTime;
+	
+	bool laserReady;
+	bool mineReady;
+	bool rocketReady;
+	bool speedReady;
 
 	hkVector4 lookDir;
 	float lookHeight;
 
 	float currentAcceleration;
+	bool braking;
+	static ConfigReader config;
+
+	
+	X3DAUDIO_EMITTER* emitter;
+
+	static hkVector4 attachCannon;
+	static hkReal chassisMass;
+	
+	IXAudio2SourceVoice* engineVoice;
 
 private:
 	Drawable* laserDraw;
@@ -79,10 +115,6 @@ private:
 
 	float currentSteering;
 
-
-	static hkpWorld* physicsWorld;
-	static Sound* sound;
-
 	// Static elements that are common between all Racers
 	static int xID;
 	static int yID;
@@ -95,12 +127,6 @@ private:
 	static hkVector4 attachFR;
 	static hkVector4 attachRL;
 	static hkVector4 attachRR;
-	static hkVector4 attachLaser;
-
-	static hkReal chassisMass;
-
-	static float dragCoeff;
-	static float topSpeed;
 
 	static float rearSpringK;
 	static float frontSpringK;
@@ -110,6 +136,7 @@ private:
 	static float frontExtents;
 	static float springForceCap;
 	static float grip;
-	
-	static ConfigReader config;
+	static float dragCoeff;
+	static float topSpeed;
+	static bool inverse; // Inverted look
 };

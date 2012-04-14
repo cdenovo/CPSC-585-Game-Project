@@ -1,6 +1,5 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -21,9 +20,10 @@ public:
 	float chassisMass;
 	float accelerationScale;
 	float springForceCap;
-	std::string serverIP;
-	float topSpeed;
 	float grip;
+	float topSpeed;
+	std::string serverIP;
+	bool inverse;
 
 private:
 	std::ifstream file;

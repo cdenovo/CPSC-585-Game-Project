@@ -38,7 +38,7 @@ void RearWheelMesh::initialize(IDirect3DDevice9* device)
 	Vertex* verts;
 	unsigned long* inds;
 
-	loadMesh("rearTire.ese");
+	loadMesh("models/rearTire.ese");
 
 	device->CreateVertexBuffer(sizeof(Vertex) * vertexCount, D3DUSAGE_WRITEONLY, D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX2,
 		D3DPOOL_MANAGED, &vertexBuffer, NULL);

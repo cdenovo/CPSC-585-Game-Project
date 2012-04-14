@@ -1,9 +1,13 @@
 #include "Physics.h"
 #include "Havok.h"	// Leave this define here, don't move it to Physics.h
 
+hkpWorld* Physics::world = NULL;
+Physics* Physics::physics = NULL;
+
 Physics::Physics(void)
 {
 	filters = NULL;
+	physics = this;
 }
 
 
@@ -29,7 +33,7 @@ void Physics::initialize(int numObjects)
 	hkpWorldCinfo info;
 	
 	info.m_gravity.set(0.0f, -20.0f, 0.0f); // Set gravity (x,y,z)	[using 9.8 instead of ~20 looks bad]
-	info.setBroadPhaseWorldSize(1000.0f); // Defaults to 1000.0f which is good in most cases
+	info.setBroadPhaseWorldSize(1400.0f); // Defaults to 1000.0f which is good in most cases
 	info.setupSolverInfo(hkpWorldCinfo::SOLVER_TYPE_4ITERS_HARD);
 	info.m_collisionTolerance = 0.01f;
 	info.m_simulationType = simulationType;
@@ -95,4 +99,5 @@ static void HK_CALL errorReport(const char* msg, void* userContext)
 void Physics::step(float seconds)
 {
 	world->stepDeltaTime(seconds);
+	return;
 }

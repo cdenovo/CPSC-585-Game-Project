@@ -42,7 +42,8 @@ public:
 	int numClients;
 	int serverID;
 	ClientInfo clients[MAXCLIENTS];
-	char world[MAXCLIENTS][RACERSIZE];
+	RacerData world[MAXCLIENTS];
+	DynamicObjManager* dynManager;
 
 
 private:

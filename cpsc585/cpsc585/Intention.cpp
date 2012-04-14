@@ -19,6 +19,8 @@ Intention::Intention(void)
 	leftTrig = 0;
 
 	acceleration = 0;
+	cameraX = 0;
+	cameraY = 0;
 }
 
 
@@ -44,6 +46,8 @@ void Intention::reset()
 	leftTrig = 0;
 
 	acceleration = 0;
+	cameraX = 0;
+	cameraY = 0;
 }
 
 

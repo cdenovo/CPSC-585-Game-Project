@@ -1,6 +1,6 @@
 #pragma once
-#include <time.h>
 #include "HUD.h"
+#include "DynamicObjManager.h"
 
 class Ability
 {
@@ -11,16 +11,21 @@ public:
 	int getCooldownTime();
 	bool onCooldown();
 	bool currentlyActive();
-	void updateCooldown();
+	void updateCooldown(float seconds);
 	float getBoostValue();
+	void update(int levelOfAbility);
+	void decreaseAmmoCount();
+	void increaseAmmoCount();
+	int getAmmoCount();
+	int getAbilityLevel();
 
 private:
-	time_t oldTime;
-	time_t newTime;
 	float boostValue;
 	float cooldownTime;
 	float lengthOfCooldown;
 	float boostDuration;
 	AbilityType abilityType;
+	int abilityLevel;
+	int ammoCount;
 };
 

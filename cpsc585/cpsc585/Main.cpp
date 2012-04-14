@@ -8,7 +8,6 @@ bool initialize()
 	ai = new AI();
 	input = new Input();
 	sound = new Sound();
-
 	
 	quit = false;
 
@@ -87,7 +86,6 @@ bool initialize()
 	// Hide the mouse
 	ShowCursor(false);
 	
-
 	// Initialize components
 	if (!renderer || !ai || !sound || !input)
 	{
@@ -97,15 +95,45 @@ bool initialize()
 
 	// TO DO: Run the 'initialize' method for each component
 	char* errorMsg = new char[128];
-	if (!(renderer->initialize(resx, resy, hwnd, 1.0f, 1000.0f, 200, errorMsg, menu)))
+	if (!(renderer->initialize(resx, resy, hwnd, 1.0f, 1000.0f, 200, errorMsg)))
 	{
 		errorPopup(errorMsg);
 		errorPopup("Renderer initialization failed!");
 		return false;
 	}
 
-	ai->initialize(renderer, input, sound, menu);
-	sound->initialize();
+	ai->initialize(renderer, input, sound);
+	
+	if (!sound->initialized)
+	{
+		errorPopup("Sound initialization failed!");
+		return false;
+	}
+
+
+
+
+
+
+	// We want to capture raw keyboard and mouse data, and ignore normal
+	// window handler keyboard/mouse messages
+	RAWINPUTDEVICE rawInpDev[2];
+    
+	rawInpDev[0].usUsagePage = 1; 
+	rawInpDev[0].usUsage = 2; // MOUSE
+	rawInpDev[0].dwFlags = RIDEV_NOLEGACY;
+	rawInpDev[0].hwndTarget = NULL;
+
+	rawInpDev[1].usUsagePage = 1; 
+	rawInpDev[1].usUsage = 6; // KEYBOARD
+	rawInpDev[1].dwFlags = RIDEV_NOLEGACY;
+	rawInpDev[1].hwndTarget = NULL;
+
+	 if (!RegisterRawInputDevices(rawInpDev, 2, sizeof(RAWINPUTDEVICE)))
+	 {
+		 errorPopup("Failed to capture keyboard and mouse input!");
+		 return false;
+	 }
 
 	return true;
 }
@@ -131,21 +159,20 @@ void run()
 
 	while (!quit)
 	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		// Process input
+		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+
+			if (msg.message == WM_QUIT)
+			{
+				quit = true;
+			}
 		}
 
 
-		if (msg.message == WM_QUIT)
-		{
-			quit = true;
-		}
-		else
-		{
-			quit = mainLoop();
-		}
+		quit = mainLoop();
 
 	}
 
@@ -172,11 +199,6 @@ void shutdown()
 	{
 		renderer->shutdown();
 		renderer = NULL;
-	}
-
-	if(menu)
-	{
-		menu = NULL;
 	}
 
 	ClipCursor(NULL);
@@ -227,11 +249,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 		}
 
 		case WM_KEYDOWN: case WM_KEYUP : case WM_MOUSEMOVE: case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN: case WM_LBUTTONUP: case WM_RBUTTONUP: 
+		case WM_RBUTTONDOWN: case WM_LBUTTONUP: case WM_RBUTTONUP: case WM_INPUT:
 		// Pass to handler for all input, that will work alongside XInput
 		{
 			if (input)
-				input->processWindowsMsg(umessage, wparam);
+				input->processWindowsMsg(umessage, wparam, lparam);
 			return 0;
 		}
 
@@ -283,12 +305,12 @@ bool mainLoop()
 	
 	float deltaTime = (currentTime - prevTime) / 1000.0f;
 	
-	if (deltaTime > 0.5f)
-		deltaTime = 0.5f;
+	if (deltaTime > 0.05f)
+		deltaTime = 0.05f;
 
 
-	input->update();
-	quit = ai->simulate((currentTime - prevTime) / 1000.0f);
+	quit = input->update();
+	ai->simulate(deltaTime);
 	renderer->render();
 
 	prevTime = currentTime;

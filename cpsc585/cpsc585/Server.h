@@ -6,6 +6,7 @@
 #include "Intention.h"
 #include "NetworkInfo.h"
 #include "Racer.h"
+#include "AIMind.h"
 #include <Windows.h>
 
 class Server
@@ -35,7 +36,7 @@ public:
 	int sendUDPMessage(const char* message, int length);
 	int sendID(int);
 	
-	int update(Racer *racers[], int numRacers);
+	int update(Racer *racers[], int numRacers, AIMind* racerMinds[]);
 
 	Intention intents[MAXCLIENTS];
 	int numClients;

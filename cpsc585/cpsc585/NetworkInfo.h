@@ -3,7 +3,7 @@
 #include <WinSock.h>
 //#include <inaddr.h>
 
-const int MAXCLIENTS = 5;
+const int MAXCLIENTS = 8;
 const int NETWORK_PORT = 5869;
 
 //Client headers

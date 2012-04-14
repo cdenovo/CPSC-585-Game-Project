@@ -1,7 +1,7 @@
 #include "Client.h"
 
 //new timeout feature (TAG1)
-const int SERVER_TIMEOUT = 5;
+const int SERVER_TIMEOUT = 50;
 
 Client::Client()
 {
@@ -291,7 +291,7 @@ int Client::getUDPMessages(float milliseconds)
 	no_response_timer -= milliseconds;
 	leader_nack_timer -= milliseconds;
 
-	char buff[1000];
+	char buff[5000];
 
 	int err = 0;
 
@@ -367,7 +367,7 @@ int Client::getUDPMessages(float milliseconds)
 							memcpy(&numRacers,buff+13,sizeof(int)); //Get player's ID
 							for(int i = 0; i < numRacers; i++)
 							{
-								memcpy(world[i],buff+17+i*RACERSIZE,RACERSIZE); //Get the button presses
+								memcpy(&world[i],buff+17+i*sizeof(RacerData),sizeof(RacerData)); //Get the button presses
 							}
 
 							newWorldInfo = true;

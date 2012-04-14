@@ -38,12 +38,9 @@ void Camera::setFocus(Drawable* focus)
 
 void Camera::update()
 {
-	D3DXVECTOR3 zVec, objPos, desiredPos;
+	position = focusObject->getPosition();
 
-	objPos = focusObject->getPosition();
-	zVec = focusObject->getZVector();
-
-	position = objPos + (lookDir * -9.0f);
+	position = position + (lookDir * -7.0f);
 	position.y += 2.0f;
 
 	lookAt = D3DXVECTOR3(position + lookDir);
@@ -51,27 +48,6 @@ void Camera::update()
 	up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 
 	D3DXMatrixLookAtLH(&viewMatrix, &position, &lookAt, &up);
-
-
-	/*
-	D3DXVECTOR3 zVec, objPos, desiredPos;
-
-	objPos = focusObject->getPosition();
-	zVec = focusObject->getZVector();
-
-	lookAt += (((zVec * (20.0f)) + objPos) - lookAt) / kValue;
-
-	desiredPos = (zVec * (-9.0f)) + objPos;
-	desiredPos.y += 2.0f;
-
-	position += (desiredPos - position) / kValue;
-
-	lookAt = D3DXVECTOR3(position + lookDir);
-
-	up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-
-	D3DXMatrixLookAtLH(&viewMatrix, &position, &lookAt, &up);
-	*/
 }
 
 
@@ -80,4 +56,15 @@ void Camera::setLookDir(float x, float y, float z)
 	lookDir.x = x;
 	lookDir.y = y;
 	lookDir.z = z;
+}
+
+void Camera::updateForSkybox()
+{
+	position = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+
+	lookAt = D3DXVECTOR3(lookDir);
+
+	up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+
+	D3DXMatrixLookAtLH(&viewMatrix, &position, &lookAt, &up);
 }

@@ -14,9 +14,11 @@ ConfigReader::ConfigReader()
 	chassisMass = 800;
 	accelerationScale = 15;
 	springForceCap = 80000;
-	serverIP = "";
+	serverIP = "127.0.0.1";
 	topSpeed = 100;
 	grip = 2.0;
+	inverse = false;
+
 
 	file.open("config.txt");
 
@@ -36,20 +38,23 @@ ConfigReader::ConfigReader()
 	{
 		std::ofstream outFile;
 		outFile.open("config.txt");
+
 		if(file.is_open())
 		{
 			outFile << "KFRONT " << kFront << "\n"
-				<< "KREAR " << kRear << "\n"
-				<< "FRONTEXTENTS " << frontExtents << "\n"
-				<< "REAREXTENTS " << rearExtents << "\n"
-				<< "FRONTDAMPING " << frontDamping << "\n"
-				<< "REARDAMPING " << rearDamping << "\n"
-				<< "CHASISMASS " << chassisMass << "\n"
-				<< "ACCELERATIONSCALE " << accelerationScale << "\n"
-				<< "SPRINGFORCECAP " << springForceCap << "\n"
-				<< "SERVERIP " << serverIP << "\n"
-				<< "TOPSPEED " << topSpeed << "\n"
-				<< "GRIP " << grip;
+			<< "KREAR " << kRear << "\n"
+			<< "FRONTEXTENTS " << frontExtents << "\n"
+			<< "REAREXTENTS " << rearExtents << "\n"
+			<< "FRONTDAMPING " << frontDamping << "\n"
+			<< "REARDAMPING " << rearDamping << "\n"
+			<< "CHASISMASS " << chassisMass << "\n"
+			<< "ACCELERATIONSCALE " << accelerationScale << "\n"
+			<< "SPRINGFORCECAP " << springForceCap << "\n"
+			<< "SERVERIP " << serverIP << "\n"
+			<< "TOPSPEED " << topSpeed << "\n"
+			<< "GRIP " << grip
+			<< "INVERSE " << (int) inverse;
+
 
 			outFile.close();
 		}
@@ -117,10 +122,13 @@ void ConfigReader::parseLine(std::string line)
 		{
 			ss >> serverIP;
 		}
-		else if(key == "TOPSPEED") 
+		else if(key == "TOPSPEED")
 		{
-			ss >> topSpeed; //Convert to float 
+			ss >> topSpeed; //Convert to float
 		}
-
+		else if(key == "INVERSE")
+		{
+			ss >> inverse; //Convert to bool
+		}
 	}
 }

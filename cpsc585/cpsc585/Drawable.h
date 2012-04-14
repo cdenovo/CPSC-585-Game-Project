@@ -12,18 +12,21 @@
 #include "RearWheelMesh.h"
 #include "WaypointMesh.h"
 #include "LaserModel.h"
+#include "RocketMesh.h"
+#include "LandmineMesh.h"
 
 #include <string>
 
 
-enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, LASERMODEL };
+enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, LASERMODEL, ROCKETMESH, LANDMINEMESH };
 
 class Drawable
 {
 public:
+	Drawable(void);
 	Drawable(MeshType type, std::string textureName, IDirect3DDevice9* device);
-	~Drawable(void);
-	void render(IDirect3DDevice9* device);
+	virtual ~Drawable();
+	virtual void render(IDirect3DDevice9* device);
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians
 	void setTransform(D3DXMATRIX* input);
@@ -37,14 +40,32 @@ public:
 	hkVector4 getYhkVector();
 	hkVector4 getZhkVector();
 
+	IDirect3DTexture9* getTexture();
+	void setTexture(IDirect3DTexture9* tex);
+	IDirect3DTexture9* getTextureFromFile(IDirect3DDevice9* device, std::string textureName);
+
+	void buildShadowVolume(D3DXVECTOR3 light);
+	void renderShadowVolume(IDirect3DDevice9* device);
+
 private:
 	void initialize(MeshType type, std::string textureName, IDirect3DDevice9* device);
 
 
 public:
 	Mesh* mesh;
+	MeshType meshType;
+	
+
+protected:
+	D3DXMATRIX transform;
 
 private:
-	D3DXMATRIX transform;
 	IDirect3DTexture9* texture;
+
+	IDirect3DVertexBuffer9* shadowVertexBuffer;
+	int shadowVertCount;
+	
+	static unsigned long** racerConnectivityTable; // Array, access with Table[triangleIndex][edge#], returns new triangle index
+	static unsigned long** frontWheelConnectivityTable;
+	static unsigned long** rearWheelConnectivityTable;
 };

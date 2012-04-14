@@ -9,7 +9,6 @@ Renderer* renderer;
 AI* ai;
 Input* input;
 Sound* sound;
-TopMenu* menu;
 
 LPCSTR appName;
 HINSTANCE hInstance;

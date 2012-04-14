@@ -5,13 +5,21 @@
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <DxErr.h>
+#include <d3dx9math.h>
 
+#include <vector>
 #include <string>
 
 #include "Camera.h"
 #include "Drawable.h"
 #include "HUD.h"
-#include "TopMenu.h"
+#include "Skybox.h"
+
+struct ShadowPoint
+{
+	D3DXVECTOR4 position;
+	D3DCOLOR color;
+};
 
 
 class Renderer
@@ -19,28 +27,34 @@ class Renderer
 public:
 	Renderer();
 	~Renderer();
-	bool initialize(int width, int height, HWND hwnd, float zNear, float zFar, int numDrawables, char* msg, TopMenu *m);
+	bool initialize(int width, int height, HWND hwnd, float zNear, float zFar, int numDrawables, char* msg);
 	void shutdown();
 	void render();
 	void setText(std::string* sentences, int count);
 	int addDrawable(Drawable* drawable);
+	void addDynamicDrawable(Drawable* drawable);
 	void setFocus(int drawableIndex);
 	IDirect3DDevice9* getDevice();
 	HUD* getHUD();
 	Camera* getCamera();
 	
+	static Renderer* renderer;
+	static IDirect3DDevice9* device;
+	static D3DXVECTOR3 lightDir;
 
 private:
 	void writeText(std::string text, int line);
+	void drawShadows();
+
+	inline DWORD FtoDw(float f)
+	{
+	    return *((DWORD*)&f);
+	}
 
 	IDirect3D9* d3dObject;
-	IDirect3DDevice9* device;
-
+	
 	D3DXMATRIX projectionMatrix;
 	D3DXMATRIX worldMatrix;
-	D3DXMATRIX orthoMatrix;
-
-	
 	
 	ID3DXFont* font;
 	
@@ -50,8 +64,14 @@ private:
 	int numDrawables;
 	int currentDrawable;
 	Drawable** drawables;
+	std::vector<Drawable*>* dynamicDrawables;
 
 	HUD* hud;
-	TopMenu* menu;
 	Camera* camera;
+
+	Skybox* skybox;
+
+	IDirect3DVertexBuffer9* shadowQuadVertexBuffer;
+
+	bool useTwoSidedStencils;
 };

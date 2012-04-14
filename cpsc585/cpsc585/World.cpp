@@ -3,7 +3,7 @@
 
 World::World(IDirect3DDevice9* device, Renderer* r, Physics* p)
 {
-	drawable = new Drawable(WORLD, "terrain0.dds", device);
+	drawable = new Drawable(WORLD, "textures/terrain0.dds", device);
 
 	hkpExtendedMeshShape* meshShape = new hkpExtendedMeshShape();
 	meshShape->setRadius(0.0f);
