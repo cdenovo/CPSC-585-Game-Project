@@ -647,52 +647,56 @@ void AI::simulate(float seconds)
 			racerPlacement[i]->setPlacement(NUMRACERS-i);
 		}
 
-		// Let player move camera before race starts
-		hkReal angle;
-		float height;
+		if (!intention.lbumpPressed)
+			{
 
-		angle = intention.cameraX * 0.05f;
+			// Let player move camera before race starts
+			hkReal angle;
+			float height;
 
-		if (racers[racerIndex]->config.inverse)
-			height = intention.cameraY * -0.02f + racers[racerIndex]->lookHeight;
-		else
-			height = intention.cameraY * 0.02f + racers[racerIndex]->lookHeight;
+			angle = intention.cameraX * 0.05f;
 
-		if (height > 0.5f)
-			height = 0.5f;
-		else if (height < -0.5f)
-			height = -0.5f;
+			if (racers[racerIndex]->config.inverse)
+				height = intention.cameraY * -0.02f + racers[racerIndex]->lookHeight;
+			else
+				height = intention.cameraY * 0.02f + racers[racerIndex]->lookHeight;
 
-		racers[racerIndex]->lookHeight = height;
+			if (height > 0.5f)
+				height = 0.5f;
+			else if (height < -0.5f)
+				height = -0.5f;
 
-		if (angle > M_PI)
-			angle = (hkReal) M_PI;
-		else if (angle < -M_PI)
-			angle = (hkReal) -M_PI;
+			racers[racerIndex]->lookHeight = height;
+
+			if (angle > M_PI)
+				angle = (hkReal) M_PI;
+			else if (angle < -M_PI)
+				angle = (hkReal) -M_PI;
 
 
-		hkQuaternion rotation;
+			hkQuaternion rotation;
 
-		if (angle < 0.0f)
-		{
-			angle *= -1;
-			rotation.setAxisAngle(hkVector4(0,-1,0), angle);
+			if (angle < 0.0f)
+			{
+				angle *= -1;
+				rotation.setAxisAngle(hkVector4(0,-1,0), angle);
+			}
+			else
+			{
+				rotation.setAxisAngle(hkVector4(0,1,0), angle);
+			}
+
+			hkTransform transRot;
+			transRot.setIdentity();
+			transRot.setRotation(rotation);
+
+			hkVector4 finalLookDir(0,0,1);
+			finalLookDir.setTransformedPos(transRot, racers[racerIndex]->lookDir);
+
+			finalLookDir(1) = height;
+
+			racers[racerIndex]->lookDir.setXYZ(finalLookDir);
 		}
-		else
-		{
-			rotation.setAxisAngle(hkVector4(0,1,0), angle);
-		}
-
-		hkTransform transRot;
-		transRot.setIdentity();
-		transRot.setRotation(rotation);
-
-		hkVector4 finalLookDir(0,0,1);
-		finalLookDir.setTransformedPos(transRot, racers[racerIndex]->lookDir);
-
-		finalLookDir(1) = height;
-
-		racers[racerIndex]->lookDir.setXYZ(finalLookDir);
 
 		// Update Heads Up Display
 		hud->update(intention);
@@ -724,7 +728,7 @@ void AI::simulate(float seconds)
 		if (raceStartTimer <= 0.0f)
 		{
 			// Show "GO" on screen, play sound
-			Sound::sound->playShotgun(Sound::sound->playerEmitter);
+			Sound::sound->playSoundEffect(SFX_SHOTGUN, Sound::sound->playerEmitter);
 
 			raceStartTimer = -0.1f;
 			raceStarted = true;
@@ -735,7 +739,7 @@ void AI::simulate(float seconds)
 			if (!playedOne)
 			{
 				// Play "One" sound
-				Sound::sound->playOne(Sound::sound->playerEmitter);
+				Sound::sound->playSoundEffect(SFX_ONE, Sound::sound->playerEmitter);
 				playedOne = true;
 
 				// Start playing music
@@ -753,7 +757,7 @@ void AI::simulate(float seconds)
 			if (!playedTwo)
 			{
 				// Play "Two" sound
-				Sound::sound->playTwo(Sound::sound->playerEmitter);
+				Sound::sound->playSoundEffect(SFX_TWO, Sound::sound->playerEmitter);
 				playedTwo = true;
 			}
 
@@ -768,7 +772,7 @@ void AI::simulate(float seconds)
 			if (!playedThree)
 			{
 				// Play "Three" sound
-				Sound::sound->playThree(Sound::sound->playerEmitter);
+				Sound::sound->playSoundEffect(SFX_THREE, Sound::sound->playerEmitter);
 				playedThree = true;
 			}
 
@@ -874,7 +878,7 @@ void AI::simulate(float seconds)
 	(renderer->getCamera())->setLookDir(look(0), look(1), look(2));
 
 	// Reset the player (in case you fall over)
-	if (intention.yPressed && !server.gameStarted)
+	if (intention.yPressed)
 	{
 		D3DXVECTOR3 cwPosition = waypoints[racerMinds[racerIndex]->getCurrentWaypoint()]->drawable->getPosition();
 		float rotation = 0;
@@ -900,7 +904,8 @@ void AI::simulate(float seconds)
 		racers[i]->update();
 	}
 
-	dynManager->update(seconds);
+	DynamicObjManager::manager->update(seconds);
+	SmokeSystem::system->update(seconds);
 
 	return;
 }

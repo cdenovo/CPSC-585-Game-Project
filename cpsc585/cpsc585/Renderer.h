@@ -14,6 +14,7 @@
 #include "Drawable.h"
 #include "HUD.h"
 #include "Skybox.h"
+#include "SmokeSystem.h"
 
 struct ShadowPoint
 {
@@ -74,4 +75,5 @@ private:
 	IDirect3DVertexBuffer9* shadowQuadVertexBuffer;
 
 	bool useTwoSidedStencils;
+	SmokeSystem* smokeSystem;
 };

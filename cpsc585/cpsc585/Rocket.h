@@ -5,6 +5,7 @@
 #include "Sound.h"
 #include "Explosion.h"
 #include "DynamicObjManager.h"
+#include "SmokeSystem.h"
 
 class Racer;
 
@@ -30,9 +31,8 @@ private:
 	hkpContactListener* listener;
 	static IXAudio2SourceVoice* rocketVoice;
 	float lifetime;
-
-
 };
+
 
 class RocketListener : public hkpContactListener
 {

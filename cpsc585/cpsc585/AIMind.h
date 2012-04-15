@@ -96,9 +96,12 @@ private:
 	int knownDamageTaken;
 
 	bool finishedRace;
+	bool playedNoAmmoSound;
 
 	float rotationAngle;
+	float showAmmoTimer;
 
 	HUD* racerHUD;
+	HUD* playerHUD;
 };
 

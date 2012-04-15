@@ -31,8 +31,11 @@ AIMind::AIMind(Racer* _racer, TypeOfRacer _racerType, int NumberOfRacers, std::s
 
 	rotationAngle = 0;
 	finishedRace = false;
+	playedNoAmmoSound = false;
+	showAmmoTimer = 0.0f;
 
 	racerHUD = NULL;
+	playerHUD = NULL;
 }
 
 AIMind::~AIMind(void)
@@ -321,6 +324,11 @@ void AIMind::acquireAmmo()
 		if (racerType == PLAYER)
 		{
 			// Show LANDMINE icon on screen
+			playerHUD->showAmmo = true;
+			playerHUD->ammoIconType = LANDMINE;
+			showAmmoTimer = 2.0f;
+
+			playerHUD->landmineAmmo++;
 		}
 	}
 	else if(random_integer > 33){
@@ -329,6 +337,11 @@ void AIMind::acquireAmmo()
 		if (racerType == PLAYER)
 		{
 			// Show SPEED icon on screen
+			playerHUD->showAmmo = true;
+			playerHUD->ammoIconType = SPEED;
+			showAmmoTimer = 2.0f;
+
+			playerHUD->speedAmmo++;
 		}
 	}
 	else if(random_integer >= 0){
@@ -337,12 +350,17 @@ void AIMind::acquireAmmo()
 		if (racerType == PLAYER)
 		{
 			// Show ROCKET icon on screen
+			playerHUD->showAmmo = true;
+			playerHUD->ammoIconType = ROCKET;
+			showAmmoTimer = 2.0f;
+
+			playerHUD->rocketAmmo++;
 		}
 	}
 
 	if (racerType == PLAYER)
 	{
-		Sound::sound->playPickup(racer->emitter);
+		Sound::sound->playSoundEffect(SFX_PICKUP, racer->emitter);
 	}
 }
 
@@ -436,6 +454,19 @@ void AIMind::downgrade()
 
 void AIMind::runPlayerCode(HUD *hud, Intention intention, float seconds)
 {
+	playerHUD = hud;
+
+	if (showAmmoTimer > 0.0f)
+		showAmmoTimer -= seconds;
+	else
+		showAmmoTimer = 0.0f;
+
+	if (showAmmoTimer == 0.0f)
+	{
+		hud->showAmmo = false;
+	}
+
+
 	// Update camera
 	if (!intention.lbumpPressed)
 	{
@@ -512,51 +543,108 @@ void AIMind::runPlayerCode(HUD *hud, Intention intention, float seconds)
 
 	if(racerType != CLIENTPLAYER)
 	{
-		if(hud->getSelectedAbility() == SPEED && intention.rightTrig && !speedBoost->onCooldown() && speedBoost->getAmmoCount() > 0){
-			speedBoost->startCooldownTimer();
-			speedBoost->decreaseAmmoCount();
-			Sound::sound->playBoost(racer->emitter);
-			hkVector4 impulse = racer->drawable->getZhkVector();
-			impulse.mul(150.0f*racer->chassisMass*speedBoost->getBoostValue());
-			racer->body->applyLinearImpulse(impulse);
+		if (hud->getSelectedAbility() == SPEED && !speedBoost->onCooldown())
+		{
+			if (intention.rightTrig)
+			{
+				if (speedBoost->getAmmoCount() > 0)
+				{
+					speedBoost->startCooldownTimer();
+					speedBoost->decreaseAmmoCount();
+					Sound::sound->playSoundEffect(SFX_BOOST, racer->emitter);
+					hkVector4 impulse = racer->drawable->getZhkVector();
+					impulse.mul(150.0f*racer->chassisMass*speedBoost->getBoostValue());
+					racer->body->applyLinearImpulse(impulse);
+
+					hud->speedAmmo--;
+				}
+				else if (!playedNoAmmoSound)
+				{
+					Sound::sound->playSoundEffect(SFX_NOAMMO, racer->emitter);
+					playedNoAmmoSound = true;
+				}
+			}
+			else
+			{
+				playedNoAmmoSound = false;
+			}
 		}
 
-		if(hud->getSelectedAbility() == LASER && intention.rightTrig && !laser->onCooldown()){
+		if (hud->getSelectedAbility() == LASER && intention.rightTrig && !laser->onCooldown())
+		{
 			laser->startCooldownTimer();
 			racer->fireLaser();
 		}
 
-		if (hud->getSelectedAbility() == ROCKET && intention.rightTrig && !rocket->onCooldown() && rocket->getAmmoCount() > 0)
+		if (hud->getSelectedAbility() == ROCKET && !rocket->onCooldown())
 		{
-			rocket->startCooldownTimer();
-			rocket->decreaseAmmoCount();
-			racer->fireRocket();
+			if (intention.rightTrig)
+			{
+				if (rocket->getAmmoCount() > 0)
+				{
+					rocket->startCooldownTimer();
+					rocket->decreaseAmmoCount();
+					racer->fireRocket();
+
+					hud->rocketAmmo--;
+				}
+				else if (!playedNoAmmoSound)
+				{
+					Sound::sound->playSoundEffect(SFX_NOAMMO, racer->emitter);
+					playedNoAmmoSound = true;
+				}
+			}
+			else
+			{
+				playedNoAmmoSound = false;
+			}
 		}
 
-		if (hud->getSelectedAbility() == LANDMINE && intention.rightTrig && !landmine->onCooldown() && landmine->getAmmoCount() > 0)
+		if (hud->getSelectedAbility() == LANDMINE && !landmine->onCooldown())
 		{
-			landmine->startCooldownTimer();
-			landmine->decreaseAmmoCount();
-			racer->dropMine();
+			if (intention.rightTrig)
+			{
+				if (landmine->getAmmoCount() > 0)
+				{
+					landmine->startCooldownTimer();
+					landmine->decreaseAmmoCount();
+					racer->dropMine();
+
+					hud->landmineAmmo--;
+				}
+				else if (!playedNoAmmoSound)
+				{
+					Sound::sound->playSoundEffect(SFX_NOAMMO, racer->emitter);
+					playedNoAmmoSound = true;
+				}
+			}
+			else
+			{
+				playedNoAmmoSound = false;
+			}
 		}
 
 
-		if(speedBoost->onCooldown()){
+		if (speedBoost->onCooldown())
+		{
 			char buf1[33];
 			speedBoost->updateCooldown(seconds);
 			std::string stringArray[] = { buf1 };//, buf2, buf3, buf4 };
 			//renderer->setText(stringArray, 1);
 		}
 
-		if(laser->onCooldown()){
+		if (laser->onCooldown())
+		{
 			laser->updateCooldown(seconds);
 		}
 
-		if(rocket->onCooldown()){
+		if (rocket->onCooldown())
+		{
 			rocket->updateCooldown(seconds);
 		}
 
-		if(landmine->onCooldown()){
+		if (landmine->onCooldown())
+		{
 			landmine->updateCooldown(seconds);
 		}
 	}
@@ -626,11 +714,11 @@ void AIMind::setPlacement(int place)
 	{
 		if ((placement >= 2) && (place == 1))
 		{
-			Sound::sound->playTakenLead(Sound::sound->playerEmitter);
+			Sound::sound->playSoundEffect(SFX_TAKENLEAD, Sound::sound->playerEmitter);
 		}
 		else if ((placement == 1) && (place >= 2))
 		{
-			Sound::sound->playLostLead(Sound::sound->playerEmitter);
+			Sound::sound->playSoundEffect(SFX_LOSTLEAD, Sound::sound->playerEmitter);
 		}
 	}
 
@@ -865,7 +953,7 @@ void AIMind::runAICode(float seconds, Waypoint* waypoints[], Racer* racers[], AI
 			&& speedBoost->getAmmoCount() > 0){
 			speedBoost->startCooldownTimer();
 			speedBoost->decreaseAmmoCount();
-			Sound::sound->playBoost(racer->emitter);
+			Sound::sound->playSoundEffect(SFX_BOOST, racer->emitter);
 			hkVector4 impulse = racer->drawable->getZhkVector();
 			impulse.mul(150.0f*racer->chassisMass*speedBoost->getBoostValue());
 			racer->body->applyLinearImpulse(impulse);

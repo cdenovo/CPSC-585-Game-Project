@@ -18,13 +18,14 @@
 #include "Ability.h"
 #include "CheckpointTimer.h"
 #include "DynamicObjManager.h"
+#include "SmokeSystem.h"
 #include "Server.h"
 #include "Client.h"
 
 #define NUMRACERS 8
 #define NUMWAYPOINTS 83
 #define NUMCHECKPOINTS 4
-#define NETWORKTIME 0.1
+#define NETWORKTIME 0.5
 
 class AI
 {

@@ -119,7 +119,7 @@ void Landmine::update(float seconds)
 			if (activationTime <= 0.0f)
 			{
 				activated = true;
-				Sound::sound->playBeep(emitter);
+				Sound::sound->playSoundEffect(SFX_BEEP, emitter);
 			}
 		}
 		else if (triggered)
@@ -138,12 +138,10 @@ void Landmine::explode()
 {
 	destroyed = true;
 
-	Sound::sound->playExplosion(emitter);
-	Explosion* explosion = new Explosion(Renderer::device, &(body->getTransform()), owner);
+	Sound::sound->playSoundEffect(SFX_EXPLOSION, emitter);
+	Explosion* explosion = new Explosion((hkTransform*) &(body->getTransform()), owner);
 
 	explosion->doDamage();
-
-	DynamicObjManager::manager->addObject(explosion);
 	explosion = NULL;
 }
 
@@ -153,7 +151,7 @@ void Landmine::trigger()
 	if (!triggered && activated)
 	{
 		triggered = true;
-		Sound::sound->playBeep(emitter);
+		Sound::sound->playSoundEffect(SFX_BEEP, emitter);
 	}
 }
 

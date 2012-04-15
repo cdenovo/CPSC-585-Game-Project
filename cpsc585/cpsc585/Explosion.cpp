@@ -1,29 +1,17 @@
 #include "Explosion.h"
 #include "Landmine.h"
 
-Explosion::Explosion(IDirect3DDevice9* device, const hkTransform* trans, Racer* owns)
+Explosion::Explosion(hkTransform* trans, Racer* owns)
 {
-	transform = (hkTransform*) trans;
 	owner = owns;
 
-	drawable = new Drawable(RACER, "textures/rocket.dds", device);
-	
-	D3DXMATRIX transMat;
-	trans->get4x4ColumnMajor(transMat);
-	drawable->setTransform(&transMat);
-
-	destroyed = false;
-	
-	lifetime = 2.0f;
+	transform = trans;
 }
 
 
 Explosion::~Explosion(void)
 {
-	if (drawable)
-	{
-		delete drawable;
-	}
+	
 }
 
 
@@ -121,18 +109,6 @@ void Explosion::doDamage()
 				mine->trigger();
 		}
 
-		iter++;
-	}
-}
-
-
-void Explosion::update(float seconds)
-{
-	if (drawable)
-	{
-		lifetime -= seconds;
-
-		if (lifetime <= 0.0f)
-			destroyed = true;
+		++iter;
 	}
 }

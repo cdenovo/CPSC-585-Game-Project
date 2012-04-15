@@ -83,22 +83,22 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam, LPARAM lparam)
 				{
 				case VK_UP:
 					{
-						intention.rightStickY = 25000;
+						intention.rightStickY = intention.rightStickY = THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 						break;
 					}
 				case VK_DOWN:
 					{
-						intention.rightStickY = -25000;
+						intention.rightStickY = -THUMBSTICK_MAX + XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 						break;
 					}
 				case VK_LEFT:
 					{
-						intention.rightStickX = -25000;
+						intention.rightStickX = -THUMBSTICK_MAX + XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 						break;
 					}
 				case VK_RIGHT:
 					{
-						intention.rightStickX = 25000;
+						intention.rightStickX = intention.rightStickY = THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 						break;
 					}
 				case VK_SPACE:
@@ -128,22 +128,22 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam, LPARAM lparam)
 					}
 				case 'A':
 					{
-						intention.leftStickX = -25000;
+						intention.leftStickX = -THUMBSTICK_MAX + XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 						break;
 					}
 				case 'D':
 					{
-						intention.leftStickX = 25000;
+						intention.leftStickX = THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 						break;
 					}
 				case 'S':
 					{
-						intention.leftStickY = -THUMBSTICK_MAX;
+						intention.leftStickY = -THUMBSTICK_MAX + XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 						break;
 					}
 				case 'W':
 					{
-						intention.leftStickY = THUMBSTICK_MAX;
+						intention.leftStickY = THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 						break;
 					}
 				case VK_RETURN:
