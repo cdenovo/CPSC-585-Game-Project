@@ -737,12 +737,12 @@ void Racer::steer(float seconds, float value)
 	else if (dot < 45.0f)
 	{
 		torqueScale = 7.0f;
-		centripScale = 10.0f;
+		centripScale = 12.0f;
 	}
 	else
 	{
-		torqueScale = 7.0f;
-		centripScale = 12.0f;
+		torqueScale = 8.0f;
+		centripScale = 15.0f;
 	}
 	
 	if (negative)
