@@ -139,11 +139,9 @@ void Landmine::explode()
 	destroyed = true;
 
 	Sound::sound->playSoundEffect(SFX_EXPLOSION, emitter);
-	Explosion* explosion = new Explosion(Renderer::device, &(body->getTransform()), owner);
+	Explosion* explosion = new Explosion((hkTransform*) &(body->getTransform()), owner);
 
 	explosion->doDamage();
-
-	DynamicObjManager::manager->addObject(explosion);
 	explosion = NULL;
 }
 

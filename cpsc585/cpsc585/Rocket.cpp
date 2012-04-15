@@ -120,15 +120,13 @@ void Rocket::update(float seconds)
 		}
 		else
 		{
-			Smoke* smoke = new Smoke(Renderer::device);
+			SmokeParticle* smoke = new SmokeParticle();
 
 			hkVector4 pos;
 			pos.setXYZ(body->getPosition());
-			pos(2) -= 0.7f;
 
-			smoke->setPos(&pos);
-			smoke->initialize(Renderer::device, 1.5f);
-			DynamicObjManager::manager->addObject(smoke);
+			smoke->setPosition(&pos);
+			SmokeSystem::system->addSmoke(ROCKET_SMOKE, smoke);
 			smoke = NULL;
 		}
 	}
@@ -140,11 +138,20 @@ void Rocket::explode()
 	rocketVoice->Stop();
 
 	Sound::sound->playSoundEffect(SFX_EXPLOSION, emitter);
-	Explosion* explosion = new Explosion(Renderer::device, &(body->getTransform()), owner);
+	Explosion* explosion = new Explosion((hkTransform*) &(body->getTransform()), owner);
 
 	explosion->doDamage();
 
-	DynamicObjManager::manager->addObject(explosion);
+	SmokeParticle* smoke = new SmokeParticle();
+
+	hkVector4 pos;
+	pos.setXYZ(body->getPosition());
+
+	smoke->setPosition(&pos);
+	SmokeSystem::system->addSmoke(EXPLOSION_SMOKE, smoke);
+	smoke = NULL;
+
+
 	explosion = NULL;
 }
 

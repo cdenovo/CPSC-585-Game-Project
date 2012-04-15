@@ -120,10 +120,10 @@
     <ClCompile Include="Landmine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Particle.cpp">
+    <ClCompile Include="SmokeSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Smoke.cpp">
+    <ClCompile Include="SmokeParticle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -236,10 +236,10 @@
     <ClInclude Include="Landmine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Particle.h">
+    <ClInclude Include="SmokeSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Smoke.h">
+    <ClInclude Include="SmokeParticle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -10,6 +10,7 @@
 #include "ConfigReader.h"
 #include "LaserModel.h"
 #include "DynamicObjManager.h"
+#include "SmokeSystem.h"
 
 enum RacerType { RACER1, RACER2, RACER3, RACER4, RACER5, RACER6, RACER7, RACER8 };
 enum WheelType { FRONT, REAR };

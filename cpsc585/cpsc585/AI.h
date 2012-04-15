@@ -17,6 +17,7 @@
 #include "Ability.h"
 #include "CheckpointTimer.h"
 #include "DynamicObjManager.h"
+#include "SmokeSystem.h"
 
 #define NUMRACERS 8
 #define NUMWAYPOINTS 83

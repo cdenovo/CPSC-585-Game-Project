@@ -182,13 +182,22 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);	// Just to be safe (ignored)
 	device->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 
+	// Stuff for particle effects
 	device->SetRenderState(D3DRS_POINTSPRITEENABLE, TRUE);
 	device->SetRenderState(D3DRS_POINTSCALEENABLE, TRUE);
 	device->SetRenderState(D3DRS_POINTSCALE_A, FtoDw(0.0f));
 	device->SetRenderState(D3DRS_POINTSCALE_B, FtoDw(0.0f));
 	device->SetRenderState(D3DRS_POINTSCALE_C, FtoDw(1.0f));
 	device->SetRenderState(D3DRS_POINTSIZE_MIN, FtoDw(0.1f));
-	device->SetRenderState(D3DRS_POINTSIZE_MAX, FtoDw(128.0f));
+	device->SetRenderState(D3DRS_POINTSIZE_MAX, FtoDw(1280.0f));
+	
+	// Set fog
+	float startFog = 1.0f;
+	float endFog = 500.0f;
+	device->SetRenderState(D3DRS_FOGCOLOR, D3DCOLOR_ARGB(200,120,120,140));
+	device->SetRenderState(D3DRS_FOGVERTEXMODE, D3DFOG_LINEAR);
+	device->SetRenderState(D3DRS_FOGSTART, *(DWORD *)(&startFog));
+    device->SetRenderState(D3DRS_FOGEND, *(DWORD *)(&endFog));
 
 	// Set up HUD
 	hud->initialize(device);
@@ -215,6 +224,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 
 	shadowQuadVertexBuffer->Unlock();
 
+	smokeSystem = new SmokeSystem();
 
 	return true;
 }
@@ -230,6 +240,13 @@ void Renderer::shutdown()
 	{
 		dynamicDrawables->clear();
 		delete dynamicDrawables;
+		dynamicDrawables = NULL;
+	}
+
+	if (smokeSystem)
+	{
+		delete smokeSystem;
+		smokeSystem = NULL;
 	}
 
 	if (hud)
@@ -314,38 +331,37 @@ void Renderer::render()
 
 	device->SetTransform(D3DTS_VIEW, &viewMatrix);
 	
+
+	device->SetRenderState(D3DRS_FOGENABLE, TRUE);
+
 	for (int i = 0; i < currentDrawable; i++)
 	{
 		drawables[i]->render(device);
 	}
-	
-	// Draw stencil shadows
-	drawShadows();
 
 	// Draw dynamic objects that will be removed after this frame (like rockets, lasers, landmines)
 	if (!(dynamicDrawables->empty()))
 	{
 		for (std::vector<Drawable*>::iterator iter = dynamicDrawables->begin();
-			iter < dynamicDrawables->end(); iter++)
+			iter < dynamicDrawables->end(); ++iter)
 		{
 			(*iter)->render(device);
 		}
 
 		dynamicDrawables->clear();
 	}
-
-
 	
 	
+	device->SetRenderState(D3DRS_FOGENABLE, FALSE);
+	// Draw stencil shadows
+	drawShadows();
+	
+
 
 	// Render SmokeSystem particles
-
-
-	// Render ExplosionSystem particles
-
-
-	// Render RainSystem particles
-
+	device->SetTransform(D3DTS_WORLD, &worldMatrix);
+	smokeSystem->render(ROCKET_SMOKE);
+	smokeSystem->render(EXPLOSION_SMOKE);
 
 	// Render LaserSystem particles (beginning and end points of shots)
 
@@ -442,6 +458,9 @@ Camera* Renderer::getCamera()
 // Adds a drawable that will be drawn for only one frame
 void Renderer::addDynamicDrawable(Drawable* drawable)
 {
+	if (!drawable)
+		return;
+
 	dynamicDrawables->push_back(drawable);
 }
 

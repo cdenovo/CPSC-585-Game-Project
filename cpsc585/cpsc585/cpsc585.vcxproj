@@ -98,7 +98,6 @@
     <ClCompile Include="LaserModel.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Particle.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Racer.cpp" />
     <ClCompile Include="RacerMesh.cpp" />
@@ -108,7 +107,8 @@
     <ClCompile Include="Rocket.cpp" />
     <ClCompile Include="RocketMesh.cpp" />
     <ClCompile Include="Skybox.cpp" />
-    <ClCompile Include="Smoke.cpp" />
+    <ClCompile Include="SmokeParticle.cpp" />
+    <ClCompile Include="SmokeSystem.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="Waypoint.cpp" />
     <ClCompile Include="WaypointEditor.cpp" />
@@ -138,7 +138,6 @@
     <ClInclude Include="LaserModel.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Particle.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Racer.h" />
     <ClInclude Include="RacerMesh.h" />
@@ -148,7 +147,8 @@
     <ClInclude Include="Rocket.h" />
     <ClInclude Include="RocketMesh.h" />
     <ClInclude Include="Skybox.h" />
-    <ClInclude Include="Smoke.h" />
+    <ClInclude Include="SmokeParticle.h" />
+    <ClInclude Include="SmokeSystem.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="Waypoint.h" />
     <ClInclude Include="WaypointEditor.h" />

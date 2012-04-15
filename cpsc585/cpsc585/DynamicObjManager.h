@@ -1,10 +1,8 @@
 #pragma once
 
-#include <vector>
+#include <list>
 #include "DynamicObj.h"
 #include "Renderer.h"
-
-
 
 class DynamicObjManager
 {
@@ -16,5 +14,5 @@ public:
 
 	static DynamicObjManager* manager;
 private:
-	std::vector<DynamicObj*>* objList;
+	std::list<DynamicObj*>* objList;
 };
