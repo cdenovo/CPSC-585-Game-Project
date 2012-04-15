@@ -25,11 +25,17 @@ public:
 	bool showTwo;
 	bool showThree;
 
+	bool showAmmo;
+	AbilityType ammoIconType;
+
+	int rocketAmmo, landmineAmmo, speedAmmo;
+
 private:
 	void showRadial(bool enabled);
 	void drawHealth();
 	void drawPosition();
 	void drawLap();
+	void drawAmmo();
 
 	AbilityType selectedAbility;
 	ID3DXSprite* sprite;
@@ -42,17 +48,23 @@ private:
 	IDirect3DTexture9* healthBarBorderTexture;
 	IDirect3DTexture9* lapPositionsTexture;
 	IDirect3DTexture9* countdownTexture;
+	IDirect3DTexture9* iconsTexture;
 
 	RECT* laserRect;
 	RECT* speedRect;
 	RECT* rocketRect;
 	RECT* mineRect;
+
+	RECT* rocketIconRect;
+	RECT* landmineIconRect;
+	RECT* speedIconRect;
 	
 	RECT* currentRect;
 
 	D3DXVECTOR3* radialPos;
 	D3DXVECTOR3* centre;
 	D3DXVECTOR3* speedoPos;
+	D3DXVECTOR3* ammoPos;
 
 	bool radialEnabled;
 

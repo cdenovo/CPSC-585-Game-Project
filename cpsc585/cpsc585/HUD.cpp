@@ -20,11 +20,16 @@ HUD::HUD(int width, int height)
 	healthBarTexture = NULL;
 	lapPositionsTexture = NULL;
 	countdownTexture = NULL;
+	iconsTexture = NULL;
 
 	laserRect = new RECT();
 	mineRect = new RECT();
 	rocketRect = new RECT();
 	speedRect = new RECT();
+
+	rocketIconRect = new RECT();
+	landmineIconRect = new RECT();
+	speedIconRect = new RECT();
 
 	laserRect->top = 0;
 	laserRect->bottom = 256;
@@ -48,6 +53,21 @@ HUD::HUD(int width, int height)
 
 	currentRect = laserRect;
 
+	rocketIconRect->top = 0;
+	rocketIconRect->bottom = 128;
+	rocketIconRect->right = 128;
+	rocketIconRect->left = 0;
+
+	landmineIconRect->top = 128;
+	landmineIconRect->bottom = 256;
+	landmineIconRect->right = 256;
+	landmineIconRect->left = 0;
+
+	speedIconRect->top = 0;
+	speedIconRect->bottom = 128;
+	speedIconRect->right = 256;
+	speedIconRect->left = 128;
+
 
 	radialPos = new D3DXVECTOR3();
 	radialPos->x = 50.0f;
@@ -65,6 +85,11 @@ HUD::HUD(int width, int height)
 	speedoPos->y = height - 180.0f;
 	speedoPos->z = 0.0f;
 
+	ammoPos = new D3DXVECTOR3();
+	ammoPos->x = width / 2.0f;
+	ammoPos->y = height - 80.0f;
+	ammoPos->z = 0.0f;
+
 	D3DXMatrixIdentity(&needleTrans);
 
 	currentSpeed = 0;
@@ -76,6 +101,13 @@ HUD::HUD(int width, int height)
 	showOne = false;
 	showTwo = false;
 	showThree = false;
+
+	showAmmo = false;
+	ammoIconType = ROCKET;
+
+	rocketAmmo = 0;
+	landmineAmmo = 0;
+	speedAmmo = 0;
 }
 
 void HUD::initialize(IDirect3DDevice9* device)
@@ -89,6 +121,7 @@ void HUD::initialize(IDirect3DDevice9* device)
 	D3DXCreateTextureFromFile(device, "textures/healthBarBorder.dds", &healthBarBorderTexture);
 	D3DXCreateTextureFromFile(device, "textures/lapPositions.dds", &lapPositionsTexture);
 	D3DXCreateTextureFromFile(device, "textures/countdown.dds", &countdownTexture);
+	D3DXCreateTextureFromFile(device, "textures/icons.dds", &iconsTexture);
 	D3DXCreateSprite(device, &sprite);
 }
 
@@ -106,6 +139,12 @@ void HUD::shutdown()
 	{
 		delete speedoPos;
 		speedoPos = NULL;
+	}
+
+	if (ammoPos)
+	{
+		delete ammoPos;
+		ammoPos = NULL;
 	}
 
 	if (centre)
@@ -136,6 +175,24 @@ void HUD::shutdown()
 	{
 		delete speedRect;
 		speedRect = NULL;
+	}
+
+	if (rocketIconRect)
+	{
+		delete rocketIconRect;
+		rocketIconRect = NULL;
+	}
+
+	if (landmineIconRect)
+	{
+		delete landmineIconRect;
+		landmineIconRect = NULL;
+	}
+
+	if (speedIconRect)
+	{
+		delete speedIconRect;
+		speedIconRect = NULL;
 	}
 
 	if (radialMenuTexture)
@@ -190,6 +247,12 @@ void HUD::shutdown()
 	{
 		countdownTexture->Release();
 		countdownTexture = NULL;
+	}
+
+	if (iconsTexture)
+	{
+		iconsTexture->Release();
+		iconsTexture = NULL;
 	}
 
 	if (sprite)
@@ -343,6 +406,40 @@ void HUD::render()
 			&(D3DXVECTOR3(screenWidth / 2.0f, screenHeight / 2.0f, 0)), 0xFFFFFFFF);
 	}
 
+	if (showAmmo)
+	{
+		RECT* iconRect = NULL;
+
+		switch (ammoIconType)
+		{
+		case ROCKET:
+			{
+				iconRect = rocketIconRect;
+				break;
+			}
+		case LANDMINE:
+			{
+				iconRect = landmineIconRect;
+				break;
+			}
+		case SPEED:
+			{
+				iconRect = speedIconRect;
+				break;
+			}
+		default:
+			{
+				iconRect = rocketIconRect;
+				break;
+			}
+		}
+
+		sprite->Draw(iconsTexture, iconRect, &(D3DXVECTOR3(64.0f, 64.0f, 0)),
+			ammoPos, 0xFFFFFFFF);
+	}
+
+	// Draw ammo counts
+	drawAmmo();
 
 	sprite->End();
 }
@@ -565,4 +662,84 @@ void HUD::drawLap()
 		}
 	}
 	
+}
+
+void HUD::drawAmmo()
+{
+	char ammoString[3];
+
+	int alpha = 0;
+
+	if (radialEnabled)
+		alpha = 150;
+	else
+		alpha = 50;
+	
+	if (rocketAmmo > 9)
+		rocketAmmo = 9;
+	
+	if (speedAmmo > 9)
+		speedAmmo = 9;
+
+	if (landmineAmmo > 9)
+		landmineAmmo = 9;
+
+	ammoString[0] = (char) rocketAmmo + '0';
+	ammoString[1] = (char) speedAmmo + '0';
+	ammoString[2] = (char) landmineAmmo + '0';
+
+	D3DXVECTOR3 drawPos = *radialPos;
+	drawPos.x += 128;
+	drawPos.y += 128;
+
+
+	drawPos.x -= 75;
+	drawPos.y += 35;
+
+	D3DXVECTOR3 currCenter;
+	currCenter.x = 16.0f;
+	currCenter.y = 32.0f;
+	currCenter.z = 0.0f;
+
+	RECT current;
+
+	current.top = 0;
+	current.bottom = 64;
+	current.left = 0;
+	current.right = 32;
+
+	if ((ammoString[0] >= '0') && (ammoString[0] <= '9'))
+	{
+		int num = (int) ammoString[0] - '0';
+
+		current.left = 32 * num;
+		current.right = 32 * (num + 1);
+
+		sprite->Draw(numbersTexture, &current, &currCenter, &drawPos, D3DCOLOR_ARGB(alpha, 255, 100, 0));
+
+		drawPos.x += 150.0f;
+	}
+	
+	if ((ammoString[1] >= '0') && (ammoString[1] <= '9'))
+	{
+		int num = (int) ammoString[1] - '0';
+
+		current.left = 32 * num;
+		current.right = 32 * (num + 1);
+
+		sprite->Draw(numbersTexture, &current, &currCenter, &drawPos, D3DCOLOR_ARGB((int)hkMath::floor(alpha * 1.7f), 0, 100, 255));
+
+		drawPos.x -= 75.0f;
+		drawPos.y += 75.0f;
+	}
+
+	if ((ammoString[2] >= '0') && (ammoString[2] <= '9'))
+	{
+		int num = (int) ammoString[2] - '0';
+
+		current.left = 32 * num;
+		current.right = 32 * (num + 1);
+
+		sprite->Draw(numbersTexture, &current, &currCenter, &drawPos, D3DCOLOR_ARGB(alpha, 0, 255, 100));
+	}
 }
