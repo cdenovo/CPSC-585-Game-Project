@@ -16,10 +16,10 @@ enum TypeOfRacer { PLAYER, COMPUTER };
 class AIMind
 {
 public:
-	AIMind(Racer* racer, TypeOfRacer _racerType, int NumberOfRacers, std::string _racerName);
+	AIMind(Racer* racer, TypeOfRacer _racerType, int NumberOfRacers, std::string _racerName, std::string _colour);
 	~AIMind(void);
 	void update(HUD* hud, Intention intention, float seconds, Waypoint* waypoints[], Racer* racers[], AIMind* racerPlacement[], Waypoint* buildingWaypoint);
-	void togglePlayerComputerAI();
+	void togglePlayerComputerAI(Waypoint* waypoints[]);
 	void setPlacement(int place);
 	int getPlacement();
 	int getCheckpointTime();
@@ -45,6 +45,7 @@ public:
 	TypeOfRacer getTypeOfRacer();
 	bool isfinishedRace();
 	std::string getRacerName();
+	std::string getRacerColour();
 
 	int numberOfLapsToWin;
 
@@ -53,6 +54,7 @@ private:
 	void acquireAmmo();
 	void upgrade();
 	void downgrade();
+	void reset(Waypoint* waypoints[]);
 	float calculateAngleToPosition(hkVector4* position);
 
 	Racer* racer;
@@ -67,12 +69,15 @@ private:
 	time_t oldTime;
 	time_t newTime;
 	float spawnTime;
+	float timeToNextTeleport;
+	float timeSinceTeleport;
 
 	hkVector4 lastPosition;
 
 	TypeOfRacer racerType;
 
 	std::string racerName;
+	std::string colour;
 
 	int currentWaypoint;
 	int checkPointTime;
@@ -88,6 +93,7 @@ private:
 	int knownDamageTaken;
 
 	bool finishedRace;
+	bool teleportedRecently;
 
 	bool playedNoAmmoSound;
 

@@ -75,7 +75,7 @@ void WaypointEditor::loadWaypoints(Waypoint* _waypoints[], std::string fileName)
 			_waypoints[i] = new Waypoint(renderer->getDevice(), (WPType)wpType);
 			_waypoints[i]->setPosAndRot((float)xPos, (float)yPos+15, (float)zPos, 0, 0, 0);
 			_waypoints[i]->setRadius((float)radius);
-			renderer->addDrawable(_waypoints[i]->drawable);
+			//renderer->addDrawable(_waypoints[i]->drawable);
 			i++;
 			
 		}

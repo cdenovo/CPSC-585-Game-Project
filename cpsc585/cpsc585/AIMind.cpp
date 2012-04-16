@@ -1,11 +1,15 @@
 #include "AIMind.h"
 
 
-AIMind::AIMind(Racer* _racer, TypeOfRacer _racerType, int NumberOfRacers, std::string _racerName)
+AIMind::AIMind(Racer* _racer, TypeOfRacer _racerType, int NumberOfRacers, std::string _racerName, std::string _colour)
 {
+	colour = _colour;
 	racerName = _racerName;
 	numberOfRacers = NumberOfRacers;
 	numberOfLapsToWin = 3;
+	timeToNextTeleport = 0;
+	timeSinceTeleport = 0;
+	teleportedRecently = false;
 	racer = _racer;
 	racerType = _racerType;
 	newTime = 0;
@@ -23,11 +27,11 @@ AIMind::AIMind(Racer* _racer, TypeOfRacer _racerType, int NumberOfRacers, std::s
 	landmine = new Ability(LANDMINE);
 
 	knownNumberOfKills = 0;
-	knownNumberOfKills = 0;
 	knownNumberOfDeaths = 0;
 	knownNumberOfSuicides = 0;
 	knownDamageDone = 0;
 	knownDamageTaken = 0;
+
 
 	rotationAngle = 0;
 	finishedRace = false;
@@ -77,7 +81,7 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 		finishedRace = true;
 		//Possibly add a value here that means the racer has completed the race. Like raceCompleted = true;
 		if(racerType == PLAYER){
-			togglePlayerComputerAI(); 
+			togglePlayerComputerAI(waypoints); 
 		}
 	}
 
@@ -351,7 +355,7 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 					to make turns more successfully.
 				*/
 				bool rubberBanding = true; // Turn this off if multiplayer
-
+				float cheatingSpeed = 0.0f;
 				float baseSpeed = 0.0f;
 				if(rubberBanding){
 					int playerPlacement = 0;
@@ -378,48 +382,47 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 							baseSpeed = 0.6f;
 						}
 						else{
-							baseSpeed = 0.8f;
+							baseSpeed = 1.0f;
 						}
+						//if(waypoints[currentWaypoint]->getWaypointType() == WAY_POINT &&
+						//	waypoints[currentWaypoint + 1]->getWaypointType() == WAY_POINT){
+						//	cheatingSpeed = 0.1f;
+						//}
 					}
 					else{ // Teleport the racers that are behind closer to the player if they get too far behind
-
-						baseSpeed = 0.8f;
+						
+						if(waypoints[currentWaypoint]->getWaypointType() == WAY_POINT &&
+							waypoints[currentWaypoint + 1]->getWaypointType() == WAY_POINT){
+							cheatingSpeed = 0.5f;
+						}
+						baseSpeed = 1.0f;
 						int distance = racerPlacement[indexOfPlayer]->getOverallPosition() - overallPosition;
-						if(distance > 5) // If the racer is behind more than 10 waypoints of the racer, will teleport them closer.
+						srand((unsigned)time(0));
+						int random_integer = (rand()+knownDamageDone)%100;
+						int waypoint_offset = rand()%3;
+						timeToNextTeleport += seconds;
+						// If the racer is behind more than X waypoints of the racer, will teleport them closer
+						// as long as they roll between 0 and 30 and so long as they haven't teleported in the last 5 seconds
+						if(distance > 6 && random_integer <= 30 && timeToNextTeleport > 5) 
 						{
-							int newCurrent = racerPlacement[indexOfPlayer]->getCurrentWaypoint()-2;
+							teleportedRecently = true;
+							timeToNextTeleport = 0;
+							int newCurrent = racerPlacement[indexOfPlayer]->getCurrentWaypoint()-(2+waypoint_offset);
 							if(newCurrent >= 0){
 								int previousWaypoint = currentWaypoint;
 								currentWaypoint = newCurrent;
 								if(previousWaypoint > currentWaypoint){ // Accounts for if the racer teleports past the lap marker
 									currentLap += 1;
 								}
-								int nextWaypoint = currentWaypoint + 1;
-								if(nextWaypoint == 83){
-									nextWaypoint = 0;
-								}
 							
-							
-							
-								D3DXVECTOR3 cwPosition = waypoints[currentWaypoint]->drawable->getPosition();
-								D3DXVECTOR3 nextPosition = waypoints[currentWaypoint+1]->drawable->getPosition();
-								hkVector4 wayptVec;
-								wayptVec.set(nextPosition.x, nextPosition.y, nextPosition.z);
-
-								wayptVec.sub(hkVector4(cwPosition.x, cwPosition.y, cwPosition.z));
-
-								hkVector4 resetPosition;
-								resetPosition.set(cwPosition.x, cwPosition.y, cwPosition.z);
-
-			
-								racer->reset(&resetPosition, 0);
+								reset(waypoints);
 							}
 						}
 
 					}
 				}
 				else{
-					baseSpeed = 0.8f; // Constant speed that racers go at when in multiplayer games
+					baseSpeed = 1.0f; // Constant speed that racers go at when in multiplayer games
 				}
 				hkVector4 vel = racer->body->getLinearVelocity();
 				float velocity = vel.dot3(racer->drawable->getZhkVector());
@@ -433,10 +436,6 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 				}
 
 
-				/* 
-					Currently, the AI only uses a speedboost if it is at waypoint 35 (the middle of the
-					ramp on the racetrack), and is traveling too slow to make the jump.
-				*/
 				int previousWaypoint = 0;
 				if(currentWaypoint - 1 == -1){
 					previousWaypoint = 82;
@@ -446,7 +445,7 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 				}
 				if(!speedBoost->onCooldown() && 
 					(waypoints[previousWaypoint]->getWaypointType() == TURN_POINT || waypoints[previousWaypoint]->getWaypointType() == SHARP_POINT)
-					&& waypoints[currentWaypoint]->getWaypointType() == CHECK_POINT
+					&& waypoints[currentWaypoint]->getWaypointType() == WAY_POINT
 					&& speedBoost->getAmmoCount() > 0){
 					speedBoost->startCooldownTimer();
 					speedBoost->decreaseAmmoCount();
@@ -471,7 +470,23 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 					landmine->updateCooldown(seconds);
 				}
 
-				racer->accelerate(seconds, baseSpeed + speedBoost->getBoostValue());
+				float extraSpeed = 0.0f;
+				if(teleportedRecently){
+					timeSinceTeleport += seconds;
+					extraSpeed = 0.5f;
+				}
+
+				if(timeSinceTeleport > 5){ // Determines the duration of the extra acceleration boost the ai gets after teleporting
+					timeSinceTeleport = 0;
+					teleportedRecently = false;
+				}
+				
+
+				racer->accelerate(seconds, baseSpeed + speedBoost->getBoostValue() + extraSpeed + cheatingSpeed);
+
+
+
+
 
 
 
@@ -511,8 +526,19 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 					hkVector4 targetPos = target->body->getPosition();
 					hkVector4 shooterPos = racer->body->getPosition();
 
+					// Generate random numbers for offset of where the computer is aiming so they aren't guaranteed to hit
+					srand((unsigned)time(0));
+					int offset = rand()%6; // Increase modulo to decrease the likelihood of getting hit.
+					srand((unsigned)time(0)+offset);
+					int negative = rand()%20;
+					if(negative%2 == 0){
+						offset *= -1;
+					}
 
-					
+					targetPos(0) += offset;
+					targetPos(2) += offset;
+
+					//------------------------------------
 
 					shooterPos(1) += 2.0f;
 					targetPos.sub(shooterPos);
@@ -545,12 +571,22 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 					
 				}
 				else if(avoidanceEngaged){
-					racer->steer(seconds, 1.0f);
+					srand((unsigned) time(0)); // Randomizes whether the racer avoids to the left or right
+					int sign = rand();
+					if(sign%2 == 0){
+						sign = -1;
+					}
+					else{
+						sign = 1;
+					}
+					racer->steer(seconds, 1.0f*sign);
 				}
 				else{
-					// Using the indexer in place of currentWaypoint would allow the ai to look one waypoint ahead for steering.
-					//---- For the current map, this is a bad design.
-					/*
+					hkVector4 vel = racer->body->getLinearVelocity();
+					float velocity = vel.dot3(racer->drawable->getZhkVector());
+					
+					// Using the indexer in place of currentWaypoint allows the ai to look one waypoint ahead for steering.
+					// This is a bad idea when they are moving slow, but at higher speeds it increases the accuracy of their driving
 					int indexer;
 					if(currentWaypoint == 82){
 						indexer = 0;
@@ -558,8 +594,15 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 					else{
 						indexer = currentWaypoint+1;
 					}
-					*/
-					hkVector4 position = waypoints[currentWaypoint]->wpPosition;
+					
+					int waypoint;
+					if(velocity > 55){
+						waypoint = indexer;
+					}
+					else{
+						waypoint = currentWaypoint;
+					}
+					hkVector4 position = waypoints[waypoint]->wpPosition;
 
 					float angle = calculateAngleToPosition(&position);
 
@@ -592,8 +635,8 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 
 
 				// This makes it so the AI's weapons aren't looking the right way
-				
-			/*	hkVector4 racerPos = racer->body->getPosition();
+				/*
+				hkVector4 racerPos = racer->body->getPosition();
 				hkSimdReal camX = racerPos.getComponent(0);
 				hkSimdReal camY = racerPos.getComponent(1);
 				hkSimdReal camZ = racerPos.getComponent(2);
@@ -621,92 +664,61 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 		not change for a particular amount of time, it will reset its location
 		to its current waypoints location.
 	*/
+	hkVector4 currentPosition = racer->body->getPosition();
+	int distanceTo = (int)currentPosition.distanceTo(lastPosition);
 	hkVector4 upVec = racer->drawable->getYhkVector();
 	hkVector4 actualUp = hkVector4(0,1,0);
-	//actualUp.normalize3();	// Don't need to normalize, as (0,1,0) is already normalized
-	//upVec.normalize3();	// Already normalized
 	spawnTime += seconds;
-	//int timeDiff = (int)difftime(newTime, oldTime);
-	if(upVec.dot3(actualUp).isLess(0.1f) || (racer->body->getPosition()(1) < 5.0f)){
+	if(upVec.dot3(actualUp).isLess(0.1f) || (racer->body->getPosition()(1) < 5.0f) || (distanceTo < 1 && racerType == COMPUTER)){
 		if(spawnTime > 2.0f){
-		D3DXVECTOR3 cwPosition = waypoints[currentWaypoint]->drawable->getPosition();
-			D3DXVECTOR3 nextPosition = waypoints[currentWaypoint+1]->drawable->getPosition();
-			hkVector4 wayptVec;
-			wayptVec.set(nextPosition.x, nextPosition.y, nextPosition.z);
-
-			wayptVec.sub(hkVector4(cwPosition.x, cwPosition.y, cwPosition.z));
-
-			hkVector4 resetPosition;
-			resetPosition.set(cwPosition.x, cwPosition.y, cwPosition.z);
-
-			
-			racer->reset(&resetPosition, 0);
-			wayptVec(1) = 0.0f;
-			wayptVec.normalize3();
- 
-			hkVector4 z = racer->drawable->getZhkVector();
-			hkVector4 x = racer->drawable->getXhkVector();
- 
-			float angle = hkMath::acos(z.dot3(wayptVec)); // angle is between 0 and 183
-			
-			// if the vector is on the LEFT side of the car...
-			if (x.dot3(wayptVec) < 0.0f)
-				angle *= -1.0f;
- 
-			rotationAngle = angle;
- 
-			racer->reset(&resetPosition, angle);
-			calculateAngleToPosition(&(hkVector4(nextPosition.x, nextPosition.y, nextPosition.z)));
+			reset(waypoints);
 			spawnTime = 0.0f;
 		}
 	}
 	else{
 		spawnTime = 0.0f;
+		lastPosition = currentPosition;
 	}
-	/*
-	hkVector4 currentPosition = racer->body->getPosition();
-	int distanceTo = (int)currentPosition.distanceTo(lastPosition);
-	newTime = time(NULL);
-	int timeDiff = (int)difftime(newTime, oldTime);
-	if(timeDiff > 3){
-		if(distanceTo < 1){
-			D3DXVECTOR3 cwPosition = waypoints[currentWaypoint]->drawable->getPosition();
-			D3DXVECTOR3 nextPosition = waypoints[currentWaypoint+1]->drawable->getPosition();
-			hkVector4 wayptVec;
-			wayptVec.set(nextPosition.x, nextPosition.y, nextPosition.z);
-
-			wayptVec.sub(hkVector4(cwPosition.x, cwPosition.y, cwPosition.z));
-
-			hkVector4 resetPosition;
-			resetPosition.set(cwPosition.x, cwPosition.y, cwPosition.z);
-
-			
-			racer->reset(&resetPosition, 0);
-			wayptVec(1) = 0.0f;
-			wayptVec.normalize3();
- 
-			hkVector4 z = racer->drawable->getZhkVector();
-			hkVector4 x = racer->drawable->getXhkVector();
- 
-			float angle = hkMath::acos(z.dot3(wayptVec)); // angle is between 0 and 183
-			
-			// if the vector is on the LEFT side of the car...
-			if (x.dot3(wayptVec) < 0.0f)
-				angle *= -1.0f;
- 
-			rotationAngle = angle;
- 
-			racer->reset(&resetPosition, angle);
-			calculateAngleToPosition(&(hkVector4(nextPosition.x, nextPosition.y, nextPosition.z)));
-		}
-		else{
-			lastPosition = currentPosition;
-		}
-		oldTime = newTime;
-	}
-	*/
+	//-----------------------------------------
+	
 	overallPosition = currentWaypoint + (currentLap-1)*83; // 83 represent the number of waypoints
 	
+}
+
+void AIMind::reset(Waypoint* waypoints[])
+{
+	int nextWaypoint = currentWaypoint + 1;
+	if(nextWaypoint == 83){
+		nextWaypoint = 0;
+	}
+	D3DXVECTOR3 cwPosition = waypoints[currentWaypoint]->drawable->getPosition();
+	D3DXVECTOR3 nextPosition = waypoints[nextWaypoint]->drawable->getPosition();
+	hkVector4 wayptVec;
+	wayptVec.set(nextPosition.x, nextPosition.y, nextPosition.z);
+
+	wayptVec.sub(hkVector4(cwPosition.x, cwPosition.y, cwPosition.z));
+
+	hkVector4 resetPosition;
+	resetPosition.set(cwPosition.x, cwPosition.y, cwPosition.z);
+
+			
+	racer->reset(&resetPosition, 0);
+	wayptVec(1) = 0.0f;
+	wayptVec.normalize3();
+ 
+	hkVector4 z = racer->drawable->getZhkVector();
+	hkVector4 x = racer->drawable->getXhkVector();
+ 
+	float angle = hkMath::acos(z.dot3(wayptVec)); // angle is between 0 and 183
+			
+	// if the vector is on the LEFT side of the car...
+	if (x.dot3(wayptVec) < 0.0f)
+		angle *= -1.0f;
+ 
+	rotationAngle = angle;
+ 
+	racer->reset(&resetPosition, angle);
+	calculateAngleToPosition(&(hkVector4(nextPosition.x, nextPosition.y, nextPosition.z)));
 }
 
 float AIMind::calculateAngleToPosition(hkVector4* position)
@@ -755,7 +767,7 @@ void AIMind::updateWaypointsAndLap(float seconds, Waypoint* waypoints[], Waypoin
 		}
 	}
 	if(waypoints[currentWaypoint]->passedWaypoint(currentPos, prevPos, &racer->body->getPosition())
-		|| (distanceOfRacer.isLess(30) && waypoints[currentWaypoint]->getWaypointType() != LAP_POINT)){
+		|| (distanceOfRacer.isLess(22) && waypoints[currentWaypoint]->getWaypointType() != LAP_POINT)){
 		if(currentWaypoint == 82){
 			currentWaypoint = 0;
 		}
@@ -771,10 +783,18 @@ void AIMind::updateWaypointsAndLap(float seconds, Waypoint* waypoints[], Waypoin
 }
 
 // Switches between whether the racer is being controlled by a player or computer
-void AIMind::togglePlayerComputerAI()
+void AIMind::togglePlayerComputerAI(Waypoint* waypoints[])
 {
 	if(racerType == COMPUTER){
 		racerType = PLAYER;
+		D3DXVECTOR3 target = waypoints[currentWaypoint]->drawable->getPosition();
+		hkVector4 targetPos = hkVector4(target.x, target.y, target.z);
+		hkVector4 shooterPos = racer->body->getPosition();
+		shooterPos(1) += 2.0f;
+		targetPos.sub(shooterPos);
+		targetPos.normalize3();
+
+		racer->lookDir.setXYZ(targetPos);
 	}
 	else{
 		racerType = COMPUTER;
@@ -1045,4 +1065,9 @@ int AIMind::getDamageDone()
 int AIMind::getDamageTaken()
 {
 	return knownDamageTaken;
+}
+
+std::string AIMind::getRacerColour()
+{
+	return colour;
 }

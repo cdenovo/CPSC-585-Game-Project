@@ -120,6 +120,7 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 	playedOne = false;
 	playedTwo = false;
 	playedThree = false;
+	generatePostGameStatistics = true;
 
 	renderer = r;
 	input = i;
@@ -147,7 +148,7 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 	//Initialize player
 	player = new Racer(r->getDevice(), RACER1);
 	player->setPosAndRot(35.0f, 15.0f, -298.0f, 0.0f, 1.4f, 0.0f);
-	playerMind = new AIMind(player, PLAYER, NUMRACERS, "Herald");
+	playerMind = new AIMind(player, PLAYER, NUMRACERS, "Herald", "Red");
 	racers[0] = player;
 	racerMinds[0] = playerMind;
 	sound->playerEmitter = player->emitter;
@@ -182,7 +183,7 @@ void AI::initialize(Renderer* r, Input* i, Sound* s)
 	player->lookDir.setXYZ(targetPos);
 	
 	//Initialize Checkpoints & Finish Lines
-	initializeCheckpoints();
+	//initializeCheckpoints();
 
 	//Initialize HUD
 	hud = renderer->getHUD();
@@ -196,31 +197,31 @@ void AI::initializeAIRacers()
 {
 	ai1 = new Racer(renderer->getDevice(), RACER2);
 	ai1->setPosAndRot(40.0f, 15.0f, -294.0f, 0.0f, 1.4f, 0.0f);
-	aiMind1 = new AIMind(ai1, COMPUTER, NUMRACERS, "Gerard");
+	aiMind1 = new AIMind(ai1, COMPUTER, NUMRACERS, "Gerard", "Blue");
 	
 	ai2 = new Racer(renderer->getDevice(), RACER3);
 	ai2->setPosAndRot(40.0f, 15.0f, -298.0f, 0.0f, 1.4f, 0.0f);
-	aiMind2 = new AIMind(ai2, COMPUTER, NUMRACERS, "Nevvel");
+	aiMind2 = new AIMind(ai2, COMPUTER, NUMRACERS, "Nevvel", "Orange");
 
 	ai3 = new Racer(renderer->getDevice(), RACER4);
 	ai3->setPosAndRot(40.0f, 15.0f, -302.0f, 0.0f, 1.4f, 0.0f);
-	aiMind3 = new AIMind(ai3, COMPUTER, NUMRACERS, "Rosey");
+	aiMind3 = new AIMind(ai3, COMPUTER, NUMRACERS, "Rosey", "Green");
 
 	ai4 = new Racer(renderer->getDevice(), RACER5);
 	ai4->setPosAndRot(40.0f, 15.0f, -306.0f, 0.0f, 1.4f, 0.0f);
-	aiMind4 = new AIMind(ai4, COMPUTER, NUMRACERS, "Delilah");
+	aiMind4 = new AIMind(ai4, COMPUTER, NUMRACERS, "Delilah", "Teal");
 
 	ai5 = new Racer(renderer->getDevice(), RACER6);
 	ai5->setPosAndRot(35.0f, 15.0f, -306.0f, 0.0f, 1.4f, 0.0f);
-	aiMind5 = new AIMind(ai5, COMPUTER, NUMRACERS, "Gupreet");
+	aiMind5 = new AIMind(ai5, COMPUTER, NUMRACERS, "Gupreet", "Yellow");
 
 	ai6 = new Racer(renderer->getDevice(), RACER7);
 	ai6->setPosAndRot(35.0f, 15.0f, -302.0f, 0.0f, 1.4f, 0.0f);
-	aiMind6 = new AIMind(ai6, COMPUTER, NUMRACERS, "Tiffany");
+	aiMind6 = new AIMind(ai6, COMPUTER, NUMRACERS, "Tiffany", "Purple");
 
 	ai7 = new Racer(renderer->getDevice(), RACER8);
 	ai7->setPosAndRot(35.0f, 15.0f, -294.0f, 0.0f, 1.4f, 0.0f);
-	aiMind7 = new AIMind(ai7, COMPUTER, NUMRACERS, "Rickardo");
+	aiMind7 = new AIMind(ai7, COMPUTER, NUMRACERS, "Rickardo", "Pink");
 
 	racers[1] = ai1;
 	racers[2] = ai2;
@@ -237,6 +238,7 @@ void AI::initializeAIRacers()
 	racerMinds[6] = aiMind6;
 	racerMinds[7] = aiMind7;
 }
+
 
 void AI::initializeCheckpoints()
 {
@@ -286,15 +288,11 @@ void AI::simulate(float seconds)
 	}
 	// ---------------------------------------------------------------
 	
-
-
-
 	if(playerMind->isfinishedRace())
 	{
 		displayPostGameStatistics();
+		raceEnded = true;
 	}
-
-
 
 
 	// ---------- UPDATE SOUND WITH CURRENT CAMERA POSITION/ORIENTATION --------------- //
@@ -394,10 +392,9 @@ void AI::simulate(float seconds)
 		hud->setPosition(racerPlacement[racerIndex]->getPlacement());
 		hud->setLap(1, racerMinds[racerIndex]->numberOfLapsToWin);
 
-
-
 		hkVector4 look = racers[racerIndex]->lookDir;
 		(renderer->getCamera())->setLookDir(look(0), look(1), look(2));
+		
 
 		for (int i = 0; i < NUMRACERS; i++)
 		{
@@ -484,6 +481,8 @@ void AI::simulate(float seconds)
 	for(int i = 0; i < NUMRACERS; i++){
 		racerMinds[i]->update(hud, intention, seconds, waypoints, racers, racerPlacement, buildingWaypoint);
 	}
+
+
 	
 	updateRacerPlacement(0, NUMRACERS - 1);
 
@@ -508,12 +507,12 @@ void AI::simulate(float seconds)
 	}
 
 	if(intention.bPressed){ // Changes control of Computer racer to Player, and Player racer to computer, for the currently viewed racer
-		racerMinds[racerIndex]->togglePlayerComputerAI();
+		racerMinds[racerIndex]->togglePlayerComputerAI(waypoints);
 	}
 
 	// Switch focus (A for player, X for AI)
 	if (intention.startPressed){
-		if(racerIndex == 4){
+		if(racerIndex == 7){
 			racerIndex = 0;
 		}
 		else{
@@ -523,16 +522,32 @@ void AI::simulate(float seconds)
 	}
 	else if (intention.selectPressed){
 		if(racerIndex == 0){
-			racerIndex = 4;
+			racerIndex = 7;
 		}
 		else{
 			racerIndex -= 1;
 		}
+
 		renderer->setFocus(racers[racerIndex]->getIndex());
 	}
 
 	hkVector4 look = racers[racerIndex]->lookDir;
-	(renderer->getCamera())->setLookDir(look(0), look(1), look(2));
+
+		if(raceEnded){
+			hkVector4 racerPos = racers[racerIndex]->body->getPosition();
+			hkSimdReal camX = racerPos.getComponent(0);
+			hkSimdReal camY = racerPos.getComponent(1);
+			hkSimdReal camZ = racerPos.getComponent(2);
+			camX.add(4);
+			camY.add(4);
+			camZ.sub(2);
+			hkVector4 camPos = hkVector4(camX, camY, camZ);
+			racerPos.sub(camPos);
+			(renderer->getCamera())->setLookDir(racerPos(0), racerPos(1), racerPos(2));
+		}
+		else{
+			(renderer->getCamera())->setLookDir(look(0), look(1), look(2));
+		}
 
 	// Reset the player (in case you fall over)
 	if (intention.yPressed)
@@ -773,6 +788,7 @@ void AI::displayDebugInfo(Intention intention, float seconds)
 
 void AI::displayPostGameStatistics()
 {
+	if(generatePostGameStatistics){
 	char buf1[33];
 	_itoa_s((int) (racerPlacement[7]->getKills()), buf1, 10);
 	char buf2[33];
@@ -783,6 +799,12 @@ void AI::displayPostGameStatistics()
 	_itoa_s((int) (racerPlacement[4]->getKills()), buf4, 10);
 	char buf5[33];
 	_itoa_s((int) (racerPlacement[3]->getKills()), buf5, 10);
+	char buf26[33];
+	_itoa_s((int) (racerPlacement[2]->getKills()), buf26, 10);
+	char buf27[33];
+	_itoa_s((int) (racerPlacement[1]->getKills()), buf27, 10);
+	char buf28[33];
+	_itoa_s((int) (racerPlacement[0]->getKills()), buf28, 10);
 
 	char buf6[33];
 	_itoa_s((int) (racerPlacement[7]->getDeaths()), buf6, 10);
@@ -794,6 +816,12 @@ void AI::displayPostGameStatistics()
 	_itoa_s((int) (racerPlacement[4]->getDeaths()), buf9, 10);
 	char buf10[33];
 	_itoa_s((int) (racerPlacement[3]->getDeaths()), buf10, 10);
+	char buf29[33];
+	_itoa_s((int) (racerPlacement[2]->getDeaths()), buf29, 10);
+	char buf30[33];
+	_itoa_s((int) (racerPlacement[1]->getDeaths()), buf30, 10);
+	char buf31[33];
+	_itoa_s((int) (racerPlacement[0]->getDeaths()), buf31, 10);
 
 	char buf11[33];
 	_itoa_s((int) (racerPlacement[7]->getSuicides()), buf11, 10);
@@ -805,6 +833,12 @@ void AI::displayPostGameStatistics()
 	_itoa_s((int) (racerPlacement[4]->getSuicides()), buf14, 10);
 	char buf15[33];
 	_itoa_s((int) (racerPlacement[3]->getSuicides()), buf15, 10);
+	char buf32[33];
+	_itoa_s((int) (racerPlacement[2]->getSuicides()), buf32, 10);
+	char buf33[33];
+	_itoa_s((int) (racerPlacement[1]->getSuicides()), buf33, 10);
+	char buf34[33];
+	_itoa_s((int) (racerPlacement[0]->getSuicides()), buf34, 10);
 
 	char buf16[33];
 	_itoa_s((int) (racerPlacement[7]->getDamageDone()), buf16, 10);
@@ -816,6 +850,12 @@ void AI::displayPostGameStatistics()
 	_itoa_s((int) (racerPlacement[4]->getDamageDone()), buf19, 10);
 	char buf20[33];
 	_itoa_s((int) (racerPlacement[3]->getDamageDone()), buf20, 10);
+	char buf35[33];
+	_itoa_s((int) (racerPlacement[2]->getDamageDone()), buf35, 10);
+	char buf36[33];
+	_itoa_s((int) (racerPlacement[1]->getDamageDone()), buf36, 10);
+	char buf37[33];
+	_itoa_s((int) (racerPlacement[0]->getDamageDone()), buf37, 10);
 
 	char buf21[33];
 	_itoa_s((int) (racerPlacement[7]->getDamageTaken()), buf21, 10);
@@ -827,20 +867,33 @@ void AI::displayPostGameStatistics()
 	_itoa_s((int) (racerPlacement[4]->getDamageTaken()), buf24, 10);
 	char buf25[33];
 	_itoa_s((int) (racerPlacement[3]->getDamageTaken()), buf25, 10);
+	char buf38[33];
+	_itoa_s((int) (racerPlacement[2]->getDamageTaken()), buf38, 10);
+	char buf39[33];
+	_itoa_s((int) (racerPlacement[1]->getDamageTaken()), buf39, 10);
+	char buf40[33];
+	_itoa_s((int) (racerPlacement[0]->getDamageTaken()), buf40, 10);
 
-	std::string stringArray[] = 
-	{
-		std::string("Player Name:     Kills:     Deaths:     Suicides:     Damage Done:     Damage Taken:"),
-		std::string(racerPlacement[7]->getRacerName() + "     " + buf1 + "     " + buf6  + "     " + buf11 + "     " + buf16+ "     " + buf21), // 1st place
-		std::string(racerPlacement[6]->getRacerName() + "     " + buf2 + "     " + buf7  + "     " + buf12 + "     " + buf17+ "     " + buf22), // 2nd place
-		std::string(racerPlacement[5]->getRacerName() + "     " + buf3 + "     " + buf8  + "     " + buf13 + "     " + buf18+ "     " + buf23), // 3rd place
-		std::string(racerPlacement[4]->getRacerName() + "     " + buf4 + "     " + buf9  + "     " + buf14 + "     " + buf19+ "     " + buf24), // 4th place
-		std::string(racerPlacement[3]->getRacerName() + "     " + buf5 + "     " + buf10 + "     " + buf15 + "     " + buf20+ "     " + buf25)  // 5th place
-		//std::string(racerPlacement[3]->getRacerName() + "     " + buf26 + "     " + buf29 + "     " + buf32 + "     " + buf35+ "     " + buf38), // 6th place
-		//std::string(racerPlacement[3]->getRacerName() + "     " + buf27 + "     " + buf30 + "     " + buf33 + "     " + buf36+ "     " + buf39), // 7th place
-		//std::string(racerPlacement[3]->getRacerName() + "     " + buf28 + "     " + buf31 + "     " + buf34 + "     " + buf37+ "     " + buf40) // 8th place
-	};
+	postGameStatistics[0] = std::string("     Player Name:     Colour:     Kills:     Deaths:     Suicides:     Damage Done:     Damage Taken:");
+	postGameStatistics[1] = std::string("1st: " + getSpaces(racerPlacement[7]->getRacerName(),17) + getSpaces(racerPlacement[7]->getRacerColour(),12) + getSpaces(buf1,11) + getSpaces(buf6,12)  + getSpaces(buf11,14) + getSpaces(buf16,17) + buf21); // 1st place
+	postGameStatistics[2] = std::string("2nd: " + getSpaces(racerPlacement[6]->getRacerName(),17) + getSpaces(racerPlacement[6]->getRacerColour(),12) + getSpaces(buf2,11) + getSpaces(buf7,12)  + getSpaces(buf12,14) + getSpaces(buf17,17) + buf22); // 2nd place
+	postGameStatistics[3] = std::string("3rd: " + getSpaces(racerPlacement[5]->getRacerName(),17) + getSpaces(racerPlacement[5]->getRacerColour(),12) + getSpaces(buf3,11) + getSpaces(buf8,12)  + getSpaces(buf13,14) + getSpaces(buf18,17) + buf23); // 3rd place
+	postGameStatistics[4] = std::string("4th: " + getSpaces(racerPlacement[4]->getRacerName(),17) + getSpaces(racerPlacement[4]->getRacerColour(),12) + getSpaces(buf4,11) + getSpaces(buf9,12)  + getSpaces(buf14,14) + getSpaces(buf19,17) + buf24); // 4th place
+	postGameStatistics[5] = std::string("5th: " + getSpaces(racerPlacement[3]->getRacerName(),17) + getSpaces(racerPlacement[3]->getRacerColour(),12) + getSpaces(buf5,11) + getSpaces(buf10,12) + getSpaces(buf15,14) + getSpaces(buf20,17) + buf25);  // 5th place
+	postGameStatistics[6] = std::string("6th: " + getSpaces(racerPlacement[2]->getRacerName(),17) + getSpaces(racerPlacement[2]->getRacerColour(),12) + getSpaces(buf26,11) + getSpaces(buf29,12) + getSpaces(buf32,14) + getSpaces(buf35,17) + buf38); // 6th place
+	postGameStatistics[7] = std::string("7th: " + getSpaces(racerPlacement[1]->getRacerName(),17) + getSpaces(racerPlacement[1]->getRacerColour(),12) + getSpaces(buf27,11) + getSpaces(buf30,12) + getSpaces(buf33,14) + getSpaces(buf36,17) + buf39); // 7th place
+	postGameStatistics[8] = std::string("8th: " + getSpaces(racerPlacement[0]->getRacerName(),17) + getSpaces(racerPlacement[0]->getRacerColour(),12) + getSpaces(buf28,11) + getSpaces(buf31,12) + getSpaces(buf34,14) + getSpaces(buf37,17) + buf40); // 8th place
 
+	generatePostGameStatistics = false;
+	}
 
-	renderer->setText(stringArray, sizeof(stringArray) / sizeof(std::string));
+	renderer->setText(postGameStatistics, sizeof(postGameStatistics) / sizeof(std::string));
+}
+
+std::string AI::getSpaces(std::string input, int numSpaces){
+	std::string output = input;
+	for(int i = 0; i < (int)numSpaces - (int)input.size(); i++){
+		output.append(" ");
+	}
+	return output;
 }

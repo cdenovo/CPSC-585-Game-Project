@@ -18,7 +18,7 @@ enum RacerType { RACER1, RACER2, RACER3, RACER4, RACER5, RACER6, RACER7, RACER8 
 enum WheelType { FRONT, REAR };
 
 
-#define LASER_DAMAGE 50
+#define LASER_DAMAGE 34
 
 
 class Racer

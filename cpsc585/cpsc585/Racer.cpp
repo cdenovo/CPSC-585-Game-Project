@@ -824,7 +824,22 @@ void Racer::reset(hkVector4* resetPos, float rotation)
 	hkVector4 resetPosition;
 	resetPosition.setXYZ(*resetPos);
 
-	setPosAndRot(resetPosition(0), resetPosition(1), resetPosition(2), 0, rotation, 0);
+	// Generate random offsets so that the racer doesn't spawn exactly in the middle of the track anymore.
+	srand((unsigned)time(0)+givenDamage);
+	int offsetX = rand()%5;
+	srand((unsigned)time(0)+offsetX);
+	int offsetZ = rand()%5;
+	if(offsetX%2 == 0){
+		offsetX *= -1;
+	}
+	if(offsetZ%2 == 0){
+		offsetZ *= -1;
+	}
+
+
+	//------------------------
+
+	setPosAndRot(resetPosition(0)+offsetX, resetPosition(1), resetPosition(2)+offsetZ, 0, rotation, 0);
 	body->setLinearVelocity(reset);
 	wheelFL->body->setLinearVelocity(reset);
 	wheelFR->body->setLinearVelocity(reset);
