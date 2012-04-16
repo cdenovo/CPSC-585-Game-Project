@@ -25,7 +25,7 @@ enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, ROCKETME
 class Drawable
 {
 public:
-	Drawable(void);
+	Drawable();
 	Drawable(MeshType type, std::string textureName, IDirect3DDevice9* device);
 	virtual ~Drawable();
 	virtual void render(IDirect3DDevice9* device);

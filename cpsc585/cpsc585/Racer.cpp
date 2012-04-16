@@ -1001,6 +1001,7 @@ void Racer::applyForces(float seconds)
 		smoke->setPosition(&pos);
 		SmokeSystem::system->addSmoke(ROCKET_SMOKE, smoke);
 		smoke = NULL;
+
 	}
 	else if (!respawned && (respawnTimer <= 0.0f))
 	{
@@ -1446,11 +1447,16 @@ void Racer::dropMine()
 
 void Racer::respawn()
 {
-	SmokeParticle* smoke = new SmokeParticle();
-	hkVector4 pos = body->getPosition();
-	smoke->setPosition(&pos);
-	SmokeSystem::system->addSmoke(EXPLOSION_SMOKE, smoke);
-	smoke = NULL;
+	AnimatedParticle* particle = new AnimatedParticle();
+	particle->initialize(Renderer::device, 0.1f, 0.4f, ANIM_EXPLOSION, 0.1f);
+	particle->setTransform(drawable->getTransform());
+	DynamicObjManager::manager->addObject(particle);
+
+	particle = new AnimatedParticle();
+	particle->initialize(Renderer::device, 0.4f, 1.0f, ANIM_SMOKE, 0.7f);
+	particle->setTransform(drawable->getTransform());
+	DynamicObjManager::manager->addObject(particle);
+	particle = NULL;
 
 	Sound::sound->playSoundEffect(SFX_CAREXPLODE, emitter);
 

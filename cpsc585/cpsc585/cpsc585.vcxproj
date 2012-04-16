@@ -81,6 +81,7 @@
     <ClCompile Include="Ability.cpp" />
     <ClCompile Include="AI.cpp" />
     <ClCompile Include="AIMind.cpp" />
+    <ClCompile Include="AnimatedParticle.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CheckpointTimer.cpp" />
     <ClCompile Include="ConfigReader.cpp" />
@@ -124,6 +125,7 @@
     <ClInclude Include="Ability.h" />
     <ClInclude Include="AI.h" />
     <ClInclude Include="AIMind.h" />
+    <ClInclude Include="AnimatedParticle.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CheckpointTimer.h" />
     <ClInclude Include="ConfigReader.h" />

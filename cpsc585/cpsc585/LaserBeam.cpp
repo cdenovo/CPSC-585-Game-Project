@@ -1,6 +1,6 @@
 #include "LaserBeam.h"
 
-float LaserBeam::vanishingSpeed = 100.0f;
+float LaserBeam::vanishingSpeed = 150.0f;
 float LaserBeam::halfThickness = 0.2f;
 
 LaserBeam::LaserBeam(D3DXVECTOR3 s, D3DXVECTOR3 e)

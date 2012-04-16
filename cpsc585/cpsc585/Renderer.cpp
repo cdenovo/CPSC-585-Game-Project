@@ -338,8 +338,15 @@ void Renderer::render()
 	{
 		drawables[i]->render(device);
 	}
+	
+	
+	device->SetRenderState(D3DRS_FOGENABLE, FALSE);
+	// Draw stencil shadows
+	drawShadows();
+	
 
-	// Draw dynamic objects that will be removed after this frame (like rockets, lasers, landmines)
+
+	// Draw dynamic objects that will be removed after this frame (like rockets, landmines, explosion effects)
 	if (!(dynamicDrawables->empty()))
 	{
 		for (std::vector<Drawable*>::iterator iter = dynamicDrawables->begin();
@@ -350,13 +357,6 @@ void Renderer::render()
 
 		dynamicDrawables->clear();
 	}
-	
-	
-	device->SetRenderState(D3DRS_FOGENABLE, FALSE);
-	// Draw stencil shadows
-	drawShadows();
-	
-
 
 	// Render SmokeSystem particles
 	device->SetTransform(D3DTS_WORLD, &worldMatrix);

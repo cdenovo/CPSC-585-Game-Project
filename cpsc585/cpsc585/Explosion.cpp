@@ -17,6 +17,21 @@ Explosion::~Explosion(void)
 
 void Explosion::doDamage()
 {
+	D3DXMATRIX trans;
+	transform->get4x4ColumnMajor(trans);
+
+	AnimatedParticle* particle = new AnimatedParticle();
+	particle->initialize(Renderer::device, 0.3f, 0.4f, ANIM_EXPLOSION, 0.1f);
+	particle->setTransform(&trans);
+	DynamicObjManager::manager->addObject(particle);
+
+	particle = new AnimatedParticle();
+	particle->initialize(Renderer::device, 1.0f, 1.0f, ANIM_SMOKE, 0.7f);
+	particle->setTransform(&trans);
+	DynamicObjManager::manager->addObject(particle);
+	particle = NULL;
+
+
 	hkpShape* blastShape =  new hkpSphereShape(BLAST_RADIUS);
 	hkpShapePhantom* blastPhantom = new hkpSimpleShapePhantom(blastShape, *transform);
 
