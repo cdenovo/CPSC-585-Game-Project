@@ -1336,6 +1336,14 @@ void Sound::playMenuMusic()
 	menumusic->Start(0);
 }
 
+void Sound::stopMusic()
+{
+	if (menumusic)
+		menumusic->Stop();
+
+	if (ingamemusic)
+		ingamemusic->Stop();
+}
 
 
 

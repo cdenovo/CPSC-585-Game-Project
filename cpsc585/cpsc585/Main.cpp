@@ -102,16 +102,16 @@ bool initialize()
 		return false;
 	}
 
-	ai->initialize(renderer, input, sound);
-	
+	sound = new Sound();
+	sound->initialize();
+
 	if (!sound->initialized)
 	{
 		errorPopup("Sound initialization failed!");
 		return false;
 	}
 
-
-
+	ai->initialize(input);
 
 
 

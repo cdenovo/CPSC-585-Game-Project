@@ -18,6 +18,7 @@ Renderer::Renderer()
 	drawables = NULL;
 	currentDrawable = 0;
 	hud = NULL;
+	menuHandler = NULL;
 
 	shadowQuadVertexBuffer = NULL;
 
@@ -40,6 +41,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	dynamicDrawables->reserve(100);
 	
 	hud = new HUD(width, height);
+	menuHandler = new MenuHandler(width, height);
 
 	d3dObject = Direct3DCreate9(D3D_SDK_VERSION);
 	
@@ -201,6 +203,9 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	// Set up HUD
 	hud->initialize(device);
 
+	// Set up menu handler
+	menuHandler->initialize(device);
+
 	// Set up Skybox
 	skybox = new Skybox(device);
 
@@ -249,11 +254,23 @@ void Renderer::shutdown()
 		smokeSystem = NULL;
 	}
 
+	if (laserSystem)
+	{
+		delete laserSystem;
+		laserSystem = NULL;
+	}
+
 	if (hud)
 	{
 		// Clean up HUD
 		hud->shutdown();
 		hud = NULL;
+	}
+
+	if (menuHandler)
+	{
+		menuHandler->shutdown();
+		menuHandler = NULL;
 	}
 
 	if (camera)
@@ -284,6 +301,28 @@ void Renderer::shutdown()
 void Renderer::render()
 {
 	D3DXMATRIX viewMatrix;
+
+	if ((menuHandler->enabled) && ((menuHandler->getMode() == MAIN_MENU) || (menuHandler->getMode() == LOADING)))
+	{
+		device->SetRenderState(D3DRS_ZENABLE, FALSE);
+		device->SetRenderState(D3DRS_LIGHTING, FALSE);
+
+		camera->updateForSkybox();
+		camera->update();
+		camera->getViewMatrix(viewMatrix);
+		device->SetTransform(D3DTS_PROJECTION, &projectionMatrix);
+		device->SetTransform(D3DTS_VIEW, &viewMatrix);
+		device->SetTransform(D3DTS_WORLD, &worldMatrix);
+
+		device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(255,0,0,0), 1.0f, 0);
+		device->BeginScene();
+		menuHandler->render();
+		device->EndScene();
+
+		device->Present(NULL, NULL, NULL, NULL);
+		return;
+	}
+	
 	
 	// Draw skybox
 
@@ -372,11 +411,15 @@ void Renderer::render()
 		writeText(sentences[i], i);
 	}
 	
-	device->EndScene();
-
 
 	// Now draw HUD
 	hud->render();
+
+	// Now draw menu stuff
+	if (menuHandler->enabled)
+		menuHandler->render();
+
+	device->EndScene();
 
 	device->Present(NULL, NULL, NULL, NULL);
 
@@ -448,6 +491,12 @@ HUD* Renderer::getHUD()
 {
 	return hud;
 }
+
+MenuHandler* Renderer::getMenuHandler()
+{
+	return menuHandler;
+}
+
 
 Camera* Renderer::getCamera()
 {

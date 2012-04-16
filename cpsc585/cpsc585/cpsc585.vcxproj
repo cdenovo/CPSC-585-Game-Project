@@ -102,6 +102,7 @@
     <ClCompile Include="LaserParticle.cpp" />
     <ClCompile Include="LaserSystem.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MenuHandler.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Racer.cpp" />
@@ -147,6 +148,7 @@
     <ClInclude Include="LaserParticle.h" />
     <ClInclude Include="LaserSystem.h" />
     <ClInclude Include="Main.h" />
+    <ClInclude Include="MenuHandler.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Racer.h" />

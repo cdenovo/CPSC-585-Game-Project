@@ -19,9 +19,11 @@ public:
 	bool debugging();
 	bool placingWaypoint();
 	void setPlaceWaypointFalse();
+	void quitGame();
 
 private:
 	bool quit;
+	bool quitting;
 	bool debug;
 	Intention intention;
 	bool controllerAvailable;

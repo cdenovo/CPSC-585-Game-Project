@@ -17,6 +17,7 @@
 #include "Ability.h"
 #include "CheckpointTimer.h"
 #include "DynamicObjManager.h"
+#include "MenuHandler.h"
 
 #define NUMRACERS 8
 #define NUMWAYPOINTS 83
@@ -25,13 +26,14 @@
 class AI
 {
 public:
-	AI(void);
-	~AI(void);
+	AI();
+	~AI();
 	void shutdown();
-	void initialize(Renderer* renderer, Input* input, Sound* sound);
+	void initialize(Input* input);
 	void simulate(float milliseconds);
 	void displayDebugInfo(Intention intention, float milliseconds);
 	void updateRacerPlacement(int left, int right);
+	void initializeGame();
 
 private:
 	std::string getFPSString(float milliseconds);
@@ -44,11 +46,10 @@ private:
 	std::string postGameStatistics[9];
 	bool generatePostGameStatistics;
 
-	Renderer* renderer;
 	Input* input;
 	Physics* physics;
-	Sound* sound;
 	HUD* hud;
+	MenuHandler* menuHandler;
 	CheckpointTimer* checkPointTimer;
 	WaypointEditor* wpEditor;
 
@@ -63,6 +64,9 @@ private:
 	bool raceStarted;
 	bool raceEnded;
 	bool playedOne, playedTwo, playedThree;
+
+	bool paused;
+	bool startReleased;
 
 	int numberOfWaypoints;
 
