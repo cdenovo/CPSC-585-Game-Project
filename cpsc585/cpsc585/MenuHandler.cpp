@@ -127,9 +127,29 @@ void MenuHandler::render()
 
 		// Draw main menu
 		D3DXVECTOR3 currentPos;
-		currentPos.x = (float) screenWidth / 2 - 192 + jitter;
-		currentPos.y = (float) screenHeight / 2 - 128 + jitter;
+		currentPos.x = (float) screenWidth / 2.0f - 192 + jitter;
+		currentPos.y = (float) screenHeight / 2.0f + jitter;
 		currentPos.z = 0;
+
+		float scaleFactorX = screenWidth / 1024.0f;
+		float scaleFactorY = screenHeight / 819.0f;
+
+		D3DXMATRIX origTrans, newTrans;
+		sprite->GetTransform(&origTrans);
+		D3DXMatrixScaling(&newTrans, scaleFactorX, scaleFactorY, 1.0f);
+		sprite->SetTransform(&newTrans);
+
+		RECT area;
+		area.top = 0;
+		area.bottom = 819;
+		area.left = 0;
+		area.right = 1024;
+
+		sprite->Draw(mainMenuTexture, &area, &D3DXVECTOR3(512, 409.5f, 0),
+			&D3DXVECTOR3(512, 409.5f, 0), 0xFFFFFFFF);
+
+		sprite->SetTransform(&origTrans);
+
 
 		// Draw menu options
 		sprite->Draw(uiTexture, startGameRect, NULL, &currentPos, 0xFFFFFFFF);
@@ -138,25 +158,28 @@ void MenuHandler::render()
 		
 		// Draw arrow next to appropriate selection
 		currentPos.x -= 128.0f;
-		currentPos.y = (float) screenHeight / 2 - 128;
+		currentPos.y = (float) screenHeight / 2.0f;
 
-		if (selectedOption == START_GAME)
-		{
-			// Do nothing
-		}
-		else if (selectedOption == QUIT)
+		if (selectedOption == QUIT)
 		{
 			currentPos.y += 128;
 		}
 
-		sprite->Draw(uiTexture, arrowRect, NULL, &currentPos, 0xFFFFFFFF);
+		sprite->Draw(uiTexture, arrowRect, NULL, &currentPos, 0xFFFF0000);
 	}
 	else if (selectedMode == PAUSE_MENU)
 	{
+		int jitter = std::rand() % 100;
+		
+		if (jitter < 95)
+			jitter = 0;
+		else
+			jitter = std::rand() % 100 - 50;
+
 		// Draw pause menu
 		D3DXVECTOR3 currentPos;
-		currentPos.x = (float) screenWidth / 2 - 128;
-		currentPos.y = (float) screenHeight / 2 - 128;
+		currentPos.x = (float) screenWidth / 2 - 128 + jitter;
+		currentPos.y = (float) screenHeight / 2 - 128 + jitter;
 		currentPos.z = 0;
 
 		// Draw menu options
@@ -177,7 +200,7 @@ void MenuHandler::render()
 			currentPos.y += 128;
 		}
 
-		sprite->Draw(uiTexture, arrowRect, NULL, &currentPos, 0xFFFFFFFF);
+		sprite->Draw(uiTexture, arrowRect, NULL, &currentPos, 0xFFFF0000);
 	}
 	else if (selectedMode == LOADING)
 	{

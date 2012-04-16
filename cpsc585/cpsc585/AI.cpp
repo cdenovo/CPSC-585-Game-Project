@@ -662,61 +662,7 @@ void AI::simulate(float seconds)
 	{
 		racerPlacement[i]->setPlacement(NUMRACERS-i);
 	}
-
 	
-	
-	
-	/*
-	if (input->placingWaypoint())
-	{
-		
-		numberOfWaypoints += 1;
-		Waypoint* addWaypoint = new Waypoint(Renderer::device, input->wpType);
-		hkVector4 wpPosition = racers[0]->body->getPosition();
-		addWaypoint->setPosAndRot(wpPosition.getComponent(0), wpPosition.getComponent(1), wpPosition.getComponent(2), 0, 0, 0);
-		wpEditor->waypoints.push_back(addWaypoint); 
-		input->setPlaceWaypointFalse();
-		
-	}
-
-
-
-
-	
-	for(int i = 0; i < 4; i++){ // currently doesn't do anything
-		waypoints[i]->update();
-	}
-
-	if(intention.bPressed){ // Changes control of Computer racer to Player, and Player racer to computer, for the currently viewed racer
-		racerMinds[racerIndex]->togglePlayerComputerAI(waypoints);
-	}
-
-	
-	// Switch focus (A for player, X for AI)
-	if (intention.startPressed){
-		if(racerIndex == 7){
-			racerIndex = 0;
-		}
-		else{
-			racerIndex += 1;
-		}
-		Renderer::renderer->setFocus(racers[racerIndex]->getIndex());
-	}
-	else if (intention.selectPressed)
-	{
-		if (racerIndex == 0)
-		{
-			racerIndex = 7;
-		}
-		else{
-			racerIndex -= 1;
-		}
-
-		Renderer::renderer->setFocus(racers[racerIndex]->getIndex());
-	}
-	*/
-
-
 
 	hkVector4 look = racers[racerIndex]->lookDir;
 
@@ -747,20 +693,6 @@ void AI::simulate(float seconds)
 		float rotation = 0;
 		racers[racerIndex]->reset(&(hkVector4(cwPosition.x, cwPosition.y, cwPosition.z)), rotation);
 	}
-
-	/*
-	if(intention.xPressed){
-		//wpEditor->writeToFile(wpEditor->waypoints, numberOfWaypoints, "RaceTrack.txt");
-	}
-	if(intention.aPressed){
-		
-		vector<Waypoint*> passWaypoints = vector<Waypoint*>();
-		for(int i = 0; i < NUMWAYPOINTS; i++){
-			passWaypoints.push_back(waypoints[i]);
-		}
-		//wpEditor->writeToFile(passWaypoints, NUMWAYPOINTS, "Figure8Waypoints.txt");
-		
-	}*/
 
 	
 	
