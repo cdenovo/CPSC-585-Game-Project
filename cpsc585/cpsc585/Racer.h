@@ -97,6 +97,12 @@ private:
 
 	float currentSteering;
 
+	float respawnTimer;
+	bool respawned;
+
+	hkVector4 deathPos;
+	hkQuaternion deathRot;
+
 	// Static elements that are common between all Racers
 	static int xID;
 	static int yID;

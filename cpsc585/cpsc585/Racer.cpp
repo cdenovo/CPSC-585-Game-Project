@@ -59,6 +59,9 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	laserReady = true;
 	laserTime = 0.0f;
 
+	respawnTimer = 0.0f;
+	respawned = true;
+
 	index = -1;
 
 	currentSteering = 0.0f;
@@ -622,7 +625,7 @@ void Racer::brake(float seconds)
 // between -1.0 and 1.0 (backwards is negative)
 void Racer::accelerate(float seconds, float value)
 {
-	if ((value == 0.0f) || ( !(wheelRL->touchingGround) && !(wheelRR->touchingGround)))
+	if ((value == 0.0f) || ( !(wheelRL->touchingGround) && !(wheelRR->touchingGround)) || !respawned)
 	{
 		currentAcceleration = 0.0f;
 		return;
@@ -719,6 +722,9 @@ void Racer::accelerate(float seconds, float value)
 // Make sure this is called once every frame, even if value = 0
 void Racer::steer(float seconds, float value)
 {
+	if (!respawned)
+		return;
+
 	currentSteering = value;
 
 	if ((!(wheelFL->touchingGround) && !(wheelFR->touchingGround))
@@ -983,6 +989,24 @@ void Racer::applyForces(float seconds)
 	if (laserTime > 0.0f)
 	{
 		laserTime -= seconds;
+	}
+
+
+	if (respawnTimer > 0.0f)
+	{
+		respawnTimer -= seconds;
+
+		SmokeParticle* smoke = new SmokeParticle();
+		hkVector4 pos = body->getPosition();
+		smoke->setPosition(&pos);
+		SmokeSystem::system->addSmoke(ROCKET_SMOKE, smoke);
+		smoke = NULL;
+	}
+	else if (!respawned && (respawnTimer <= 0.0f))
+	{
+		respawnTimer = 0.0f;
+		respawned = true;
+		respawn();
 	}
 }
 
@@ -1435,17 +1459,29 @@ void Racer::dropMine()
 
 void Racer::respawn()
 {
-	hkVector4 deathPos = body->getPosition();
-	hkQuaternion deathRot = body->getRotation();
+	SmokeParticle* smoke = new SmokeParticle();
+	hkVector4 pos = body->getPosition();
+	smoke->setPosition(&pos);
+	SmokeSystem::system->addSmoke(EXPLOSION_SMOKE, smoke);
+	smoke = NULL;
 
-	reset(&(hkVector4(0, 0, 0, 0)), 0);
+	Sound::sound->playSoundEffect(SFX_CAREXPLODE, emitter);
 
-	deathPos(1) += 5.0f;
+	deathPos(1) += 3.0f;
+	reset(&deathPos, 0);
+
 	body->setPositionAndRotation(deathPos, deathRot);
+
+	health = 100;
+
+	update();
 }
 
 void Racer::applyDamage(Racer* attacker, int damage)
 {
+	if (!respawned)
+		return;
+
 	health -= damage;
 	Sound::sound->playSoundEffect(SFX_CRASH, emitter);
 
@@ -1454,8 +1490,27 @@ void Racer::applyDamage(Racer* attacker, int damage)
 		Sound::sound->playSoundEffect(SFX_SCREAM, emitter);
 		Sound::sound->playSoundEffect(SFX_CAREXPLODE, emitter);
 
-		health = 100;
-		//respawn();
+		// Apply an upward point impulse, then have them respawn after 3 seconds
+
+		health = 0;
+
+		deathPos.setXYZ(body->getPosition());
+		deathRot = body->getRotation();
+
+		hkVector4 pointOfImpact;
+		pointOfImpact.set(-0.9f, -0.6f, -2.0f);
+		
+		pointOfImpact.setTransformedPos(body->getTransform(), pointOfImpact);
+
+		hkVector4 force;
+		force.set(0, chassisMass * 20.0f, 0);
+
+		body->applyPointImpulse(force, pointOfImpact);
+
+		respawnTimer = 3.0f;
+		respawned = false;
+
+
 
 		if (attacker)
 		{
@@ -1471,6 +1526,7 @@ void Racer::applyDamage(Racer* attacker, int damage)
 			}
 		}
 	}
+
 	if(attacker != this){
 		attacker->givenDamage += damage;
 		takenDamage += damage;
