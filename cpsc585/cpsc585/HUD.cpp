@@ -22,6 +22,8 @@ HUD::HUD(int width, int height)
 	countdownTexture = NULL;
 	iconsTexture = NULL;
 
+	enabled = true;
+
 	laserRect = new RECT();
 	mineRect = new RECT();
 	rocketRect = new RECT();
