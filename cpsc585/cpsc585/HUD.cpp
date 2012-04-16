@@ -326,6 +326,9 @@ void HUD::update(Intention intention)
 
 void HUD::render()
 {
+	if (!enabled)
+		return;
+
 	D3DXMATRIX origTrans;
 	sprite->GetTransform(&origTrans);
 	
@@ -742,4 +745,9 @@ void HUD::drawAmmo()
 
 		sprite->Draw(numbersTexture, &current, &currCenter, &drawPos, D3DCOLOR_ARGB(alpha, 0, 255, 100));
 	}
+}
+
+void HUD::enable(bool e)
+{
+	enabled = e;
 }

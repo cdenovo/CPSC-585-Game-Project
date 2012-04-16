@@ -20,6 +20,7 @@ public:
 	void setHealth(int health);
 	void setPosition(int placement);
 	void setLap(int lap, int numToWin);
+	void enable(bool enabled);
 
 	bool showOne;
 	bool showTwo;
@@ -75,6 +76,8 @@ private:
 	int position;
 	int currentLap;
 	int numLapsToWin;
+
+	bool enabled;
 
 	int screenWidth, screenHeight;
 };
