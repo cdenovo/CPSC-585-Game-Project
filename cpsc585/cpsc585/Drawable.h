@@ -11,7 +11,6 @@
 #include "FrontWheelMesh.h"
 #include "RearWheelMesh.h"
 #include "WaypointMesh.h"
-#include "LaserModel.h"
 #include "RocketMesh.h"
 #include "LandmineMesh.h"
 #include "GunMesh.h"
@@ -20,13 +19,13 @@
 #include <string>
 
 
-enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, LASERMODEL, ROCKETMESH, LANDMINEMESH,
+enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, ROCKETMESH, LANDMINEMESH,
 	GUNMOUNTMESH, GUNMESH };
 
 class Drawable
 {
 public:
-	Drawable(void);
+	Drawable();
 	Drawable(MeshType type, std::string textureName, IDirect3DDevice9* device);
 	virtual ~Drawable();
 	virtual void render(IDirect3DDevice9* device);

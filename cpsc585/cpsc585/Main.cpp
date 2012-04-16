@@ -31,7 +31,7 @@ bool initialize()
 	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &screenSettings);
 
 	hInstance = GetModuleHandle(NULL);
-	appName = "CPSC 585 Game";
+	appName = "Via Invictus";
 
 	memset(&wc, 0, sizeof(WNDCLASSEX));
 
@@ -102,16 +102,16 @@ bool initialize()
 		return false;
 	}
 
-	ai->initialize(renderer, input, sound);
-	
+	sound = new Sound();
+	sound->initialize();
+
 	if (!sound->initialized)
 	{
 		errorPopup("Sound initialization failed!");
 		return false;
 	}
 
-
-
+	ai->initialize(input);
 
 
 

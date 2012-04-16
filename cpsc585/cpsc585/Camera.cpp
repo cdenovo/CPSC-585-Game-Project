@@ -38,12 +38,21 @@ void Camera::setFocus(Drawable* focus)
 
 void Camera::update()
 {
-	position = focusObject->getPosition();
+	if (focusObject)
+	{
+		position = focusObject->getPosition();
+	
+		position = position + (lookDir * -7.0f);
+		position.y += 2.0f;
 
-	position = position + (lookDir * -7.0f);
-	position.y += 2.0f;
+		lookAt = D3DXVECTOR3(position + lookDir);
+	}
+	else
+	{
+		position = D3DXVECTOR3(0,0,0);
+		lookAt = D3DXVECTOR3(0,0,1);
+	}
 
-	lookAt = D3DXVECTOR3(position + lookDir);
 
 	up = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 

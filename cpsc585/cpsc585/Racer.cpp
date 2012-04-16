@@ -7,7 +7,7 @@ int Racer::yID = 1;
 int Racer::zID = 2;
 
 ConfigReader Racer::config = ConfigReader();
-	
+
 hkVector4 Racer::xAxis = hkVector4(1.0f, 0.0f, 0.0f);
 hkVector4 Racer::yAxis = hkVector4(0.0f, 1.0f, 0.0f);
 hkVector4 Racer::zAxis = hkVector4(0.0f, 0.0f, 1.0f);
@@ -39,8 +39,6 @@ bool Racer::inverse = config.inverse;
 Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 {
 	engineVoice = NULL;
-	laserDraw = new Drawable(LASERMODEL, "textures/laser.dds", device);
-	Renderer::renderer->addDrawable(laserDraw);
 
 	gunMountDraw = new Drawable(GUNMOUNTMESH, "textures/gun.dds", device);
 	Renderer::renderer->addDrawable(gunMountDraw);
@@ -247,21 +245,8 @@ void Racer::update()
 		(body->getTransform()).get4x4ColumnMajor(transMat);
 		drawable->setTransform(&transMat);
 
-		if (laserTime < 0.5f)
-		{
-			((LaserModel*)(laserDraw->mesh))->drawLaser = false;
-		}
-		else
-		{
-			((LaserModel*)(laserDraw->mesh))->drawLaser = true;
-			
-			laserDraw->setTransform(&transMat);
-		}
-
 		// Draw gunmount
 		gunMountDraw->setTransform(&transMat);
-
-
 
 		// Draw gun, centered on attachGun
 		hkRotation carRot;
@@ -811,12 +796,12 @@ void Racer::steer(float seconds, float value)
 	else if (dot < 45.0f)
 	{
 		torqueScale = 7.0f;
-		centripScale = 12.0f;
+		centripScale = 10.0f;
 	}
 	else
 	{
-		torqueScale = 8.0f;
-		centripScale = 15.0f;
+		torqueScale = 7.0f;
+		centripScale = 12.0f;
 	}
 	
 	if (negative)
@@ -1031,6 +1016,7 @@ void Racer::applyForces(float seconds)
 		smoke->setPosition(&pos);
 		SmokeSystem::system->addSmoke(ROCKET_SMOKE, smoke);
 		smoke = NULL;
+
 	}
 	else if (!respawned && (respawnTimer <= 0.0f))
 	{
@@ -1300,10 +1286,14 @@ void Racer::fireLaser()
 	hkpWorldRayCastOutput output = hkpWorldRayCastOutput();
 	hkVector4 from;
 
-	hkTransform trans = body->getTransform();
-	from.setTransformedPos(trans, attachGun);
-
 	input = fireWeapon();
+
+	hkVector4 toPoint;
+	toPoint.setXYZ(input.m_to);
+	toPoint.sub(input.m_from);
+	toPoint.mul(0.90f);
+	toPoint.add(input.m_from);
+	LaserSystem::system->addLaser(&(input.m_from), &(toPoint));
 
 	// Check if anything was hit
 	if (input.m_userData == -1)
@@ -1319,23 +1309,6 @@ void Racer::fireLaser()
 
 		if ((attacked != NULL) && (attacked != this))
 		{
-			hkVector4 raycastDir;
-			raycastDir.setXYZ(input.m_to);
-
-			raycastDir.sub(from);
-			raycastDir.normalize3();
-
-			hkVector4 force;
-			force.setXYZ(raycastDir);
-
-			//force.mul(chassisMass * 10.0f); // Probably don't need this anymore
-			
-			input.m_to.sub(from);
-			input.m_to.mul(output.m_hitFraction);
-			input.m_to.add(from);
-			
-			hitBody->applyPointImpulse(force, input.m_to);
-
 			attacked->applyDamage(this, LASER_DAMAGE);
 		}
 		else if ((hitBody->getProperty(1)).getPtr())
@@ -1378,7 +1351,7 @@ hkpWorldRayCastInput Racer::fireWeapon()
 	to.setXYZ(from);
 
 	look.setXYZ(lookDir);
-	look.mul(1000.0f);	// Essentially goes on until it hits something
+	look.mul(1200.0f);	// Essentially goes on until it hits something
 	to.add(look);
 	
 
@@ -1394,13 +1367,13 @@ hkpWorldRayCastInput Racer::fireWeapon()
 		to.mul(output.m_hitFraction * 1.1f);
 		to.add(from);
 
-		hkTransform trans = body->getTransform();
-		from.setTransformedPos(trans, attachGun);
+		hkVector4 firePoint;
+		firePoint.setXYZ(attachGun);
+		firePoint(2) -= 1;
 
-
-		// TO DO:
-		// Make sure that this ray is within a permissible range
-		// for the racer to fire from
+		hkTransform trans;
+		trans.set4x4ColumnMajor((hkFloat32*) gunDraw->getTransform());
+		from.setTransformedPos(trans, firePoint);
 		
 		input = hkpWorldRayCastInput();
 		input.m_filterInfo = body->getCollisionFilterInfo();
@@ -1489,11 +1462,16 @@ void Racer::dropMine()
 
 void Racer::respawn()
 {
-	SmokeParticle* smoke = new SmokeParticle();
-	hkVector4 pos = body->getPosition();
-	smoke->setPosition(&pos);
-	SmokeSystem::system->addSmoke(EXPLOSION_SMOKE, smoke);
-	smoke = NULL;
+	AnimatedParticle* particle = new AnimatedParticle();
+	particle->initialize(Renderer::device, 0.1f, 0.4f, ANIM_EXPLOSION, 0.1f);
+	particle->setTransform(drawable->getTransform());
+	DynamicObjManager::manager->addObject(particle);
+
+	particle = new AnimatedParticle();
+	particle->initialize(Renderer::device, 0.4f, 1.0f, ANIM_SMOKE, 0.7f);
+	particle->setTransform(drawable->getTransform());
+	DynamicObjManager::manager->addObject(particle);
+	particle = NULL;
 
 	Sound::sound->playSoundEffect(SFX_CAREXPLODE, emitter);
 

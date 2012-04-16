@@ -143,6 +143,15 @@ void Landmine::explode()
 
 	explosion->doDamage();
 	explosion = NULL;
+
+	SmokeParticle* smoke = new SmokeParticle();
+
+	hkVector4 pos;
+	pos.setXYZ(body->getPosition());
+
+	smoke->setPosition(&pos);
+	SmokeSystem::system->addSmoke(EXPLOSION_SMOKE, smoke);
+	smoke = NULL;
 }
 
 

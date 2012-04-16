@@ -13,8 +13,10 @@
 #include "Camera.h"
 #include "Drawable.h"
 #include "HUD.h"
+#include "MenuHandler.h"
 #include "Skybox.h"
 #include "SmokeSystem.h"
+#include "LaserSystem.h"
 
 struct ShadowPoint
 {
@@ -37,6 +39,7 @@ public:
 	void setFocus(int drawableIndex);
 	IDirect3DDevice9* getDevice();
 	HUD* getHUD();
+	MenuHandler* getMenuHandler();
 	Camera* getCamera();
 	
 	static Renderer* renderer;
@@ -68,6 +71,7 @@ private:
 	std::vector<Drawable*>* dynamicDrawables;
 
 	HUD* hud;
+	MenuHandler* menuHandler;
 	Camera* camera;
 
 	Skybox* skybox;
@@ -76,4 +80,5 @@ private:
 
 	bool useTwoSidedStencils;
 	SmokeSystem* smokeSystem;
+	LaserSystem* laserSystem;
 };

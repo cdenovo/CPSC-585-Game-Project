@@ -22,12 +22,14 @@ public:
 	bool isClient();
 	bool placingWaypoint();
 	void setPlaceWaypointFalse();
+	void quitGame();
 
 private:
 	bool quit;
 	bool network;
 	bool client;
 	bool server;
+	bool quitting;
 	bool debug;
 	Intention intention;
 	bool controllerAvailable;

@@ -14,7 +14,7 @@ class Rocket :
 {
 public:
 	Rocket(IDirect3DDevice9* device, Racer* owner);
-	~Rocket(void);
+	~Rocket();
 	void setPosAndRot(float posX, float posY, float posZ,
 		float rotX, float rotY, float rotZ);	// In Radians
 	void explode();

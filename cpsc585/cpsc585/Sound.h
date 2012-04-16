@@ -30,7 +30,7 @@ public:
 	void playRocket(X3DAUDIO_EMITTER* emit, IXAudio2SourceVoice* rocket);
 	void playInGameMusic();
 	void playMenuMusic();
-
+	void stopMusic();
 	
 
 	bool initialized;

@@ -22,6 +22,8 @@ HUD::HUD(int width, int height)
 	countdownTexture = NULL;
 	iconsTexture = NULL;
 
+	enabled = true;
+
 	laserRect = new RECT();
 	mineRect = new RECT();
 	rocketRect = new RECT();
@@ -326,6 +328,9 @@ void HUD::update(Intention intention)
 
 void HUD::render()
 {
+	if (!enabled)
+		return;
+
 	D3DXMATRIX origTrans;
 	sprite->GetTransform(&origTrans);
 	
@@ -744,12 +749,7 @@ void HUD::drawAmmo()
 	}
 }
 
-int HUD::getWidth()
+void HUD::enable(bool e)
 {
-	return screenWidth;
-}
-
-int HUD::getHeight()
-{
-	return screenHeight;
+	enabled = e;
 }

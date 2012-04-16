@@ -9,7 +9,7 @@ class HUD
 {
 public:
 	HUD(int width, int height);
-	~HUD(void);
+	~HUD();
 	void initialize(IDirect3DDevice9* device);
 	void setSelectedAbility(AbilityType ability);
 	AbilityType getSelectedAbility();
@@ -20,6 +20,7 @@ public:
 	void setHealth(int health);
 	void setPosition(int placement);
 	void setLap(int lap, int numToWin);
+	void enable(bool enabled);
 
 	int getWidth();
 	int getHeight();
@@ -42,6 +43,7 @@ private:
 
 	AbilityType selectedAbility;
 	ID3DXSprite* sprite;
+
 	IDirect3DTexture9* radialMenuTexture;
 	IDirect3DTexture9* reticuleTexture;
 	IDirect3DTexture9* speedoTexture;
@@ -78,6 +80,8 @@ private:
 	int position;
 	int currentLap;
 	int numLapsToWin;
+
+	bool enabled;
 
 	int screenWidth, screenHeight;
 };

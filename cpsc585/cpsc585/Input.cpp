@@ -4,6 +4,7 @@
 Input::Input(void)
 {
 	quit = false;
+	quitting = false;
 	debug = false;
 	placeWaypoint = false;
 	network = false;
@@ -151,6 +152,11 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam, LPARAM lparam)
 						intention.aPressed = true;
 						break;
 					}
+				case VK_ESCAPE:
+					{
+						intention.startPressed = true;
+						break;
+					}
 				}
 			}
 			else if (umessage == WM_KEYUP)
@@ -227,6 +233,11 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam, LPARAM lparam)
 							intention.aPressed = false;
 							break;
 						}
+					case VK_ESCAPE:
+					{
+						intention.startPressed = false;
+						break;
+					}
 				}
 			}
 		}
@@ -294,6 +305,11 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam, LPARAM lparam)
 // Returns TRUE if quitting, FALSE otherwise
 bool Input::update()
 {
+	if (quitting)
+	{
+		return true;
+	}
+
 	XINPUT_CAPABILITIES cap;
 
 	if (XInputGetCapabilities(0, XINPUT_FLAG_GAMEPAD, &cap) != ERROR_SUCCESS)
@@ -462,6 +478,11 @@ bool Input::placingWaypoint()
 void Input::setPlaceWaypointFalse()
 {
 	placeWaypoint = false;
+}
+
+void Input::quitGame()
+{
+	quitting = true;
 }
 
 bool Input::networking()

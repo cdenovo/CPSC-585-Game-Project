@@ -1158,3 +1158,13 @@ void AIMind::setRubberBanding(bool val)
 {
 	rubberBanding = val;
 }
+
+int HUD::getWidth()
+{
+	return screenWidth;
+}
+
+int HUD::getHeight()
+{
+	return screenHeight;
+}

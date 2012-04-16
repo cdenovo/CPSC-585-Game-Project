@@ -471,11 +471,6 @@ void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevic
 			mesh = WaypointMesh::getInstance(device);
 			break;
 		}
-	case LASERMODEL:
-		{
-			mesh = LaserModel::getInstance(device);
-			break;
-		}
 	case ROCKETMESH:
 		{
 			mesh = RocketMesh::getInstance(device);
