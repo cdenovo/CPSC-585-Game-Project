@@ -11,7 +11,6 @@
 #include "FrontWheelMesh.h"
 #include "RearWheelMesh.h"
 #include "WaypointMesh.h"
-#include "LaserModel.h"
 #include "RocketMesh.h"
 #include "LandmineMesh.h"
 #include "GunMesh.h"
@@ -20,7 +19,7 @@
 #include <string>
 
 
-enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, LASERMODEL, ROCKETMESH, LANDMINEMESH,
+enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, ROCKETMESH, LANDMINEMESH,
 	GUNMOUNTMESH, GUNMESH };
 
 class Drawable

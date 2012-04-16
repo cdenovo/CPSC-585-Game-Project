@@ -2,7 +2,7 @@
 
 Renderer* Renderer::renderer = NULL;
 IDirect3DDevice9* Renderer::device = NULL;
-D3DXVECTOR3 Renderer::lightDir = D3DXVECTOR3(0,-0.4f,-1);
+D3DXVECTOR3 Renderer::lightDir = D3DXVECTOR3(0,-0.7f,-1);
 
 Renderer::Renderer()
 {
@@ -225,6 +225,7 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 	shadowQuadVertexBuffer->Unlock();
 
 	smokeSystem = new SmokeSystem();
+	laserSystem = new LaserSystem();
 
 	return true;
 }
@@ -364,7 +365,7 @@ void Renderer::render()
 	smokeSystem->render(ROCKET_SMOKE);
 
 	// Render LaserSystem particles (beginning and end points of shots)
-
+	laserSystem->render();
 
 
 	for (int i = 0; i < numSentences; i++)

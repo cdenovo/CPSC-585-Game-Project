@@ -31,7 +31,7 @@ bool initialize()
 	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &screenSettings);
 
 	hInstance = GetModuleHandle(NULL);
-	appName = "CPSC 585 Game";
+	appName = "Via Invictus";
 
 	memset(&wc, 0, sizeof(WNDCLASSEX));
 

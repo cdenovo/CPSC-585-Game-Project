@@ -84,9 +84,6 @@
     <ClCompile Include="WaypointMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LaserModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="WaypointEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -130,6 +127,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GunMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LaserSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LaserBeam.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LaserParticle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -206,9 +212,6 @@
     <ClInclude Include="WaypointMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LaserModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="WaypointEditor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -252,6 +255,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GunMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LaserSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LaserBeam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LaserParticle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

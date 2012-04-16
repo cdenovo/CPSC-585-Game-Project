@@ -15,6 +15,7 @@
 #include "HUD.h"
 #include "Skybox.h"
 #include "SmokeSystem.h"
+#include "LaserSystem.h"
 
 struct ShadowPoint
 {
@@ -76,4 +77,5 @@ private:
 
 	bool useTwoSidedStencils;
 	SmokeSystem* smokeSystem;
+	LaserSystem* laserSystem;
 };

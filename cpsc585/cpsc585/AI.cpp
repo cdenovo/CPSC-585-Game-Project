@@ -568,6 +568,7 @@ void AI::simulate(float seconds)
 
 	DynamicObjManager::manager->update(seconds);
 	SmokeSystem::system->update(seconds);
+	LaserSystem::system->update(seconds);
 	
 
 	return;

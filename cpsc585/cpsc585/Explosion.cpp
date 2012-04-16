@@ -82,7 +82,7 @@ void Explosion::doDamage()
 				hkVector4 force;
 				force.setXYZ(raycastDir);
 
-				force.mul((const hkReal) (4.0f * racer->chassisMass));
+				force.mul((hkReal) (8.0f * racer->chassisMass));
 				
 				if (distance < 0.0f)
 				{

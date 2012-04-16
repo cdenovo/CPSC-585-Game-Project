@@ -23,7 +23,7 @@ void Physics::initialize(int numObjects)
 	filters = new int[numFilters];
 
 
-	memoryRouter = hkMemoryInitUtil::initDefault( hkMallocAllocator::m_defaultMallocAllocator, hkMemorySystem::FrameInfo( 500* 1024 ) );
+	memoryRouter = hkMemoryInitUtil::initDefault( hkMallocAllocator::m_defaultMallocAllocator, hkMemorySystem::FrameInfo( 1000* 1024 ) );
 	hkBaseSystem::init( memoryRouter, errorReport );
 	
 	hkpWorldCinfo::SimulationType simulationType;

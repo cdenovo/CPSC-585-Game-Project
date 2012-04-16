@@ -220,7 +220,7 @@ void Sound::initialize()
 	for (int i = 0; i < maxVoices; i++)
 	{
 		voiceBuffer[i] = NULL;
-		audio->CreateSourceVoice(&(voiceBuffer[i]), (WAVEFORMATEX*) wfm, XAUDIO2_VOICE_USEFILTER, XAUDIO2_MAX_FREQ_RATIO, NULL, &SFXSendList, NULL);
+		audio->CreateSourceVoice(&(voiceBuffer[i]), (WAVEFORMATEX*) wfm, XAUDIO2_VOICE_USEFILTER, XAUDIO2_MAX_FREQ_RATIO, 0, &SFXSendList, 0);
 	}
 
 	voiceBufferReserved = new IXAudio2SourceVoice*[maxReservedVoices];
@@ -228,9 +228,9 @@ void Sound::initialize()
 	for (int i = 0; i < maxReservedVoices; i++)
 	{
 		voiceBufferReserved[i] = NULL;
-		audio->CreateSourceVoice(&(voiceBufferReserved[i]), (WAVEFORMATEX*) wfm, XAUDIO2_VOICE_USEFILTER, XAUDIO2_MAX_FREQ_RATIO, NULL, &SFXSendList, NULL);
+		audio->CreateSourceVoice(&(voiceBufferReserved[i]), (WAVEFORMATEX*) wfm, XAUDIO2_VOICE_USEFILTER, XAUDIO2_MAX_FREQ_RATIO, 0, &SFXSendList, 0);
 	}
-
+	
 	initialized = true;
 	
 	return;

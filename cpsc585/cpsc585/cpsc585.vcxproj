@@ -97,7 +97,9 @@
     <ClCompile Include="Intention.cpp" />
     <ClCompile Include="Landmine.cpp" />
     <ClCompile Include="LandmineMesh.cpp" />
-    <ClCompile Include="LaserModel.cpp" />
+    <ClCompile Include="LaserBeam.cpp" />
+    <ClCompile Include="LaserParticle.cpp" />
+    <ClCompile Include="LaserSystem.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Physics.cpp" />
@@ -139,7 +141,9 @@
     <ClInclude Include="Intention.h" />
     <ClInclude Include="Landmine.h" />
     <ClInclude Include="LandmineMesh.h" />
-    <ClInclude Include="LaserModel.h" />
+    <ClInclude Include="LaserBeam.h" />
+    <ClInclude Include="LaserParticle.h" />
+    <ClInclude Include="LaserSystem.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Physics.h" />

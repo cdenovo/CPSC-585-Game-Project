@@ -14,7 +14,6 @@ public:
 	void addSmoke(SmokeType type, SmokeParticle* particle);
 	void update(float seconds);
 	void render(SmokeType type);
-	void cleanDestroyed();
 
 	static SmokeSystem* system;
 
