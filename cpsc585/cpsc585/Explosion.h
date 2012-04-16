@@ -5,7 +5,7 @@
 
 
 #define BLAST_RADIUS 20.0
-#define BLAST_DAMAGE 15.0
+#define BLAST_DAMAGE 30.0
 
 class Explosion
 {

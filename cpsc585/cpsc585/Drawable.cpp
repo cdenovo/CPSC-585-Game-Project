@@ -3,6 +3,8 @@
 unsigned long** Drawable::racerConnectivityTable = NULL;
 unsigned long** Drawable::frontWheelConnectivityTable = NULL;
 unsigned long** Drawable::rearWheelConnectivityTable = NULL;
+unsigned long** Drawable::gunConnectivityTable = NULL;
+unsigned long** Drawable::gunMountConnectivityTable = NULL;
 
 
 Drawable::Drawable(void)
@@ -484,6 +486,148 @@ void Drawable::initialize(MeshType type, std::string textureName, IDirect3DDevic
 			mesh = LandmineMesh::getInstance(device);
 			break;
 		}
+	case GUNMESH:
+		{
+			mesh = GunMesh::getInstance(device);
+			break;
+		}
+	case GUNMOUNTMESH:
+		{
+			mesh = GunMountMesh::getInstance(device);
+
+			device->CreateVertexBuffer(sizeof(D3DXVECTOR3) * mesh->indexCount * 6, D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC, D3DFVF_XYZ,
+				D3DPOOL_DEFAULT, &shadowVertexBuffer, NULL);
+
+			if (!gunMountConnectivityTable)
+			{
+				int numFaces = mesh->indexCount / 3;
+				gunMountConnectivityTable = new unsigned long*[numFaces];
+
+				for (int i = 0; i < numFaces; i++)
+				{
+					gunMountConnectivityTable[i] = new unsigned long[3];
+					ZeroMemory(gunMountConnectivityTable[i], sizeof(unsigned long) * 3);
+				}
+				
+				Vertex* vertices = mesh->vertices;
+				unsigned long* indices = mesh->indices;
+				unsigned long indexCount = mesh->indexCount;
+
+				unsigned long v0, v1, v2;
+
+				// Now set up connectivity table
+				// (MUCH faster than classical approach for stencil shadows!)
+
+				// For each triangle...
+				for (int i = 0; i < numFaces; i++)
+				{
+					// For each edge:
+					// Search index list. Add triangle index to connectivity table when the edge in reverse order is found
+					v0 = indices[i * 3];
+					v1 = indices[i * 3 + 1];
+					v2 = indices[i * 3 + 2];
+
+					// First edge = (v0, v1). Searching for (v1, v0) in index list
+					for (int j = 0; j < numFaces; j++)
+					{
+						if (j != i)
+						{
+							if (vertices[indices[j*3]].position == vertices[v1].position)
+							{
+								if (vertices[indices[j*3 + 1]].position == vertices[v0].position)
+								{
+									gunMountConnectivityTable[i][0] = (unsigned long) j;
+									break;
+								}
+							}
+							else if (vertices[indices[j*3 + 1]].position == vertices[v1].position)
+							{
+								if (vertices[indices[j*3 + 2]].position == vertices[v0].position)
+								{
+									gunMountConnectivityTable[i][0] = (unsigned long) j;
+									break;
+								}
+							}
+							else if (vertices[indices[j*3 + 2]].position == vertices[v1].position)
+							{
+								if (vertices[indices[j*3]].position == vertices[v0].position)
+								{
+									gunMountConnectivityTable[i][0] = (unsigned long) j;
+									break;
+								}
+							}
+						}
+					}
+
+					// Second edge = (v1, v2). Searching for (v2, v1) in index list
+					for (int j = 0; j < numFaces; j++)
+					{
+						if (j != i)
+						{
+							if (vertices[indices[j*3]].position == vertices[v2].position)
+							{
+								if (vertices[indices[j*3 + 1]].position == vertices[v1].position)
+								{
+									gunMountConnectivityTable[i][1] = (unsigned long) j;
+									break;
+								}
+							}
+							else if (vertices[indices[j*3 + 1]].position == vertices[v2].position)
+							{
+								if (vertices[indices[j*3 + 2]].position == vertices[v1].position)
+								{
+									gunMountConnectivityTable[i][1] = (unsigned long) j;
+									break;
+								}
+							}
+							else if (vertices[indices[j*3 + 2]].position == vertices[v2].position)
+							{
+								if (vertices[indices[j*3]].position == vertices[v1].position)
+								{
+									gunMountConnectivityTable[i][1] = (unsigned long) j;
+									break;
+								}
+							}
+						}
+					}
+					
+					// Third edge = (v2, v0). Searching for (v0, v2) in index list
+					for (int j = 0; j < numFaces; j++)
+					{
+						if (j != i)
+						{
+							if (vertices[indices[j*3]].position == vertices[v0].position)
+							{
+								if (vertices[indices[j*3 + 1]].position == vertices[v2].position)
+								{
+									gunMountConnectivityTable[i][2] = (unsigned long) j;
+									break;
+								}
+							}
+							else if (vertices[indices[j*3 + 1]].position == vertices[v0].position)
+							{
+								if (vertices[indices[j*3 + 2]].position == vertices[v2].position)
+								{
+									gunMountConnectivityTable[i][2] = (unsigned long) j;
+									break;
+								}
+							}
+							else if (vertices[indices[j*3 + 2]].position == vertices[v0].position)
+							{
+								if (vertices[indices[j*3]].position == vertices[v2].position)
+								{
+									gunMountConnectivityTable[i][2] = (unsigned long) j;
+									break;
+								}
+							}
+						}
+					}
+
+				}
+			}
+
+			break;
+		}
 	default:
 		mesh = NULL;
 	}
@@ -603,8 +747,13 @@ void Drawable::buildShadowVolume(D3DXVECTOR3 light)
 			connectivityTable = rearWheelConnectivityTable;
 			break;
 		}
-		default:
-			connectivityTable = racerConnectivityTable;
+	case (GUNMOUNTMESH):
+		{
+			connectivityTable = gunMountConnectivityTable;
+			break;
+		}
+	default:
+		connectivityTable = racerConnectivityTable;
 	}
 
 	D3DXMATRIX invTrans;
@@ -744,4 +893,9 @@ void Drawable::renderShadowVolume(IDirect3DDevice9* device)
 	device->SetStreamSource(0, shadowVertexBuffer, 0, sizeof(D3DXVECTOR3));
 	device->SetFVF(D3DFVF_XYZ);
 	device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, shadowVertCount / 3);
+}
+
+D3DXMATRIX* Drawable::getTransform()
+{
+	return &transform;
 }

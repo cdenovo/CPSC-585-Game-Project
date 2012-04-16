@@ -133,3 +133,8 @@ int Ability::getAmmoCount()
 {
 	return ammoCount;
 }
+
+void Ability::setAmmoCount(int count)
+{
+	ammoCount = count;
+}

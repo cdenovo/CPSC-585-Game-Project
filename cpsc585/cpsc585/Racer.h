@@ -9,8 +9,11 @@
 #include "RearWheel.h"
 #include "ConfigReader.h"
 #include "LaserModel.h"
+#include "GunMesh.h"
+#include "GunMountMesh.h"
 #include "DynamicObjManager.h"
 #include "SmokeSystem.h"
+#include "Ability.h"
 
 enum RacerType { RACER1, RACER2, RACER3, RACER4, RACER5, RACER6, RACER7, RACER8 };
 enum WheelType { FRONT, REAR };
@@ -18,23 +21,36 @@ enum WheelType { FRONT, REAR };
 
 #define LASER_DAMAGE 50
 
- struct RacerData
- {
-	 hkVector4 position;
-	 hkQuaternion rotation;
-	 hkVector4 linearVelocity;
-	 hkVector4 angularVelocity;
-	 hkVector4 wheelFL;
-	 hkVector4 wheelFR;
-	 hkVector4 wheelRL;
-	 hkVector4 wheelRR;
-	 hkVector4 lookDir;
-	 float lookHeight;
-	 bool laserCoolDown;
-	 bool rocketCoolDown;
-	 bool mineCoolDown;
-	 bool speedCoolDown;
- };
+struct RacerData
+{
+	hkVector4 position;
+	hkQuaternion rotation;
+	hkVector4 linearVelocity;
+	hkVector4 angularVelocity;
+	hkVector4 wheelFL;
+	hkVector4 wheelFR;
+	hkVector4 wheelRL;
+	hkVector4 wheelRR;
+	hkVector4 lookDir;
+	float lookHeight;
+	bool laserCoolDown;
+	bool rocketCoolDown;
+	bool mineCoolDown;
+	bool speedCoolDown;
+	int health;
+	int rockets;
+	int landmines;
+	int speedboosts;
+	int kills;
+	int suicides;
+	int deaths;
+	int takenDamage;
+	int givenDamage;
+	int currentWaypoint;
+	int currentLap;
+	int overallPosition;
+	int placement;
+};
 
 class Racer
 {
@@ -57,8 +73,8 @@ public:
 	void dropMine();
 	void applyDamage(Racer* attacker, int damage);
 	void computeRPM();
-
-	void serialize(char buff[], bool laserOnCooldown, bool rocketOnCooldown, bool mineOnCooldown, bool speedOnCooldown);
+	
+	void serialize(char buff[]);
 	void unserialize(RacerData *data);
 
 private:
@@ -83,11 +99,16 @@ public:
 	int takenDamage;
 	int givenDamage;
 	float laserTime;
-	
+
 	bool laserReady;
 	bool mineReady;
 	bool rocketReady;
 	bool speedReady;
+
+	Ability* speedBoost;
+	Ability* laser;
+	Ability* rocket;
+	Ability* landmine;
 
 	hkVector4 lookDir;
 	float lookHeight;
@@ -99,13 +120,20 @@ public:
 	
 	X3DAUDIO_EMITTER* emitter;
 
-	static hkVector4 attachCannon;
+	static hkVector4 attachGun;
 	static hkReal chassisMass;
 	
 	IXAudio2SourceVoice* engineVoice;
 
+	int currentWaypoint;
+	int currentLap;
+	int overallPosition;
+	int placement;
+
 private:
 	Drawable* laserDraw;
+	Drawable* gunDraw;
+	Drawable* gunMountDraw;
 
 	int index;
 	FrontWheel* wheelFL;
@@ -115,6 +143,12 @@ private:
 	RearWheel* wheelRR;
 
 	float currentSteering;
+
+	float respawnTimer;
+	bool respawned;
+
+	hkVector4 deathPos;
+	hkQuaternion deathRot;
 
 	// Static elements that are common between all Racers
 	static int xID;

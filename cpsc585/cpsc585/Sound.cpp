@@ -92,7 +92,7 @@ void Sound::initialize()
 {
 	HRESULT res;
 	
-	if (FAILED(res = XAudio2Create(&audio, 0, XAUDIO2_DEFAULT_PROCESSOR)))
+	if (FAILED(res = XAudio2Create(&audio)))
 	{
 		// Failed to create XAudio2 engine instance
 		initialized = false;
@@ -100,9 +100,9 @@ void Sound::initialize()
 		return;
 	}
 
-	audio->GetDeviceDetails(NULL, &details);
+	audio->GetDeviceDetails(0, &details);
 
-	if (FAILED(res = audio->CreateMasteringVoice(&mVoice, details.OutputFormat.Format.nChannels, XAUDIO2_DEFAULT_SAMPLERATE)))
+	if (FAILED(res = audio->CreateMasteringVoice(&mVoice, details.OutputFormat.Format.nChannels)))
 	{
 		// Failed to create mastering voice
 		initialized = false;

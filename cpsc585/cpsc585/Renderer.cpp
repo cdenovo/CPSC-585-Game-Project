@@ -2,7 +2,7 @@
 
 Renderer* Renderer::renderer = NULL;
 IDirect3DDevice9* Renderer::device = NULL;
-D3DXVECTOR3 Renderer::lightDir = D3DXVECTOR3(0,-0.7f,-1);
+D3DXVECTOR3 Renderer::lightDir = D3DXVECTOR3(0,-0.4f,-1);
 
 Renderer::Renderer()
 {
@@ -173,10 +173,9 @@ bool Renderer::initialize(int width, int height, HWND hwnd, float zNear, float z
 
 	device->SetMaterial(&material);    // set the globably-used material to &material
 
-
 	// Set up font stuff
-	D3DXCreateFont(device, 0, 10, FW_NORMAL, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, DRAFT_QUALITY,
-		DEFAULT_PITCH | FF_DONTCARE, "", &font);
+	D3DXCreateFont(device, 0, 10, FW_BOLD, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, DRAFT_QUALITY,
+		DEFAULT_PITCH | FF_DONTCARE, "Terminal", &font);
 
 	device->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTOP_SELECTARG1);
 	device->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);	// Just to be safe (ignored)
@@ -296,7 +295,7 @@ void Renderer::render()
 	for (int i = 0; i < currentDrawable; i++)
 	{
 		if ((drawables[i]->meshType == RACER) || (drawables[i]->meshType == REARWHEEL)
-			|| (drawables[i]->meshType == FRONTWHEEL))
+			|| (drawables[i]->meshType == FRONTWHEEL) || (drawables[i]->meshType == GUNMOUNTMESH))
 		{
 			drawables[i]->buildShadowVolume(lightDir);
 		}
@@ -360,8 +359,8 @@ void Renderer::render()
 
 	// Render SmokeSystem particles
 	device->SetTransform(D3DTS_WORLD, &worldMatrix);
-	smokeSystem->render(ROCKET_SMOKE);
 	smokeSystem->render(EXPLOSION_SMOKE);
+	smokeSystem->render(ROCKET_SMOKE);
 
 	// Render LaserSystem particles (beginning and end points of shots)
 
@@ -511,7 +510,7 @@ void Renderer::drawShadows()
 		for (int i = 0; i < currentDrawable; i++)
 		{
 			if ((drawables[i]->meshType == RACER) || (drawables[i]->meshType == REARWHEEL)
-				|| (drawables[i]->meshType == FRONTWHEEL))
+				|| (drawables[i]->meshType == FRONTWHEEL) || (drawables[i]->meshType == GUNMOUNTMESH))
 			{
 				drawables[i]->renderShadowVolume(device);
 			}
@@ -525,7 +524,7 @@ void Renderer::drawShadows()
 		for (int i = 0; i < currentDrawable; i++)
 		{
 			if ((drawables[i]->meshType == RACER) || (drawables[i]->meshType == REARWHEEL)
-				|| (drawables[i]->meshType == FRONTWHEEL))
+				|| (drawables[i]->meshType == FRONTWHEEL) || (drawables[i]->meshType == GUNMOUNTMESH))
 			{
 				drawables[i]->renderShadowVolume(device);
 			}
@@ -541,7 +540,7 @@ void Renderer::drawShadows()
 		for (int i = 0; i < currentDrawable; i++)
 		{
 			if ((drawables[i]->meshType == RACER) || (drawables[i]->meshType == REARWHEEL)
-				|| (drawables[i]->meshType == FRONTWHEEL))
+				|| (drawables[i]->meshType == FRONTWHEEL) || (drawables[i]->meshType == GUNMOUNTMESH))
 			{
 				drawables[i]->renderShadowVolume(device);
 			}

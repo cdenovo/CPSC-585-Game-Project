@@ -1,6 +1,6 @@
 #include "Server.h"
 
-const int CLIENT_TIMEOUT = 50;
+const int CLIENT_TIMEOUT = 5;
 
 Server::Server()
 {
@@ -391,7 +391,7 @@ int Server::sendLobbyInfo()
 /**
  * Server updates all clients with state of the world
  */
-int Server::update(Racer *racers[], int numRacers, AIMind* racerMinds[])
+int Server::update(Racer *racers[], int numRacers)
 {
 	//Put data in buffer
 	int size = sizeof(RacerData)*numRacers + 1 + 4*sizeof(int);
@@ -404,7 +404,7 @@ int Server::update(Racer *racers[], int numRacers, AIMind* racerMinds[])
 	for(int i = 0; i < numRacers; i++)
 	{
 		char sBuff[sizeof(RacerData)];
-		racers[i]->serialize(sBuff, racerMinds[i]->laserOnCooldown(), racerMinds[i]->rocketOnCooldown(), racerMinds[i]->mineOnCooldown(), racerMinds[i]->speedOnCooldown());
+		racers[i]->serialize(sBuff);
 		memcpy(buffer+17+sizeof(RacerData)*i,sBuff,sizeof(RacerData));
 	}
 

@@ -17,6 +17,7 @@ public:
 	void decreaseAmmoCount();
 	void increaseAmmoCount();
 	int getAmmoCount();
+	void setAmmoCount(int count);
 	int getAbilityLevel();
 
 private:

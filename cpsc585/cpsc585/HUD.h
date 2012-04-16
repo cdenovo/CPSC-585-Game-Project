@@ -26,7 +26,7 @@ public:
 
 	bool showOne;
 	bool showTwo;
-	bool showThree; 
+	bool showThree;
 
 	bool showAmmo;
 	AbilityType ammoIconType;
@@ -67,7 +67,6 @@ private:
 	D3DXVECTOR3* radialPos;
 	D3DXVECTOR3* centre;
 	D3DXVECTOR3* speedoPos;
-
 	D3DXVECTOR3* ammoPos;
 
 	bool radialEnabled;

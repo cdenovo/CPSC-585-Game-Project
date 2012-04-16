@@ -83,7 +83,7 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam, LPARAM lparam)
 				{
 				case VK_UP:
 					{
-						intention.rightStickY = intention.rightStickY = THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
+						intention.rightStickY = THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 						break;
 					}
 				case VK_DOWN:
@@ -98,7 +98,7 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam, LPARAM lparam)
 					}
 				case VK_RIGHT:
 					{
-						intention.rightStickX = intention.rightStickY = THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
+						intention.rightStickX = THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
 						break;
 					}
 				case VK_SPACE:
@@ -128,7 +128,7 @@ void Input::processWindowsMsg(UINT umessage, WPARAM wparam, LPARAM lparam)
 					}
 				case 'A':
 					{
-						intention.leftStickX = -THUMBSTICK_MAX + XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
+						intention.leftStickX = -THUMBSTICK_MAX + XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
 						break;
 					}
 				case 'D':
@@ -418,8 +418,6 @@ bool Input::update()
 		intention.acceleration = intention.leftStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
 		intention.cameraX = intention.rightStickX / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
 		intention.cameraY = intention.rightStickY / (float) (THUMBSTICK_MAX - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
-		
-
 
 
 		 /*Vibrating the controller:

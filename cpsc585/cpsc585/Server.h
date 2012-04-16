@@ -36,7 +36,7 @@ public:
 	int sendUDPMessage(const char* message, int length);
 	int sendID(int);
 	
-	int update(Racer *racers[], int numRacers, AIMind* racerMinds[]);
+	int update(Racer *racers[], int numRacers);
 
 	Intention intents[MAXCLIENTS];
 	int numClients;

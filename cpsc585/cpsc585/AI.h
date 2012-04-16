@@ -25,7 +25,7 @@
 #define NUMRACERS 8
 #define NUMWAYPOINTS 83
 #define NUMCHECKPOINTS 4
-#define NETWORKTIME 0.5
+#define NETWORKTIME 0.00
 
 class AI
 {
@@ -44,6 +44,7 @@ private:
 	void initializeCheckpoints();
 	void displayPostGameStatistics();
 	std::string boolToString(bool boolean);
+	std::string getSpaces(std::string input, int numSpaces);
 
 	//Networking functions
 	static unsigned __stdcall staticSetupServer(void * pThis);
@@ -52,6 +53,9 @@ private:
 	void connectToServer();
 	void runNetworking(float milliseconds);
 	void switchToServer();
+
+	std::string postGameStatistics[9];
+	bool generatePostGameStatistics;
 
 	Renderer* renderer;
 	Input* input;
@@ -71,7 +75,7 @@ private:
 	float raceStartTimer;
 	bool raceStarted;
 	bool raceEnded;
-	bool playedOne, playedTwo, playedThree; 
+	bool playedOne, playedTwo, playedThree;
 
 	int numberOfWaypoints;
 

@@ -15,7 +15,7 @@ hkVector4 Racer::attachFL = hkVector4(-0.8f, -0.67f, 1.65f);
 hkVector4 Racer::attachFR = hkVector4(0.8f, -0.67f, 1.65f);
 hkVector4 Racer::attachRL = hkVector4(-0.8f, -0.6f, -1.3f);
 hkVector4 Racer::attachRR = hkVector4(0.8f, -0.6f, -1.3f);
-hkVector4 Racer::attachCannon = hkVector4(0.0f, 0.6f, 2.1f);
+hkVector4 Racer::attachGun = hkVector4(0.0f, 0.5f, 1.6f);
 
 hkReal Racer::chassisMass = config.chassisMass;
 float Racer::grip = config.grip;
@@ -42,6 +42,12 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	laserDraw = new Drawable(LASERMODEL, "textures/laser.dds", device);
 	Renderer::renderer->addDrawable(laserDraw);
 
+	gunMountDraw = new Drawable(GUNMOUNTMESH, "textures/gun.dds", device);
+	Renderer::renderer->addDrawable(gunMountDraw);
+
+	gunDraw = new Drawable(GUNMESH, "textures/gun.dds", device);
+	Renderer::renderer->addDrawable(gunDraw);
+
 	engineVoice = Sound::sound->reserveSFXVoice();
 
 	health = 100;
@@ -53,10 +59,23 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	laserReady = true;
 	laserTime = 0.0f;
 
+	currentWaypoint = 0;
+	currentLap = 1;
+	overallPosition = 0;
+	placement = 1;
+
 	laserReady = true;
 	rocketReady = true;
 	mineReady = true;
 	speedReady = true;
+
+	laser = NULL;
+	rocket = NULL;
+	landmine = NULL;
+	speedBoost = NULL;
+
+	respawnTimer = 0.0f;
+	respawned = true;
 
 	index = -1;
 
@@ -215,6 +234,8 @@ void Racer::setPosAndRot(float posX, float posY, float posZ,
 	wheelFR->setPosAndRot(attachFR(0) + pos(0), attachFR(1) + pos(1), attachFR(2) + pos(2), rotX, rotY, rotZ);
 	wheelRL->setPosAndRot(attachRL(0) + pos(0), attachRL(1) + pos(1), attachRL(2) + pos(2), rotX, rotY, rotZ);
 	wheelRR->setPosAndRot(attachRR(0) + pos(0), attachRR(1) + pos(1), attachRR(2) + pos(2), rotX, rotY, rotZ);
+
+	lookDir.setXYZ(drawable->getZhkVector());
 }
 
 
@@ -236,9 +257,62 @@ void Racer::update()
 			
 			laserDraw->setTransform(&transMat);
 		}
-		
-		// Now update wheels
 
+		// Draw gunmount
+		gunMountDraw->setTransform(&transMat);
+
+
+
+		// Draw gun, centered on attachGun
+		hkRotation carRot;
+		carRot = body->getTransform().getRotation();
+
+
+		hkVector4 finalTranslation;
+		finalTranslation.setTransformedPos(body->getTransform(), attachGun);
+		
+		hkVector4 crossProd, normLook, unitX, unitY, unitZ;
+		normLook.setXYZ(lookDir);
+		normLook(1) += 0.2f;
+		normLook.normalize3();
+		
+		unitZ.set(0,0,1);
+		
+
+		crossProd.setCross(unitZ, normLook);
+		hkReal length = crossProd.length3();
+
+		hkRotation gunRot;
+
+		if (length == 0.0f)
+		{
+			crossProd.setXYZ(unitZ);
+			gunRot.setIdentity();
+		}
+		else
+		{
+			crossProd.normalize3();
+			hkReal gunAngle = hkMath::acos(unitZ.dot3(normLook));
+			gunRot.setAxisAngle(crossProd, gunAngle);
+		}
+
+		hkTransform finalRot, finalTrans, tempTrans;
+
+		finalTrans.setIdentity();
+		finalTrans.setTranslation(finalTranslation);
+
+		finalRot.setIdentity();
+		finalRot.setRotation(gunRot);
+		
+		tempTrans.setMul(finalTrans, finalRot);
+
+		tempTrans.get4x4ColumnMajor(transMat);
+
+		gunDraw->setTransform(&transMat);
+
+
+
+		// Now update wheels
 		// rot1 = car rotation, trans1 = car translation
 		D3DXMATRIX rot1, trans1;
 		D3DXVECTOR3 scale, trans;
@@ -248,10 +322,7 @@ void Racer::update()
 		double dist = 0;
 		hkVector4 zDir;
 		hkTransform wheelTransform;
-		hkRotation carRot;
-
-		carRot = body->getTransform().getRotation();
-
+		
 
 		wheelTransform = wheelRL->body->getTransform();
 		wheelTransform.setRotation(carRot);
@@ -569,7 +640,7 @@ void Racer::brake(float seconds)
 // between -1.0 and 1.0 (backwards is negative)
 void Racer::accelerate(float seconds, float value)
 {
-	if ((value == 0.0f) || ( !(wheelRL->touchingGround) && !(wheelRR->touchingGround)))
+	if ((value == 0.0f) || ( !(wheelRL->touchingGround) && !(wheelRR->touchingGround)) || !respawned)
 	{
 		currentAcceleration = 0.0f;
 		return;
@@ -666,6 +737,9 @@ void Racer::accelerate(float seconds, float value)
 // Make sure this is called once every frame, even if value = 0
 void Racer::steer(float seconds, float value)
 {
+	if (!respawned)
+		return;
+
 	currentSteering = value;
 
 	if ((!(wheelFL->touchingGround) && !(wheelFR->touchingGround))
@@ -780,7 +854,22 @@ void Racer::reset(hkVector4* resetPos, float rotation)
 	hkVector4 resetPosition;
 	resetPosition.setXYZ(*resetPos);
 
-	setPosAndRot(resetPosition(0), resetPosition(1), resetPosition(2), 0, rotation, 0);
+	// Generate random offsets so that the racer doesn't spawn exactly in the middle of the track anymore.
+	srand((unsigned)time(0)+givenDamage);
+	int offsetX = rand()%5;
+	srand((unsigned)time(0)+offsetX);
+	int offsetZ = rand()%5;
+	if(offsetX%2 == 0){
+		offsetX *= -1;
+	}
+	if(offsetZ%2 == 0){
+		offsetZ *= -1;
+	}
+
+
+	//------------------------
+
+	setPosAndRot(resetPosition(0)+offsetX, resetPosition(1), resetPosition(2)+offsetZ, 0, rotation, 0);
 	body->setLinearVelocity(reset);
 	wheelFL->body->setLinearVelocity(reset);
 	wheelFR->body->setLinearVelocity(reset);
@@ -930,6 +1019,24 @@ void Racer::applyForces(float seconds)
 	if (laserTime > 0.0f)
 	{
 		laserTime -= seconds;
+	}
+
+
+	if (respawnTimer > 0.0f)
+	{
+		respawnTimer -= seconds;
+
+		SmokeParticle* smoke = new SmokeParticle();
+		hkVector4 pos = body->getPosition();
+		smoke->setPosition(&pos);
+		SmokeSystem::system->addSmoke(ROCKET_SMOKE, smoke);
+		smoke = NULL;
+	}
+	else if (!respawned && (respawnTimer <= 0.0f))
+	{
+		respawnTimer = 0.0f;
+		respawned = true;
+		respawn();
 	}
 }
 
@@ -1194,7 +1301,7 @@ void Racer::fireLaser()
 	hkVector4 from;
 
 	hkTransform trans = body->getTransform();
-	from.setTransformedPos(trans, attachCannon);
+	from.setTransformedPos(trans, attachGun);
 
 	input = fireWeapon();
 
@@ -1288,7 +1395,7 @@ hkpWorldRayCastInput Racer::fireWeapon()
 		to.add(from);
 
 		hkTransform trans = body->getTransform();
-		from.setTransformedPos(trans, attachCannon);
+		from.setTransformedPos(trans, attachGun);
 
 
 		// TO DO:
@@ -1319,7 +1426,7 @@ void Racer::fireRocket()
 	hkVector4 from;
 
 	hkTransform trans = body->getTransform();
-	from.setTransformedPos(trans, attachCannon);
+	from.setTransformedPos(trans, attachGun);
 
 	input = fireWeapon();
 
@@ -1336,13 +1443,15 @@ void Racer::fireRocket()
 	currentRocket->owner = this;
 
 	hkVector4 rocketPos;
-	hkTransform bodyTransform = body->getTransform();
+	hkTransform bodyTransform;
+	bodyTransform.set4x4ColumnMajor((const hkFloat32*) gunDraw->getTransform());
 
 	hkVector4 rocketAttach;
-	rocketAttach.setXYZ(Racer::attachCannon);
-	rocketAttach(2) = rocketAttach(2) + 0.7f;
+	rocketAttach.setXYZ(Racer::attachGun);
 
 	rocketPos.setTransformedPos(bodyTransform, rocketAttach);
+
+
 	currentRocket->body->setTransform(bodyTransform);
 	currentRocket->body->setPosition(rocketPos);
 
@@ -1380,17 +1489,29 @@ void Racer::dropMine()
 
 void Racer::respawn()
 {
-	hkVector4 deathPos = body->getPosition();
-	hkQuaternion deathRot = body->getRotation();
+	SmokeParticle* smoke = new SmokeParticle();
+	hkVector4 pos = body->getPosition();
+	smoke->setPosition(&pos);
+	SmokeSystem::system->addSmoke(EXPLOSION_SMOKE, smoke);
+	smoke = NULL;
 
-	reset(&(hkVector4(0, 0, 0, 0)), 0);
+	Sound::sound->playSoundEffect(SFX_CAREXPLODE, emitter);
 
-	deathPos(1) += 5.0f;
+	deathPos(1) += 3.0f;
+	reset(&deathPos, 0);
+
 	body->setPositionAndRotation(deathPos, deathRot);
+
+	health = 100;
+
+	update();
 }
 
 void Racer::applyDamage(Racer* attacker, int damage)
 {
+	if (!respawned)
+		return;
+
 	health -= damage;
 	Sound::sound->playSoundEffect(SFX_CRASH, emitter);
 
@@ -1399,8 +1520,27 @@ void Racer::applyDamage(Racer* attacker, int damage)
 		Sound::sound->playSoundEffect(SFX_SCREAM, emitter);
 		Sound::sound->playSoundEffect(SFX_CAREXPLODE, emitter);
 
-		health = 100;
-		//respawn();
+		// Apply an upward point impulse, then have them respawn after 3 seconds
+
+		health = 0;
+
+		deathPos.setXYZ(body->getPosition());
+		deathRot = body->getRotation();
+
+		hkVector4 pointOfImpact;
+		pointOfImpact.set(-0.9f, -0.6f, -2.0f);
+		
+		pointOfImpact.setTransformedPos(body->getTransform(), pointOfImpact);
+
+		hkVector4 force;
+		force.set(0, chassisMass * 20.0f, 0);
+
+		body->applyPointImpulse(force, pointOfImpact);
+
+		respawnTimer = 3.0f;
+		respawned = false;
+
+
 
 		if (attacker)
 		{
@@ -1416,6 +1556,7 @@ void Racer::applyDamage(Racer* attacker, int damage)
 			}
 		}
 	}
+
 	if(attacker != this){
 		attacker->givenDamage += damage;
 		takenDamage += damage;
@@ -1458,7 +1599,7 @@ void Racer::computeRPM()
 	Sound::sound->playEngine(emitter, rpm/ 1024.0f, engineVoice);
 }
 
-void Racer::serialize(char buff[], bool laserOnCooldown, bool rocketOnCooldown, bool mineOnCooldown, bool speedOnCooldown)
+void Racer::serialize(char buff[])
 {
 	RacerData data;
 	data.position = body->getPosition();
@@ -1471,10 +1612,23 @@ void Racer::serialize(char buff[], bool laserOnCooldown, bool rocketOnCooldown, 
 	data.wheelRR = wheelRR->body->getPosition();
 	data.lookDir = lookDir;
 	data.lookHeight = lookHeight;
-	data.laserCoolDown = laserOnCooldown;
-	data.rocketCoolDown = rocketOnCooldown;
-	data.mineCoolDown = mineOnCooldown;
-	data.speedCoolDown = speedOnCooldown;
+	data.laserCoolDown = laser->onCooldown();
+	data.rocketCoolDown = rocket->onCooldown();
+	data.mineCoolDown = landmine->onCooldown();
+	data.speedCoolDown = speedBoost->onCooldown();
+	data.health = health;
+	data.rockets = rocket->getAmmoCount();
+	data.landmines = landmine->getAmmoCount();
+	data.speedboosts = speedBoost->getAmmoCount();
+	data.kills = kills;
+	data.suicides = suicides;
+	data.deaths = deaths;
+	data.takenDamage = takenDamage;
+	data.givenDamage = givenDamage;
+	data.currentWaypoint = currentWaypoint;
+	data.currentLap = currentLap;
+	data.overallPosition = overallPosition;
+	data.placement = placement;
 
 	memcpy(buff,&data,sizeof(data));
 }
@@ -1530,4 +1684,16 @@ void Racer::unserialize(RacerData *data)
 		speedReady = false;
 		Sound::sound->playSoundEffect(SFX_BOOST, emitter);
 	}
+	rocket->setAmmoCount(data->rockets);
+	landmine->setAmmoCount(data->landmines);
+	speedBoost->setAmmoCount(data->speedboosts);
+	kills = data->kills;
+	suicides = data->suicides;
+	deaths = data->deaths;
+	takenDamage = data->takenDamage;
+	givenDamage = data->givenDamage;
+	currentWaypoint = data->currentWaypoint;
+	currentLap = data->currentLap;
+	overallPosition = data->overallPosition;
+	placement = data->placement;
 }
