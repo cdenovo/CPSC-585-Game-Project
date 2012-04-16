@@ -15,7 +15,7 @@ hkVector4 Racer::attachFL = hkVector4(-0.8f, -0.67f, 1.65f);
 hkVector4 Racer::attachFR = hkVector4(0.8f, -0.67f, 1.65f);
 hkVector4 Racer::attachRL = hkVector4(-0.8f, -0.6f, -1.3f);
 hkVector4 Racer::attachRR = hkVector4(0.8f, -0.6f, -1.3f);
-hkVector4 Racer::attachCannon = hkVector4(0.0f, 0.6f, 2.1f);
+hkVector4 Racer::attachGun = hkVector4(0.0f, 0.5f, 1.6f);
 
 hkReal Racer::chassisMass = config.chassisMass;
 float Racer::grip = config.grip;
@@ -41,6 +41,12 @@ Racer::Racer(IDirect3DDevice9* device, RacerType racerType)
 	engineVoice = NULL;
 	laserDraw = new Drawable(LASERMODEL, "textures/laser.dds", device);
 	Renderer::renderer->addDrawable(laserDraw);
+
+	gunMountDraw = new Drawable(GUNMOUNTMESH, "textures/gun.dds", device);
+	Renderer::renderer->addDrawable(gunMountDraw);
+
+	gunDraw = new Drawable(GUNMESH, "textures/gun.dds", device);
+	Renderer::renderer->addDrawable(gunDraw);
 
 	engineVoice = Sound::sound->reserveSFXVoice();
 
@@ -210,6 +216,8 @@ void Racer::setPosAndRot(float posX, float posY, float posZ,
 	wheelFR->setPosAndRot(attachFR(0) + pos(0), attachFR(1) + pos(1), attachFR(2) + pos(2), rotX, rotY, rotZ);
 	wheelRL->setPosAndRot(attachRL(0) + pos(0), attachRL(1) + pos(1), attachRL(2) + pos(2), rotX, rotY, rotZ);
 	wheelRR->setPosAndRot(attachRR(0) + pos(0), attachRR(1) + pos(1), attachRR(2) + pos(2), rotX, rotY, rotZ);
+
+	lookDir.setXYZ(drawable->getZhkVector());
 }
 
 
@@ -231,9 +239,62 @@ void Racer::update()
 			
 			laserDraw->setTransform(&transMat);
 		}
-		
-		// Now update wheels
 
+		// Draw gunmount
+		gunMountDraw->setTransform(&transMat);
+
+
+
+		// Draw gun, centered on attachGun
+		hkRotation carRot;
+		carRot = body->getTransform().getRotation();
+
+
+		hkVector4 finalTranslation;
+		finalTranslation.setTransformedPos(body->getTransform(), attachGun);
+		
+		hkVector4 crossProd, normLook, unitX, unitY, unitZ;
+		normLook.setXYZ(lookDir);
+		normLook(1) += 0.2f;
+		normLook.normalize3();
+		
+		unitZ.set(0,0,1);
+		
+
+		crossProd.setCross(unitZ, normLook);
+		hkReal length = crossProd.length3();
+
+		hkRotation gunRot;
+
+		if (length == 0.0f)
+		{
+			crossProd.setXYZ(unitZ);
+			gunRot.setIdentity();
+		}
+		else
+		{
+			crossProd.normalize3();
+			hkReal gunAngle = hkMath::acos(unitZ.dot3(normLook));
+			gunRot.setAxisAngle(crossProd, gunAngle);
+		}
+
+		hkTransform finalRot, finalTrans, tempTrans;
+
+		finalTrans.setIdentity();
+		finalTrans.setTranslation(finalTranslation);
+
+		finalRot.setIdentity();
+		finalRot.setRotation(gunRot);
+		
+		tempTrans.setMul(finalTrans, finalRot);
+
+		tempTrans.get4x4ColumnMajor(transMat);
+
+		gunDraw->setTransform(&transMat);
+
+
+
+		// Now update wheels
 		// rot1 = car rotation, trans1 = car translation
 		D3DXMATRIX rot1, trans1;
 		D3DXVECTOR3 scale, trans;
@@ -243,10 +304,7 @@ void Racer::update()
 		double dist = 0;
 		hkVector4 zDir;
 		hkTransform wheelTransform;
-		hkRotation carRot;
-
-		carRot = body->getTransform().getRotation();
-
+		
 
 		wheelTransform = wheelRL->body->getTransform();
 		wheelTransform.setRotation(carRot);
@@ -1189,7 +1247,7 @@ void Racer::fireLaser()
 	hkVector4 from;
 
 	hkTransform trans = body->getTransform();
-	from.setTransformedPos(trans, attachCannon);
+	from.setTransformedPos(trans, attachGun);
 
 	input = fireWeapon();
 
@@ -1283,7 +1341,7 @@ hkpWorldRayCastInput Racer::fireWeapon()
 		to.add(from);
 
 		hkTransform trans = body->getTransform();
-		from.setTransformedPos(trans, attachCannon);
+		from.setTransformedPos(trans, attachGun);
 
 
 		// TO DO:
@@ -1314,7 +1372,7 @@ void Racer::fireRocket()
 	hkVector4 from;
 
 	hkTransform trans = body->getTransform();
-	from.setTransformedPos(trans, attachCannon);
+	from.setTransformedPos(trans, attachGun);
 
 	input = fireWeapon();
 
@@ -1331,13 +1389,15 @@ void Racer::fireRocket()
 	currentRocket->owner = this;
 
 	hkVector4 rocketPos;
-	hkTransform bodyTransform = body->getTransform();
+	hkTransform bodyTransform;
+	bodyTransform.set4x4ColumnMajor((const hkFloat32*) gunDraw->getTransform());
 
 	hkVector4 rocketAttach;
-	rocketAttach.setXYZ(Racer::attachCannon);
-	rocketAttach(2) = rocketAttach(2) + 0.7f;
+	rocketAttach.setXYZ(Racer::attachGun);
 
 	rocketPos.setTransformedPos(bodyTransform, rocketAttach);
+
+
 	currentRocket->body->setTransform(bodyTransform);
 	currentRocket->body->setPosition(rocketPos);
 

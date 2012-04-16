@@ -589,8 +589,11 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 						racer->steer(seconds, 0.0f);
 					}
 				}
+
+
+				// This makes it so the AI's weapons aren't looking the right way
 				
-				hkVector4 racerPos = racer->body->getPosition();
+			/*	hkVector4 racerPos = racer->body->getPosition();
 				hkSimdReal camX = racerPos.getComponent(0);
 				hkSimdReal camY = racerPos.getComponent(1);
 				hkSimdReal camZ = racerPos.getComponent(2);
@@ -599,7 +602,7 @@ void AIMind::update(HUD* hud, Intention intention, float seconds, Waypoint* wayp
 				camZ.sub(2);
 				hkVector4 camPos = hkVector4(camX, camY, camZ);
 				racerPos.sub(camPos);
-				racer->lookDir = racerPos;
+				racer->lookDir = racerPos;*/
 				
 				
 				/****************************************************/

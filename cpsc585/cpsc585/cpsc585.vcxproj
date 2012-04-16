@@ -90,6 +90,8 @@
     <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="FrontWheel.cpp" />
     <ClCompile Include="FrontWheelMesh.cpp" />
+    <ClCompile Include="GunMesh.cpp" />
+    <ClCompile Include="GunMountMesh.cpp" />
     <ClCompile Include="HUD.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Intention.cpp" />
@@ -129,6 +131,8 @@
     <ClInclude Include="Explosion.h" />
     <ClInclude Include="FrontWheel.h" />
     <ClInclude Include="FrontWheelMesh.h" />
+    <ClInclude Include="GunMesh.h" />
+    <ClInclude Include="GunMountMesh.h" />
     <ClInclude Include="Havok.h" />
     <ClInclude Include="HUD.h" />
     <ClInclude Include="Input.h" />

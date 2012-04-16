@@ -14,11 +14,14 @@
 #include "LaserModel.h"
 #include "RocketMesh.h"
 #include "LandmineMesh.h"
+#include "GunMesh.h"
+#include "GunMountMesh.h"
 
 #include <string>
 
 
-enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, LASERMODEL, ROCKETMESH, LANDMINEMESH };
+enum MeshType { RACER, TRAFFIC, WORLD, FRONTWHEEL, REARWHEEL, WAYPOINT, LASERMODEL, ROCKETMESH, LANDMINEMESH,
+	GUNMOUNTMESH, GUNMESH };
 
 class Drawable
 {
@@ -47,6 +50,8 @@ public:
 	void buildShadowVolume(D3DXVECTOR3 light);
 	void renderShadowVolume(IDirect3DDevice9* device);
 
+	D3DXMATRIX* getTransform();
+
 private:
 	void initialize(MeshType type, std::string textureName, IDirect3DDevice9* device);
 
@@ -68,4 +73,6 @@ private:
 	static unsigned long** racerConnectivityTable; // Array, access with Table[triangleIndex][edge#], returns new triangle index
 	static unsigned long** frontWheelConnectivityTable;
 	static unsigned long** rearWheelConnectivityTable;
+	static unsigned long** gunConnectivityTable;
+	static unsigned long** gunMountConnectivityTable;
 };

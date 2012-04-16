@@ -9,6 +9,8 @@
 #include "RearWheel.h"
 #include "ConfigReader.h"
 #include "LaserModel.h"
+#include "GunMesh.h"
+#include "GunMountMesh.h"
 #include "DynamicObjManager.h"
 #include "SmokeSystem.h"
 
@@ -76,13 +78,15 @@ public:
 	
 	X3DAUDIO_EMITTER* emitter;
 
-	static hkVector4 attachCannon;
+	static hkVector4 attachGun;
 	static hkReal chassisMass;
 	
 	IXAudio2SourceVoice* engineVoice;
 
 private:
 	Drawable* laserDraw;
+	Drawable* gunDraw;
+	Drawable* gunMountDraw;
 
 	int index;
 	FrontWheel* wheelFL;
